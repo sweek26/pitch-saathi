@@ -1,0 +1,146 @@
+PITCH SAATHI — TOOLS & LIBRARIES USED (with what each one does)
+==================================================================
+This lists everything used to build the app so far, grouped by purpose.
+Written for reference/learning, not as project documentation.
+
+
+1. VERSION CONTROL & HOSTING
+------------------------------------------------------------
+Git
+    What it is: A tool that tracks every change made to the code over time,
+    so nothing is ever silently lost or overwritten.
+    Used for: Saving every step of this build as a "commit" (a checkpoint).
+
+GitHub
+    What it is: A website that hosts your Git project online.
+    Used for: Storing the code at github.com/sweek26/pitch-saathi, so it's
+    backed up and can be shared with others later.
+
+GitHub Desktop
+    What it is: A visual app for Git, so you don't need to type Git commands.
+    Used for: Reviewing and pushing changes to GitHub by clicking buttons
+    instead of using the terminal.
+
+
+2. LANGUAGE & BACKEND FRAMEWORK
+------------------------------------------------------------
+Python
+    What it is: The programming language the entire backend is written in.
+    Used for: All the logic — talking to APIs, scoring conversations,
+    logging to Sheets, running the servers.
+
+Flask
+    What it is: A lightweight Python library for building web servers.
+    Used for: TWO things in this project —
+      1. webhook.py — the real entrypoint that will receive WhatsApp
+         messages once that's connected.
+      2. demo/server.py — the browser demo app's backend.
+
+
+3. PYTHON LIBRARIES (installed via requirements.txt)
+------------------------------------------------------------
+python-dotenv
+    Used for: Reading your .env file (API keys) into the program safely,
+    without hardcoding secrets into the code itself.
+
+requests
+    Used for: Making HTTP calls to external APIs — specifically Sarvam AI
+    (speech-to-text) and the WhatsApp Cloud API (once connected).
+
+anthropic
+    What it is: Anthropic's official Python library for calling Claude.
+    Used for: Every LLM call — the household persona in Practice, the
+    scoring/gap-tagging step, and the Mera Madad coach.
+
+gspread
+    What it is: A Python library for reading/writing Google Sheets.
+    Used for: Logging every practice interaction as a row in your shared
+    Google Sheet (sheets_logger.py).
+
+google-auth
+    Used for: Authenticating gspread against Google using the service
+    account key file (service_account.json), so the script is allowed to
+    write to your Sheet.
+
+sounddevice
+    Used for: Recording audio directly from your computer's microphone —
+    used by voice_test.py and the demo app's mic button.
+
+numpy
+    Used for: Handling the raw audio data captured by sounddevice before
+    it's saved as a .wav file.
+
+
+4. EXTERNAL AI / API SERVICES
+------------------------------------------------------------
+Anthropic (Claude)
+    What it does: The actual "thinking" — plays the household character,
+    scores the pitch against your rubric, tags Knowledge vs. Confidence,
+    and writes the Mera Madad recap. This is the app's brain.
+
+Sarvam AI
+    What it does: Converts a PU's spoken Hindi/Avadhi voice note into text
+    (speech-to-text), before Claude ever sees it. Chosen specifically
+    because it's built for Indian languages/dialects.
+
+Google Cloud (Service Account) + Google Sheets API
+    What it does: Lets the app write rows into your Google Sheet
+    automatically, so every interaction is logged without manual copying.
+
+WhatsApp Cloud API (Meta) — not yet connected
+    What it will do, once set up: The actual channel — how a real PU's
+    voice note reaches the app, and how the reply reaches her back, on
+    WhatsApp itself.
+
+
+5. TESTING TOOLS (built specifically for this project, not external)
+------------------------------------------------------------
+scripts/console_test.py
+    What it is: A script that lets you type as the PU in a terminal and see
+    the household's reply + scoring — no voice, no WhatsApp needed. Fastest
+    way to test if the AI's behavior/prompts are working.
+
+scripts/voice_test.py
+    What it is: Like the above, but you actually SPEAK into your
+    microphone. Uses the real Sarvam + Claude pipeline, so it's the closest
+    thing to the real WhatsApp experience without WhatsApp itself.
+
+demo/server.py + demo/static/index.html
+    What it is: A browser-based demo — a WhatsApp-style chat screen you can
+    click through, to show other people (like Arun or L&D) how the app will
+    feel, without needing WhatsApp connected yet.
+
+
+6. BROWSER TECHNOLOGY (used inside the demo web app's front-end code)
+------------------------------------------------------------
+MediaRecorder API
+    What it is: A built-in browser feature (not something installed) that
+    records audio from the microphone directly inside a webpage.
+    Used for: Capturing your voice when you tap the mic button in the demo.
+
+getUserMedia
+    What it is: The browser permission system that asks "allow this site to
+    use your microphone?"
+    Used for: Getting permission before MediaRecorder can access your mic.
+
+Fetch API
+    What it is: A built-in browser feature for a webpage to talk to a
+    server without reloading the page.
+    Used for: Sending your recorded voice to demo/server.py and getting the
+    household's reply back, instantly, inside the chat.
+
+
+7. CONFIG / SAFETY FILES (not tools exactly, but worth knowing)
+------------------------------------------------------------
+.env
+    What it is: A local file (never uploaded to GitHub) holding all your
+    real API keys.
+
+.gitignore
+    What it is: A file that tells Git "never track these files" — used to
+    make sure .env and service_account.json never accidentally get
+    uploaded to GitHub.
+
+service_account.json
+    What it is: Google's credential file that proves the app is allowed to
+    write to your Sheet on your behalf.
