@@ -50,7 +50,8 @@ def run_practice_voice():
     scenario = "basic_pitch" if input("> ").strip() == "1" else "price_objection"
 
     turns = []
-    print("\nHar turn: Enter dabaiye, bolna shuru kijiye, khatam hone par Enter dabaiye phir se.\n")
+    print("\nHar turn: Enter dabaiye, bolna shuru kijiye, khatam hone par Enter dabaiye phir se.")
+    print("Conversation khatam karne ke liye, bol dijiye 'end'.\n")
 
     while True:
         input("[Bolne ke liye Enter dabaiye]")
@@ -70,14 +71,14 @@ def run_practice_voice():
             print("Kuch transcribe nahi hua — shayad bahut chhota ya chup rahi recording thi. Dobara try kijiye.\n")
             continue
 
+        words = [w.strip(".।,!?").lower() for w in result["text"].strip().split()]
+        if any(w in ("end", "एंड", "इंड") for w in words):
+            break
+
         turns.append({"role": "user", "text": result["text"]})
         reply = llm.practice_persona_reply(scenario, turns)
         turns.append({"role": "assistant", "text": reply})
         print(f"\nHousehold> {reply}\n")
-
-        cont = input("Aur bolna hai? (y/n) > ").strip().lower()
-        if cont != "y":
-            break
 
     if not turns:
         print("Koi turn record nahi hua, scoring skip kar rahe hain.")
