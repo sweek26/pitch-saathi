@@ -23,6 +23,15 @@ def _load_prompt(filename):
         return f.read()
 
 
+def _extract_text(response):
+    """The model may emit a thinking block before its text block — find the
+    text block instead of assuming content[0] is it."""
+    for block in response.content:
+        if block.type == "text":
+            return block.text.strip()
+    raise RuntimeError("No text block in Claude's response")
+
+
 PRACTICE_PROMPT = None
 MERA_MADAD_PROMPT = None
 
@@ -45,7 +54,7 @@ def practice_persona_reply(scenario, turns):
         system=system,
         messages=messages,
     )
-    return response.content[0].text.strip()
+    return _extract_text(response)
 
 
 def practice_score_session(scenario, turns):
@@ -70,7 +79,7 @@ def practice_score_session(scenario, turns):
         system=system,
         messages=messages,
     )
-    raw = response.content[0].text.strip()
+    raw = _extract_text(response)
     return json.loads(raw)
 
 
@@ -96,4 +105,4 @@ def mera_madad_reply(history_summary):
         system=MERA_MADAD_PROMPT,
         messages=[{"role": "user", "content": user_content}],
     )
-    return response.content[0].text.strip()
+    return _extract_text(response)
