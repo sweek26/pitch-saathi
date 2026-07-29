@@ -23,13 +23,20 @@ def _load_prompt(filename):
         return f.read()
 
 
-def _extract_text(response):
+def _extract_text(response, fallback=None):
     """The model may emit a thinking block before its text block — find the
-    text block instead of assuming content[0] is it."""
+    text block instead of assuming content[0] is it.
+
+    If max_tokens is too small, thinking can consume the whole budget and
+    leave no text block at all (stop_reason "max_tokens"). When a fallback
+    is given, return that instead of crashing the conversation.
+    """
     for block in response.content:
         if block.type == "text":
             return block.text.strip()
-    raise RuntimeError("No text block in Claude's response")
+    if fallback is not None:
+        return fallback
+    raise RuntimeError(f"No text block in Claude's response (stop_reason={response.stop_reason})")
 
 
 PRACTICE_PROMPT = None
@@ -50,11 +57,14 @@ def practice_persona_reply(scenario, turns):
 
     response = _get_client().messages.create(
         model="claude-sonnet-5",
-        max_tokens=300,
+        max_tokens=1024,
         system=system,
         messages=messages,
     )
-    return _extract_text(response)
+    return _extract_text(
+        response,
+        fallback="Maaf kijiye, thoda ruk kar dobara boliye — samajh nahi paayi.",
+    )
 
 
 def practice_score_session(scenario, turns):
@@ -75,7 +85,7 @@ def practice_score_session(scenario, turns):
 
     response = _get_client().messages.create(
         model="claude-sonnet-5",
-        max_tokens=500,
+        max_tokens=1024,
         system=system,
         messages=messages,
     )
@@ -101,8 +111,11 @@ def mera_madad_reply(history_summary):
 
     response = _get_client().messages.create(
         model="claude-sonnet-5",
-        max_tokens=300,
+        max_tokens=1024,
         system=MERA_MADAD_PROMPT,
         messages=[{"role": "user", "content": user_content}],
     )
-    return _extract_text(response)
+    return _extract_text(
+        response,
+        fallback="Maaf kijiye, abhi jawab dene mein dikkat ho rahi hai — thodi der baad phir try kijiye.",
+    )
