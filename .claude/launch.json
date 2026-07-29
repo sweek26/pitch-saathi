@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pitch-saathi-demo",
+      "runtimeExecutable": "C:\\Users\\Techvity\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "runtimeArgs": ["-m", "demo.server"],
+      "port": 5050
+    }
+  ]
+}
