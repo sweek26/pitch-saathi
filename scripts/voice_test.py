@@ -21,6 +21,7 @@ import numpy as np  # noqa: E402
 import sounddevice as sd  # noqa: E402
 
 from src import llm, sheets_logger, stt  # noqa: E402
+from src.stt import AudioTooLongError, TranscriptionError  # noqa: E402
 
 SAMPLE_RATE = 16000
 TEST_PHONE = "CONSOLE_TEST_919999999999"
@@ -51,6 +52,7 @@ def run_practice_voice():
 
     turns = []
     print("\nHar turn: Enter dabaiye, bolna shuru kijiye, khatam hone par Enter dabaiye phir se.")
+    print("Har turn ~25 second se chhota rakhiye — Sarvam 30 second se lambi recording nahi le sakta.")
     print("Conversation khatam karne ke liye, bol dijiye 'end'.\n")
 
     while True:
@@ -62,7 +64,16 @@ def run_practice_voice():
             audio_bytes = f.read()
         os.remove(path)
 
-        result = stt.transcribe(audio_bytes)
+        try:
+            result = stt.transcribe(audio_bytes)
+        except AudioTooLongError:
+            print("\nYe recording 30 second se lambi thi, Sarvam isko process nahi kar saka.")
+            print("Yehi baat thodi chhoti karke, dobara boliye.\n")
+            continue
+        except TranscriptionError as e:
+            print(f"\nTranscription mein dikkat aayi ({e}). Dobara try kijiye.\n")
+            continue
+
         print(f"\nAapne bola (transcript): {result['text']}")
         if result.get("confidence") is not None:
             print(f"(confidence: {result['confidence']})")

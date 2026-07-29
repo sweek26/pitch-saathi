@@ -10,11 +10,20 @@ import requests
 SARVAM_STT_URL = "https://api.sarvam.ai/speech-to-text"
 
 
+class TranscriptionError(Exception):
+    """Sarvam couldn't transcribe this audio - caller decides how to recover
+    (e.g. ask the PU to resend a shorter voice note)."""
+
+
+class AudioTooLongError(TranscriptionError):
+    """Sarvam's synchronous endpoint hard-caps audio at 30 seconds."""
+
+
 def transcribe(audio_bytes, mime_type="audio/ogg"):
     """
     Returns {"text": str, "confidence": float | None}.
-    Raises RuntimeError on API failure — caller decides how to handle it
-    (e.g. ask the PU to resend the voice note).
+    Raises AudioTooLongError if the clip exceeds Sarvam's 30-second limit,
+    or TranscriptionError for any other API failure.
     """
     api_key = os.environ["SARVAM_API_KEY"]
     response = requests.post(
@@ -25,7 +34,9 @@ def transcribe(audio_bytes, mime_type="audio/ogg"):
         timeout=30,
     )
     if response.status_code != 200:
-        raise RuntimeError(f"Sarvam STT failed: {response.status_code} {response.text}")
+        if "exceeds the maximum limit" in response.text:
+            raise AudioTooLongError(response.text)
+        raise TranscriptionError(f"Sarvam STT failed: {response.status_code} {response.text}")
 
     result = response.json()
     return {

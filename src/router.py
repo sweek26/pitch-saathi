@@ -8,6 +8,7 @@ explicit "end" signal. Change MAX_PRACTICE_TURNS, or swap in a keyword-based
 end trigger, if that's not the right call.
 """
 from . import llm, sheets_logger, state_store, stt, whatsapp
+from .stt import AudioTooLongError, TranscriptionError
 
 MAX_PRACTICE_TURNS = 5
 
@@ -68,7 +69,22 @@ def _handle_voice_note(phone_number, message):
 
     media_id = message["audio"]["id"]
     audio_bytes = whatsapp.download_media(media_id)
-    transcript = stt.transcribe(audio_bytes)
+
+    try:
+        transcript = stt.transcribe(audio_bytes)
+    except AudioTooLongError:
+        whatsapp.send_text(
+            phone_number,
+            "Aapka voice note thoda lamba ho gaya (30 second se zyada). Kripya thoda "
+            "chhota voice note bhej kar dobara bataiye.",
+        )
+        return
+    except TranscriptionError:
+        whatsapp.send_text(
+            phone_number,
+            "Aapki voice note samajh nahi payi. Kripya dobara bhejiye.",
+        )
+        return
 
     if session["module"] == "practice":
         _run_practice_turn(phone_number, session, transcript)
