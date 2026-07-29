@@ -4,3 +4,5 @@ requests
 anthropic
 gspread
 google-auth
+sounddevice
+numpy
