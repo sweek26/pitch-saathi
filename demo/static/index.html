@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pitch Saathi — Demo</title>
+<style>
+  :root {
+    --wa-header: #1f2c26;
+    --wa-header-accent: #25d366;
+    --wa-chat-bg: #efe9e0;
+    --wa-sent: #d9fdd3;
+    --wa-received: #ffffff;
+    --wa-system: #fef3c7;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #d8d2c6;
+    --danger: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #0b141a;
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px 12px;
+  }
+  .phone {
+    width: 100%;
+    max-width: 430px;
+    background: var(--wa-chat-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
+    max-height: 800px;
+  }
+  header {
+    background: var(--wa-header);
+    color: #fff;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  header .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--wa-header-accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  header .titles { flex: 1; min-width: 0; }
+  header .name { font-weight: 600; font-size: 0.95rem; }
+  header .status { font-size: 0.75rem; color: #b7c2bd; }
+  header button.back {
+    background: none; border: none; color: #fff; font-size: 1.2rem;
+    cursor: pointer; padding: 4px 8px;
+  }
+
+  .screen { flex: 1; overflow-y: auto; display: none; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* Picker screens */
+  .picker { padding: 28px 20px; gap: 14px; display: flex; flex-direction: column; }
+  .picker h2 { font-size: 1.05rem; margin: 0 0 4px; }
+  .picker p.hint { color: var(--muted); font-size: 0.85rem; margin: 0 0 12px; }
+  .option-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px; cursor: pointer; text-align: left; font-size: 0.95rem;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .option-card:hover { border-color: var(--wa-header-accent); }
+  .option-card .sub { color: var(--muted); font-size: 0.8rem; }
+
+  /* Chat screen */
+  .messages { flex: 1; overflow-y: auto; padding: 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .bubble-row { display: flex; }
+  .bubble-row.sent { justify-content: flex-end; }
+  .bubble {
+    max-width: 78%; padding: 8px 11px; border-radius: 9px; font-size: 0.9rem; line-height: 1.4;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.08);
+  }
+  .sent .bubble { background: var(--wa-sent); border-top-right-radius: 2px; }
+  .received .bubble { background: var(--wa-received); border-top-left-radius: 2px; }
+  .system .bubble { background: var(--wa-system); margin: 0 auto; text-align: center; max-width: 90%; }
+  .bubble .meta { font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
+  .bubble.error { background: #fde2e1; color: var(--danger); }
+
+  .composer {
+    flex-shrink: 0; padding: 10px 12px; background: #f0f0f0;
+    display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--line);
+  }
+  .mic-btn {
+    width: 46px; height: 46px; border-radius: 50%; border: none;
+    background: var(--wa-header-accent); color: #fff; font-size: 1.2rem;
+    cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  }
+  .mic-btn.recording { background: var(--danger); animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(179,38,30,0.4); } 50% { box-shadow: 0 0 0 10px rgba(179,38,30,0); } }
+  .composer .label { flex: 1; color: var(--muted); font-size: 0.85rem; }
+  .end-btn {
+    background: none; border: 1px solid var(--danger); color: var(--danger);
+    border-radius: 16px; padding: 6px 12px; font-size: 0.78rem; cursor: pointer;
+  }
+
+  /* Results screen */
+  .results { padding: 20px; overflow-y: auto; }
+  .results h2 { font-size: 1rem; margin: 0 0 12px; }
+  .feedback-card {
+    background: var(--wa-sent); border-radius: 10px; padding: 14px; font-size: 0.92rem; line-height: 1.5;
+  }
+  .trainer-toggle {
+    margin-top: 18px; font-size: 0.82rem; color: var(--muted); cursor: pointer;
+    text-decoration: underline; background: none; border: none; padding: 0;
+  }
+  .trainer-view {
+    display: none; margin-top: 12px; background: #fff; border: 1px dashed var(--line);
+    border-radius: 8px; padding: 12px; font-size: 0.85rem;
+  }
+  .trainer-view.open { display: block; }
+  .trainer-view .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; }
+  .trainer-view .warn { color: var(--muted); font-size: 0.78rem; margin-top: 8px; }
+  .restart-btn, .primary-btn {
+    margin-top: 18px; width: 100%; padding: 12px; border-radius: 8px; border: none;
+    background: var(--wa-header-accent); color: #fff; font-size: 0.9rem; cursor: pointer;
+  }
+  .log-row { margin-top: 14px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+
+  .status-line { text-align: center; color: var(--muted); font-size: 0.82rem; padding: 8px; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <header>
+    <button class="back" id="backBtn" style="visibility:hidden">‹</button>
+    <div class="avatar">🐐</div>
+    <div class="titles">
+      <div class="name" id="headerName">Pitch Saathi</div>
+      <div class="status" id="headerStatus">demo — not a real PU line</div>
+    </div>
+  </header>
+
+  <!-- Module picker -->
+  <div class="screen active" id="screen-module">
+    <div class="picker">
+      <h2>Kya try karna hai?</h2>
+      <p class="hint">Ye demo hai — asli app WhatsApp par isi tarah kaam karega.</p>
+      <div class="option-card" onclick="showScenarioPicker()">
+        <strong>Practice</strong>
+        <span class="sub">Household ke saath pitch practice kijiye, AI role-play karega</span>
+      </div>
+      <div class="option-card" onclick="startMeraMadad()">
+        <strong>Mera Madad</strong>
+        <span class="sub">Apni pichhli practice se recap paayein</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario picker -->
+  <div class="screen" id="screen-scenario">
+    <div class="picker">
+      <h2>Scenario chuniye</h2>
+      <div class="option-card" onclick="startPractice('basic_pitch')">
+        <strong>Basic pitch</strong>
+        <span class="sub">Pehli baar household ko service samjhana</span>
+      </div>
+      <div class="option-card" onclick="startPractice('price_objection')">
+        <strong>Price objection</strong>
+        <span class="sub">Household daam par sawaal utha raha hai</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat screen -->
+  <div class="screen" id="screen-chat">
+    <div class="messages" id="messages"></div>
+    <div class="status-line" id="statusLine"></div>
+    <div class="composer">
+      <button class="mic-btn" id="micBtn">🎤</button>
+      <span class="label" id="composerLabel">Bolne ke liye mic dabaiye</span>
+      <button class="end-btn" id="endBtn">End &amp; Score</button>
+    </div>
+  </div>
+
+  <!-- Results screen -->
+  <div class="screen" id="screen-results">
+    <div class="results">
+      <h2>Feedback (jo PU dekhegi)</h2>
+      <div class="feedback-card" id="feedbackText"></div>
+
+      <button class="trainer-toggle" id="trainerToggle">Trainer / L&amp;D view dikhaiye ▾</button>
+      <div class="trainer-view" id="trainerView">
+        <div class="row"><span>Introduction</span><strong id="tIntro"></strong></div>
+        <div class="row"><span>Rapport</span><strong id="tRapport"></strong></div>
+        <div class="row"><span>Service</span><strong id="tService"></strong></div>
+        <div class="row"><span>Gap tag</span><strong id="tGap"></strong></div>
+        <div class="warn">PU isko kabhi nahi dekhti — sirf upar wala qualitative feedback dekhti hai.</div>
+      </div>
+
+      <label class="log-row"><input type="checkbox" id="logCheckbox"> Iss session ko real Sheet mein log karein</label>
+      <button class="restart-btn" id="restartBtn">Dobara try karein</button>
+    </div>
+  </div>
+
+  <!-- Mera Madad results -->
+  <div class="screen" id="screen-madad">
+    <div class="results">
+      <h2>Mera Madad</h2>
+      <div class="feedback-card" id="madadText"></div>
+      <button class="restart-btn" id="madadRestartBtn">Wapas jaayein</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const sessionId = "WEBDEMO_" + crypto.randomUUID();
+let currentScenario = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+const screens = ["screen-module", "screen-scenario", "screen-chat", "screen-results", "screen-madad"];
+function showScreen(id) {
+  screens.forEach(s => document.getElementById(s).classList.toggle("active", s === id));
+  document.getElementById("backBtn").style.visibility = id === "screen-module" ? "hidden" : "visible";
+}
+
+document.getElementById("backBtn").onclick = () => {
+  showScreen("screen-module");
+  document.getElementById("headerStatus").textContent = "demo — not a real PU line";
+};
+
+function showScenarioPicker() {
+  showScreen("screen-scenario");
+}
+
+async function startPractice(scenario) {
+  currentScenario = scenario;
+  document.getElementById("messages").innerHTML = "";
+  document.getElementById("headerStatus").textContent = scenario === "basic_pitch" ? "Basic pitch scenario" : "Price objection scenario";
+  await fetch("/api/practice/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id: sessionId, scenario }),
+  });
+  showScreen("screen-chat");
+}
+
+async function startMeraMadad() {
+  document.getElementById("madadText").textContent = "Recap laa rahe hain...";
+  showScreen("screen-madad");
+  const resp = await fetch("/api/mera_madad", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id: sessionId }),
+  });
+  const data = await resp.json();
+  if (data.no_history) {
+    document.getElementById("madadText").textContent =
+      "Abhi tak koi Practice session nahi hua hai. Pehle Practice try kijiye aur 'log to Sheet' tick kijiye, phir yahan wapas aayein.";
+  } else {
+    document.getElementById("madadText").textContent = data.reply;
+  }
+}
+document.getElementById("madadRestartBtn").onclick = () => showScreen("screen-module");
+
+function addBubble(kind, text, meta) {
+  const row = document.createElement("div");
+  row.className = "bubble-row " + (kind === "pu" ? "sent" : kind === "household" ? "received" : "system");
+  const bubble = document.createElement("div");
+  bubble.className = "bubble" + (kind === "error" ? " error" : "");
+  bubble.textContent = text;
+  if (meta) {
+    const m = document.createElement("div");
+    m.className = "meta";
+    m.textContent = meta;
+    bubble.appendChild(m);
+  }
+  row.appendChild(bubble);
+  const messages = document.getElementById("messages");
+  messages.appendChild(row);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+const micBtn = document.getElementById("micBtn");
+const composerLabel = document.getElementById("composerLabel");
+const statusLine = document.getElementById("statusLine");
+
+micBtn.onclick = async () => {
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+      mediaRecorder.onstop = onRecordingStop;
+      mediaRecorder.start();
+      isRecording = true;
+      micBtn.classList.add("recording");
+      composerLabel.textContent = "Recording... rokne ke liye mic dabaiye";
+    } catch (err) {
+      statusLine.textContent = "Microphone access nahi mila: " + err.message;
+    }
+  } else {
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    isRecording = false;
+    micBtn.classList.remove("recording");
+    composerLabel.textContent = "Process ho raha hai...";
+  }
+};
+
+async function onRecordingStop() {
+  const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+  const form = new FormData();
+  form.append("session_id", sessionId);
+  form.append("audio", blob, "turn.webm");
+
+  statusLine.textContent = "Transcribe ho raha hai...";
+  const resp = await fetch("/api/practice/turn", { method: "POST", body: form });
+  const data = await resp.json();
+  statusLine.textContent = "";
+  composerLabel.textContent = "Bolne ke liye mic dabaiye";
+
+  if (data.error === "too_long") {
+    addBubble("error", "Ye recording 30 second se lambi thi. Thodi chhoti recording try kijiye.");
+    return;
+  }
+  if (data.error === "empty_transcript") {
+    addBubble("error", "Kuch sunayi nahi diya. Dobara try kijiye.");
+    return;
+  }
+  if (data.error) {
+    addBubble("error", "Transcription mein dikkat aayi. Dobara try kijiye.");
+    return;
+  }
+
+  addBubble("pu", data.transcript, data.confidence != null ? `confidence: ${data.confidence}` : null);
+  addBubble("household", data.reply);
+}
+
+let lastScore = null;
+
+document.getElementById("endBtn").onclick = async () => {
+  statusLine.textContent = "Score ho raha hai...";
+  const resp = await fetch("/api/practice/end", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id: sessionId }),
+  });
+  const data = await resp.json();
+  statusLine.textContent = "";
+
+  if (data.error) {
+    addBubble("error", "Abhi score nahi kar sake — pehle kam se kam ek baar boliye.");
+    return;
+  }
+
+  lastScore = data;
+  document.getElementById("feedbackText").textContent = data.pu_feedback_hindi;
+  document.getElementById("tIntro").textContent = data.introduction;
+  document.getElementById("tRapport").textContent = data.rapport;
+  document.getElementById("tService").textContent = data.service;
+  document.getElementById("tGap").textContent = data.gap_tag;
+  document.getElementById("trainerView").classList.remove("open");
+  document.getElementById("trainerToggle").textContent = "Trainer / L&D view dikhaiye ▾";
+
+  const logCheckbox = document.getElementById("logCheckbox");
+  logCheckbox.checked = false;
+  logCheckbox.disabled = false;
+  logCheckbox.onchange = async (e) => {
+    if (e.target.checked && lastScore) {
+      logCheckbox.disabled = true;
+      await fetch("/api/practice/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, ...lastScore }),
+      });
+      document.querySelector(".log-row").insertAdjacentHTML("beforeend", ' <span style="color:var(--muted)">— logged ✓</span>');
+    }
+  };
+  showScreen("screen-results");
+};
+
+document.getElementById("trainerToggle").onclick = () => {
+  const view = document.getElementById("trainerView");
+  view.classList.toggle("open");
+  document.getElementById("trainerToggle").textContent =
+    view.classList.contains("open") ? "Trainer / L&D view chhupaiye ▴" : "Trainer / L&D view dikhaiye ▾";
+};
+
+document.getElementById("restartBtn").onclick = () => showScreen("screen-module");
+</script>
+</body>
+</html>
