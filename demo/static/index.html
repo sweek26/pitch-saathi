@@ -160,6 +160,38 @@
         <strong>Mera Madad</strong>
         <span class="sub">Apni pichhli practice se recap paayein</span>
       </div>
+      <div class="option-card" onclick="showScreen('screen-ask')" style="border-color:#b3261e">
+        <strong>Ask — Test Mode ⚠️</strong>
+        <span class="sub">Sirf evaluation ke liye — 3 tareeke se jawab compare karein. WhatsApp app mein nahi hai.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ask test mode -->
+  <div class="screen" id="screen-ask">
+    <div class="picker">
+      <h2>Ask — Test Mode</h2>
+      <p class="hint">Koi bhi technical sawaal type kijiye (jaise: "bakri chhat se gir gayi, kya karein"). Teeno jawab side-by-side dikhenge, taaki aap compare kar sakein — final approach abhi tay nahi hai.</p>
+      <textarea id="askQuestion" rows="3" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);font-family:inherit;font-size:0.9rem;" placeholder="Apna sawaal yahan likhiye..."></textarea>
+      <button class="primary-btn" id="askSubmitBtn">Teeno jawab dekhiye</button>
+      <div class="status-line" id="askStatusLine"></div>
+
+      <div id="askResults" style="display:none; margin-top:16px;">
+        <div style="margin-bottom:14px;">
+          <div style="font-size:0.78rem;font-weight:700;color:#2e7d32;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">🟢 Safe — abhi ka default</div>
+          <div class="feedback-card" id="askSafeText" style="background:#e8f5e9;"></div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="font-size:0.78rem;font-weight:700;color:#b9793a;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">🟡 Vetted retrieval — sirf asli handout se</div>
+          <div class="feedback-card" id="askVettedText" style="background:#fff3e0;"></div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="font-size:0.78rem;font-weight:700;color:#b3261e;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">🔴 Experimental — unvetted, AI-generated</div>
+          <div class="feedback-card" id="askExperimentalText" style="background:#fdecea;"></div>
+        </div>
+      </div>
+
+      <button class="restart-btn" id="askRestartBtn">Wapas jaayein</button>
     </div>
   </div>
 
@@ -226,7 +258,7 @@ let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
 
-const screens = ["screen-module", "screen-scenario", "screen-chat", "screen-results", "screen-madad"];
+const screens = ["screen-module", "screen-scenario", "screen-chat", "screen-results", "screen-madad", "screen-ask"];
 function showScreen(id) {
   screens.forEach(s => document.getElementById(s).classList.toggle("active", s === id));
   document.getElementById("backBtn").style.visibility = id === "screen-module" ? "hidden" : "visible";
@@ -397,6 +429,41 @@ document.getElementById("trainerToggle").onclick = () => {
 };
 
 document.getElementById("restartBtn").onclick = () => showScreen("screen-module");
+
+document.getElementById("askSubmitBtn").onclick = async () => {
+  const question = document.getElementById("askQuestion").value.trim();
+  if (!question) return;
+
+  const statusLine = document.getElementById("askStatusLine");
+  const results = document.getElementById("askResults");
+  results.style.display = "none";
+  statusLine.textContent = "Teeno jawab generate ho rahe hain...";
+
+  const resp = await fetch("/api/ask_test", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question }),
+  });
+  const data = await resp.json();
+  statusLine.textContent = "";
+
+  if (data.error) {
+    statusLine.textContent = "Sawaal likhiye pehle.";
+    return;
+  }
+
+  document.getElementById("askSafeText").textContent = data.safe;
+  document.getElementById("askVettedText").textContent = data.vetted;
+  document.getElementById("askExperimentalText").textContent = data.experimental;
+  results.style.display = "block";
+};
+
+document.getElementById("askRestartBtn").onclick = () => {
+  document.getElementById("askQuestion").value = "";
+  document.getElementById("askResults").style.display = "none";
+  document.getElementById("askStatusLine").textContent = "";
+  showScreen("screen-module");
+};
 </script>
 </body>
 </html>

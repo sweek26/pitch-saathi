@@ -1,0 +1,46 @@
+SOURCE: Disease dosage handout.pdf + Common diseases in goat.jpg
+(Handouts_Curative Care folder, L&D_Resources — real vetted training material)
+
+This is the ONLY content ask_vetted.txt is allowed to answer from. If a
+question isn't covered here, say so — do not extrapolate.
+
+## बुखार (Fever)
+लक्षण: शरीर का तापमान 103°F से ऊपर, सुस्ती, शरीर में दर्द, भूख न लगना
+दवा: Rugamax
+  5-10 Kg: एक चौथाई टैबलेट
+  10-15 Kg: एक तिहाई टैबलेट
+  15-20 Kg: आधी टैबलेट
+
+## भूख न लगना (Loss of appetite)
+दवा: Pachoplus (गुड़ या दाने में मिलाकर)
+  5-10 Kg: 3 ग्राम गुड़/दाना + एक चौथाई टैबलेट
+  10-15 Kg: 4 ग्राम गुड़/दाना + एक तिहाई टैबलेट
+  15-20 Kg: 5 ग्राम गुड़/दाना + आधी टैबलेट
+
+## डाइरिया / दस्त (Diarrhea)
+लक्षण: पतली दस्त, पेट में दर्द, त्वचा रूखी होना, आंखें अंदर धंसना, शरीर में पानी की कमी
+दवा: Nabolon Diarex bolus
+  5-10 Kg: 20 ग्राम - 100ml पानी में, एक चौथाई टैबलेट, दिन में दो बार
+  10-15 Kg: 30 ग्राम - 200ml पानी में, एक तिहाई टैबलेट, दिन में दो बार
+  15-20 Kg: 40 ग्राम - 250ml पानी में, आधी टैबलेट, दिन में दो बार
+
+## निमोनिया / खांसी-जुखाम (Pneumonia)
+लक्षण: नाक से पानी/तरल पदार्थ निकलना, सांस लेने में दिक्कत, खाना-पीना कम करना
+दवा: Kaflon
+  5-10 Kg: 10 ग्राम - 100ml पानी में
+  10-15 Kg: 15 ग्राम - 200ml पानी में
+  15-20 Kg: 20 ग्राम - 250ml पानी में
+
+## अफरा / पेट फूलना (Bloat)
+लक्षण: बेचैनी, गैस बनना, पेट फूल जाना, सुस्त पड़ जाना, गंभीर होने पर बैठकर लेट जाना
+दवा: Tympol powder + Tyral (घोल)
+  5-10 Kg: 15 ग्राम पाउडर (100ml पानी में) + 20ml टाइरल
+  10-15 Kg: 20 ग्राम पाउडर (200ml पानी में) + 30ml टाइरल
+  15-20 Kg: 25 ग्राम पाउडर (250ml पानी में) + 40ml टाइरल
+
+All doses given twice a day (दिन में 2 बार) unless noted otherwise.
+
+## NOT COVERED by this reference
+Physical injury, falls, wounds, fractures, bleeding, or any condition not
+listed above. If asked about these, say clearly that this isn't in the
+vetted material and she should contact her Field Executive.

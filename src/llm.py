@@ -119,3 +119,63 @@ def mera_madad_reply(history_summary):
         response,
         fallback="Maaf kijiye, abhi jawab dene mein dikkat ho rahi hai — thodi der baad phir try kijiye.",
     )
+
+
+# ---------------------------------------------------------------------------
+# Ask — TEST MODE ONLY. Not wired into router.py/webhook.py (the real
+# WhatsApp pipeline stays Practice + Mera Madad only, per locked scope).
+# Three modes for side-by-side evaluation before deciding on one long-term:
+#   safe        - no generation at all, honest "not covered, ask your FE"
+#   vetted      - answers only from a real vetted curative reference doc
+#   experimental- AI-generated herbal-only suggestion, no vetted source
+# ---------------------------------------------------------------------------
+
+ASK_VETTED_PROMPT = None
+ASK_EXPERIMENTAL_PROMPT = None
+VETTED_CURATIVE_REFERENCE = None
+
+
+def ask_safe_defer(question):
+    """No LLM call at all - the safest possible floor. Matches the
+    non-negotiable rule already in practice.txt."""
+    return (
+        f'Aapne poocha: "{question}" — iska pakka jawab abhi mere paas nahi hai. '
+        "Kripya apne Field Executive se poochiye, taaki bakri ko sahi salah mil sake."
+    )
+
+
+def ask_vetted_retrieval(question):
+    global ASK_VETTED_PROMPT, VETTED_CURATIVE_REFERENCE
+    if ASK_VETTED_PROMPT is None:
+        ASK_VETTED_PROMPT = _load_prompt("ask_vetted.txt")
+    if VETTED_CURATIVE_REFERENCE is None:
+        VETTED_CURATIVE_REFERENCE = _load_prompt("vetted_curative_reference.txt")
+
+    system = f"{ASK_VETTED_PROMPT}\n\n## Vetted reference content\n{VETTED_CURATIVE_REFERENCE}"
+    response = _get_client().messages.create(
+        model="claude-sonnet-5",
+        max_tokens=1024,
+        system=system,
+        messages=[{"role": "user", "content": question}],
+    )
+    return _extract_text(
+        response,
+        fallback="Is sawaal ka jawab abhi vetted material mein nahi mila — apne FE se poochiye.",
+    )
+
+
+def ask_experimental_herbal(question):
+    global ASK_EXPERIMENTAL_PROMPT
+    if ASK_EXPERIMENTAL_PROMPT is None:
+        ASK_EXPERIMENTAL_PROMPT = _load_prompt("ask_experimental_herbal.txt")
+
+    response = _get_client().messages.create(
+        model="claude-sonnet-5",
+        max_tokens=1024,
+        system=ASK_EXPERIMENTAL_PROMPT,
+        messages=[{"role": "user", "content": question}],
+    )
+    return _extract_text(
+        response,
+        fallback="Jawab generate nahi ho paya — dobara try kijiye.",
+    )

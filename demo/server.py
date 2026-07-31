@@ -122,5 +122,21 @@ def mera_madad():
     return jsonify({"reply": reply})
 
 
+@app.route("/api/ask_test", methods=["POST"])
+def ask_test():
+    """TEST MODE ONLY - runs a question through all three Ask approaches
+    for side-by-side evaluation. Not part of the real WhatsApp pipeline."""
+    data = request.get_json()
+    question = data["question"].strip()
+    if not question:
+        return jsonify({"error": "empty_question"}), 400
+
+    return jsonify({
+        "safe": llm.ask_safe_defer(question),
+        "vetted": llm.ask_vetted_retrieval(question),
+        "experimental": llm.ask_experimental_herbal(question),
+    })
+
+
 if __name__ == "__main__":
     app.run(port=5050, debug=True)
