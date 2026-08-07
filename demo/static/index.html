@@ -262,7 +262,8 @@
       </div>
 
       <label class="log-row"><input type="checkbox" id="logCheckbox"> Iss session ko real Sheet mein log karein</label>
-      <button class="restart-btn" id="restartBtn">Dobara try karein</button>
+      <button class="restart-btn" id="restartBtn">Isi scenario ko phir se try karein</button>
+      <button class="footer-link" id="changeScenarioBtn" style="margin-top:10px;">Doosra scenario try karein</button>
     </div>
   </div>
 
@@ -487,7 +488,8 @@ document.getElementById("trainerToggle").onclick = () => {
     view.classList.contains("open") ? "Trainer / L&D view chhupaiye ▴" : "Trainer / L&D view dikhaiye ▾";
 };
 
-document.getElementById("restartBtn").onclick = () => showScreen("screen-module");
+document.getElementById("restartBtn").onclick = () => startPractice(currentScenario);
+document.getElementById("changeScenarioBtn").onclick = () => showScreen("screen-module");
 
 document.getElementById("askSubmitBtn").onclick = async () => {
   const question = document.getElementById("askQuestion").value.trim();
