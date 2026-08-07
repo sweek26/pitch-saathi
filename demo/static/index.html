@@ -329,6 +329,15 @@ document.getElementById("onboardPanchayatNext").onclick = () => {
   showScenarioPicker();
 };
 
+// Mobile keyboards show "Go"/"Next" as the Enter key - pressing it should
+// act like tapping the visible button, not do nothing.
+document.getElementById("onboardNameInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") document.getElementById("onboardNameNext").click();
+});
+document.getElementById("onboardPanchayatInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") document.getElementById("onboardPanchayatNext").click();
+});
+
 if (savedName && savedPanchayat) {
   applyProfileToHeader(savedName);
   showScreen("screen-module");
