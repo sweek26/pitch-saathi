@@ -259,9 +259,9 @@
         <div class="row"><span>Service</span><strong id="tService"></strong></div>
         <div class="row"><span>Gap tag</span><strong id="tGap"></strong></div>
         <div class="warn">PU isko kabhi nahi dekhti — sirf upar wala qualitative feedback dekhti hai.</div>
+        <label class="log-row"><input type="checkbox" id="logCheckbox"> Iss session ko real Sheet mein log karein</label>
       </div>
 
-      <label class="log-row"><input type="checkbox" id="logCheckbox"> Iss session ko real Sheet mein log karein</label>
       <button class="restart-btn" id="restartBtn">Isi scenario ko phir se try karein</button>
       <button class="footer-link" id="changeScenarioBtn" style="margin-top:10px;">Doosra scenario try karein</button>
     </div>
@@ -332,7 +332,7 @@ function showScenarioPicker() {
 async function startPractice(scenario) {
   currentScenario = scenario;
   document.getElementById("messages").innerHTML = "";
-  document.getElementById("headerStatus").textContent = scenario === "basic_pitch" ? "Basic pitch scenario" : "Price objection scenario";
+  document.getElementById("headerStatus").textContent = scenario === "basic_pitch" ? "Pehli mulakaat" : "Daam ki baat";
   await fetch("/api/practice/start", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
