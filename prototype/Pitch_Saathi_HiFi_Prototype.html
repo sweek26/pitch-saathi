@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pitch Saathi — Hi-Fi Interactive Prototype v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brown:#693D30; --brown-dk:#4E2C23; --brown-lt:#8A5748;
+  --tint:#DDD0CC; --beige:#F1E9E5; --cream:#FBF7F5;
+  --rose:#D4A496; --tan:#C99E89; --rule:#ADB6BE; --ink:#160601; --green:#2E9935;
+  --f:'Montserrat','Noto Sans Devanagari','Helvetica Neue',Arial,sans-serif;
+  --fd:'Noto Sans Devanagari','Montserrat',sans-serif;
+  --fl:'Lato','Montserrat',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--f);color:var(--brown);background:#EFE7E3;line-height:1.65;font-size:16px;
+  background-image:radial-gradient(circle at 20% 0%,#F7F1EE 0%,#EFE7E3 55%)}
+.wrap{max-width:1220px;margin:0 auto;padding:34px 24px 70px}
+.masthead{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  border-bottom:2px solid var(--brown);padding-bottom:18px}
+.brandmark{font-weight:700;letter-spacing:.5px;font-size:15px}
+.masthead h1{font-weight:400;font-size:38px;line-height:1.2;margin-top:6px}
+.masthead h1 b{font-weight:600}
+.kick{font-family:var(--fl);font-weight:700;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--rule)}
+.lede{max-width:790px;margin:20px 0 4px;font-size:15.5px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:22px 0 26px}
+.btn{font-family:var(--f);font-size:13.5px;font-weight:500;border:1.5px solid var(--brown);background:transparent;
+  color:var(--brown);padding:9px 18px;cursor:pointer;border-radius:0;transition:.15s}
+.btn:hover{background:var(--beige)} .btn.on{background:var(--brown);color:#fff}
+.stage{display:grid;grid-template-columns:auto 1fr;gap:38px;align-items:start}
+@media(max-width:920px){.stage{grid-template-columns:1fr}}
+
+/* phone */
+.phone{width:372px;height:772px;background:#fff;border-radius:34px;position:relative;
+  border:9px solid #2B1A15;box-shadow:0 24px 60px rgba(35,25,20,.30);overflow:hidden;flex:none}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:22px;background:#2B1A15;
+  border-radius:0 0 14px 14px;z-index:40}
+.status{height:30px;display:flex;align-items:center;justify-content:space-between;padding:0 20px 0 22px;
+  font-family:var(--fl);font-size:10.5px;background:var(--cream);position:relative;z-index:30}
+.appbar{background:var(--brown);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:11px;position:relative;z-index:20}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--tint);flex:none;display:grid;place-items:center;color:var(--brown)}
+.appbar .nm{font-size:14.5px;font-weight:600;font-family:var(--fd)}
+.appbar .sub{font-size:10.5px;opacity:.82;font-family:var(--fl)}
+.iconbtn{background:none;border:none;color:#fff;cursor:pointer;opacity:.9;padding:4px;display:grid;place-items:center}
+.iconbtn:hover{opacity:1}
+.trail{background:var(--tint);padding:7px 14px;font-family:var(--fd);font-size:11.5px;color:var(--brown);
+  display:flex;align-items:center;gap:6px;position:relative;z-index:19}
+.trail b{font-weight:600}
+.screen{overflow-y:auto;background:var(--cream);padding:18px 15px 26px}
+.screen::-webkit-scrollbar{width:0}
+svg.i{display:block}
+
+/* app parts */
+.dtitle{font-family:var(--fd);font-size:19.5px;font-weight:600;line-height:1.45;margin-bottom:3px}
+.dsub{font-family:var(--fd);font-size:13px;line-height:1.62;color:var(--brown-lt);margin-bottom:15px}
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:11px;cursor:pointer;
+  box-shadow:0 0 22px rgba(35,35,35,.075);border:1.5px solid transparent;transition:.14s;display:flex;gap:13px;align-items:center;min-height:64px}
+.card:hover{border-color:var(--tan);transform:translateY(-1px)}
+.card .ic{width:46px;height:46px;border-radius:11px;background:var(--beige);display:grid;place-items:center;flex:none}
+.card .t{font-family:var(--fd);font-size:15.5px;font-weight:600;line-height:1.38}
+.card .en{font-family:var(--fl);font-size:10.5px;letter-spacing:.6px;color:var(--rule);text-transform:uppercase;margin-top:1px}
+.card .d{font-family:var(--fd);font-size:12px;color:var(--brown-lt);line-height:1.5;margin-top:3px}
+.card .ch{margin-left:auto;color:var(--tan);flex:none}
+.card.beige{background:var(--beige);box-shadow:none}
+.card.big{padding:17px 15px;min-height:80px}
+.card .cta-in{font-family:var(--fd);font-size:12.5px;font-weight:600;color:var(--brown);margin-top:6px;
+  display:inline-flex;align-items:center;gap:5px}
+.card.done .ic{background:var(--tint)}
+.badge{font-family:var(--fd);font-size:10px;background:var(--tint);color:var(--brown);padding:2px 8px;border-radius:20px;margin-left:7px}
+
+.bubble{background:#fff;border-radius:12px 12px 12px 3px;padding:12px 14px;margin-bottom:11px;font-family:var(--fd);
+  font-size:14px;line-height:1.62;box-shadow:0 0 16px rgba(35,35,35,.06);max-width:88%}
+.bubble.me{background:var(--brown);color:#fff;border-radius:12px 12px 3px 12px;margin-left:auto}
+.bubble.coach{background:var(--beige);box-shadow:none;border-left:3px solid var(--brown);max-width:100%}
+.who{font-family:var(--fl);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--rule);margin-bottom:5px}
+.play{display:inline-flex;align-items:center;gap:5px;background:var(--beige);border:none;color:var(--brown);
+  font-size:11px;padding:5px 11px;border-radius:20px;cursor:pointer;margin-top:8px;font-family:var(--fd);font-weight:600}
+.bubble.me .play{background:rgba(255,255,255,.2);color:#fff}
+
+.mic{width:88px;height:88px;border-radius:50%;background:var(--brown);color:#fff;border:none;cursor:pointer;
+  display:grid;place-items:center;margin:10px auto 8px;box-shadow:0 8px 26px rgba(105,61,48,.36);transition:.15s}
+.mic:hover{background:var(--brown-dk)}
+.miccap{text-align:center;font-family:var(--fd);font-size:13px;color:var(--brown-lt);margin-bottom:4px}
+.safe{background:var(--beige);border-radius:10px;padding:11px 13px;font-family:var(--fd);font-size:12.5px;
+  line-height:1.62;display:flex;gap:9px;align-items:flex-start;margin-bottom:14px}
+.safe svg{flex:none;margin-top:2px}
+
+.choose{background:#fff;border:1.5px dashed var(--tan);border-radius:11px;padding:11px;margin-top:12px}
+.choose .lbl{font-family:var(--fl);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--rule);margin-bottom:8px}
+.opt{display:block;width:100%;text-align:left;background:var(--cream);border:1px solid var(--tint);border-radius:9px;
+  padding:9px 11px;margin-bottom:7px;cursor:pointer;font-family:var(--fd);font-size:12.5px;line-height:1.55;color:var(--brown)}
+.opt:hover{background:var(--beige);border-color:var(--tan)}
+.opt .tag{font-family:var(--fl);font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--rule);display:block;margin-bottom:3px}
+
+.cta{width:100%;background:var(--brown);color:#fff;border:none;padding:14px;font-family:var(--fd);font-size:15px;
+  font-weight:600;cursor:pointer;border-radius:0;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.cta:hover{background:var(--brown-dk)}
+.cta.ghost{background:transparent;color:var(--brown);border:1.5px solid var(--brown)}
+.cta.ghost:hover{background:var(--beige)}
+.linkbtn{display:block;width:100%;text-align:center;background:none;border:none;color:var(--brown);font-family:var(--fd);
+  font-size:12.5px;text-decoration:underline;cursor:pointer;margin-top:11px;padding:6px}
+
+.pick{background:#fff;border:1.5px solid var(--tint);border-radius:11px;padding:13px 14px;margin-bottom:12px;cursor:pointer;
+  display:flex;align-items:center;gap:11px;min-height:58px}
+.pick:hover{border-color:var(--tan)}
+.pick.sel{border-color:var(--brown);background:var(--beige)}
+.pick .lbl{font-family:var(--fd);font-size:11.5px;color:var(--brown-lt)}
+.pick .val{font-family:var(--fd);font-size:15px;font-weight:600}
+.pickrow{background:var(--cream);border:1px solid var(--tint);border-radius:9px;padding:11px 13px;margin-bottom:7px;
+  cursor:pointer;font-family:var(--fd);font-size:14.5px;display:flex;align-items:center;gap:9px}
+.pickrow:hover{background:var(--beige)}
+.pickrow.on{background:var(--brown);color:#fff;border-color:var(--brown)}
+
+.fbblock{background:#fff;border-radius:12px;padding:16px;box-shadow:0 0 22px rgba(35,35,35,.075);margin-bottom:12px}
+.fbpart{margin-bottom:14px;padding-left:12px;border-left:3px solid var(--tint)}
+.fbpart:last-child{margin-bottom:0}
+.fbpart.p1{border-color:var(--green)} .fbpart.p2{border-color:var(--tan)} .fbpart.p3{border-color:var(--brown)}
+.fbpart .h{font-family:var(--fd);font-size:11px;font-weight:600;color:var(--brown-lt);margin-bottom:4px;
+  display:flex;align-items:center;gap:5px}
+.fbpart .b{font-family:var(--fd);font-size:13.5px;line-height:1.68}
+.quoteline{background:var(--beige);border-radius:9px;padding:11px 13px;font-family:var(--fd);font-size:13.5px;
+  line-height:1.62;margin-top:8px;font-weight:600}
+.phrase{background:#fff;border-radius:11px;padding:13px 14px;margin-bottom:10px;box-shadow:0 0 18px rgba(35,35,35,.06);
+  border-left:4px solid var(--brown)}
+.phrase .q{font-family:var(--fd);font-size:14px;line-height:1.6;font-weight:600}
+.phrase .m{font-family:var(--fd);font-size:10.5px;color:var(--brown-lt);margin-top:6px;display:flex;align-items:center;gap:7px}
+.empty{background:var(--beige);border-radius:11px;padding:22px 16px;text-align:center;font-family:var(--fd);
+  font-size:13.5px;line-height:1.7}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:2px}
+.tile{background:#fff;border-radius:14px;padding:18px 12px 16px;cursor:pointer;box-shadow:0 0 22px rgba(35,35,35,.075);
+  border:1.5px solid transparent;transition:.14s;text-align:center;min-height:132px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:9px}
+.tile:hover{border-color:var(--tan);transform:translateY(-2px)}
+.tile .tic{width:56px;height:56px;border-radius:14px;background:var(--beige);display:grid;place-items:center}
+.tile .tname{font-family:var(--fd);font-size:15.5px;font-weight:600;line-height:1.35}
+.tile.done .tic{background:var(--tint)}
+.tile .tdone{font-family:var(--fd);font-size:10px;background:var(--tint);padding:2px 9px;border-radius:20px}
+.fieldlbl{font-family:var(--fd);font-size:13.5px;font-weight:600;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.tf{width:100%;font-family:var(--fd);font-size:16px;color:var(--brown);background:#fff;border:1.5px solid var(--tint);
+  border-radius:11px;padding:14px 14px;outline:none}
+.tf:focus{border-color:var(--brown)}
+.tf::placeholder{color:#BBA79F}
+.qa{background:#fff;border-radius:11px;margin-bottom:9px;box-shadow:0 0 16px rgba(35,35,35,.05);overflow:hidden}
+.qa .q{padding:13px 14px;font-family:var(--fd);font-size:13.5px;font-weight:600;cursor:pointer;display:flex;gap:10px;align-items:center}
+.qa .q .ch{margin-left:auto;color:var(--tan)}
+.qa .a{padding:0 14px 14px;font-family:var(--fd);font-size:13px;line-height:1.66;color:var(--brown-lt);display:none}
+.qa.open .a{display:block}
+.escal{background:var(--beige);border-radius:9px;padding:10px 12px;font-family:var(--fd);font-size:12.5px;line-height:1.6;
+  margin-top:9px;border-left:3px solid var(--rose)}
+.note-in{background:var(--beige);border-radius:9px;padding:10px 12px;font-size:11.5px;line-height:1.55;
+  margin-top:14px;border-left:3px solid var(--rule);font-family:var(--f);color:var(--brown-lt)}
+.toast{position:absolute;left:14px;right:14px;bottom:16px;background:var(--ink);color:#fff;border-radius:11px;
+  padding:12px 14px;font-family:var(--fd);font-size:12.5px;line-height:1.55;z-index:50;opacity:0;transform:translateY(10px);
+  transition:.28s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* rail */
+.rail{min-width:0}
+.note{background:#fff;border-radius:11px;padding:17px 19px;margin-bottom:13px;box-shadow:0 0 26px rgba(35,35,35,.07)}
+.note h3{font-size:15.5px;font-weight:600;margin-bottom:7px;line-height:1.4}
+.note p{font-size:13.8px;margin-bottom:9px} .note p:last-child{margin-bottom:0}
+.note .ev{background:var(--beige);border-left:3px solid var(--brown);padding:9px 12px;border-radius:0 6px 6px 0;
+  font-size:13px;font-style:italic;margin:9px 0}
+.live{background:var(--ink);color:#fff;border-radius:11px;padding:14px 17px;margin-bottom:13px;font-size:13.5px;line-height:1.6}
+.live b{color:var(--tint)}
+.pill{display:inline-block;font-family:var(--fl);font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  padding:3px 9px;border-radius:20px;margin:0 5px 7px 0}
+.pill.ev{background:var(--beige);color:var(--brown)}
+.pill.fix{background:var(--brown);color:#fff}
+.pill.new{background:var(--rose);color:var(--ink)}
+.pill.warn{background:#B4453A;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--brown);color:#fff;text-align:left;padding:9px 11px;font-weight:600;font-size:12.5px}
+td{padding:9px 11px;border-bottom:1px solid var(--rule)}
+.foot{margin-top:44px;padding-top:20px;border-top:1px solid var(--rule);font-family:var(--fl);font-size:12px}
+.foot a{color:var(--brown)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="masthead">
+  <div><div class="brandmark">THE/NUDGE</div>
+    <h1>Pitch Saathi — <b>hi-fi interactive prototype</b></h1></div>
+  <div class="kick">v2 · service-wise practice · 7 Aug 2026</div>
+</div>
+
+<p class="lede">A <b>working</b> prototype. The conversation branches on what she says, the feedback is generated from the
+path she took, and her good lines accumulate in मेरी बातें. Pick a weak or very short reply to watch the
+<b>hostility ceiling</b> and <b>rescue rule</b> fire. Design notes on the right explain each decision and cite the evidence.</p>
+
+<div class="bar">
+  <button class="btn on" id="btnNotes" onclick="toggleNotes()">Design notes: on</button>
+  <button class="btn" onclick="go('trainer')">Trainer / L&amp;D view</button>
+  <button class="btn" onclick="errDemo()">Simulate a bad recording</button>
+  <button class="btn" onclick="resetAll()">Restart from login</button>
+  <span style="font-family:var(--fl);font-size:12px;color:var(--rule);margin-left:6px" id="sessInfo"></span>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="status"><span>9:41</span><span>●●● 4G ▮</span></div>
+    <div id="chrome"></div>
+    <div class="screen" id="screen"></div>
+    <div class="toast" id="toast"></div>
+  </div>
+  <div class="rail" id="rail"></div>
+</div>
+
+<div class="foot">
+  Built from PRD v3, the field interviews, the Wireframe tab and the PU screening data. Interaction choices grounded in
+  published guidance for low-literate smartphone users — see the design notes on the login and service screens.
+</div>
+</div>
+
+<script>
+/* ============================ ICONS (consistent 2px stroke set) ========= */
+const IC = {
+  mic:'<path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>',
+  chat:'<path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/>',
+  star:'<path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6.1L12 16.8 6.7 19.7l1.1-6.1L3.4 9.4l6-.8L12 3z"/>',
+  phone:'<path d="M21 16.5v3a2 2 0 0 1-2.2 2 19 19 0 0 1-8.3-3 18.6 18.6 0 0 1-5.7-5.7 19 19 0 0 1-3-8.4A2 2 0 0 1 3.8 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a15 15 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
+  goat:'<path d="M6 5c-1 2-1.5 4-1 6 .6 2.4 2.6 4 5 4h4c2.4 0 4.4-1.6 5-4 .5-2 0-4-1-6"/><path d="M6 5l-2-2M18 5l2-2"/><path d="M9 19v2M15 19v2"/><circle cx="10" cy="11" r=".6" fill="currentColor"/><circle cx="14" cy="11" r=".6" fill="currentColor"/>',
+  pill:'<path d="M10.5 3.5 3.5 10.5a5 5 0 0 0 7 7l7-7a5 5 0 0 0-7-7z"/><path d="M7 7l7 7"/>',
+  syringe:'<path d="M18 2l4 4"/><path d="M17 7l-2-2"/><path d="M20 4 9.5 14.5 5 19l-2 2"/><path d="M14 6l4 4"/><path d="M9 11l4 4"/>',
+  steth:'<path d="M5 3v6a5 5 0 0 0 10 0V3"/><path d="M5 3H3M15 3h2"/><path d="M10 14v2a5 5 0 0 0 10 0v-2"/><circle cx="20" cy="11" r="2.2"/>',
+  scissors:'<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M20 4 8.1 16.5M20 20 8.1 7.5"/>',
+  wave:'<path d="M8 12V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M11 11V4.5a1.5 1.5 0 0 1 3 0V11"/><path d="M14 11V6.5a1.5 1.5 0 0 1 3 0V13"/><path d="M8 12v-1a1.5 1.5 0 0 0-3 0v4a7 7 0 0 0 12 5"/>',
+  chev:'<path d="M9 6l6 6-6 6"/>',
+  back:'<path d="M15 18l-6-6 6-6"/>',
+  home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>',
+  play:'<path d="M7 4l12 8-12 8z"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  check:'<path d="M4 12.5 9 17.5 20 6.5"/>',
+  person:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  pin:'<path d="M12 22s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="11" r="2.6"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  again:'<path d="M3 12a9 9 0 1 1 3 6.7"/><path d="M3 19v-5h5"/>',
+  stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>'
+};
+function icon(n,s=22,c='currentColor',w=1.9){
+  return `<svg class="i" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}"
+    stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${IC[n]||''}</svg>`;}
+
+/* ============================ DATA ===================================== */
+const GPS = ['जहाँगीरपुर','अस्तिया','उदयपुर','सिखमापुर','सरसी'];
+const NAMES = {'जहाँगीरपुर':['तबस्सुम'],'अस्तिया':['फ़मीदा'],'उदयपुर':['निशा'],
+  'सिखमापुर':['सुषमा सांखवार'],'सरसी':['नीलम पाल']};
+
+const PRACTICE = {
+  first:{ key:'first', icon:'wave', name:'पहली मुलाक़ात', en:'First visit',
+    desc:'नए घर पर पहली बार जाना — अपना परिचय देना',
+    prep:'बकरीपालक आपको पहली बार देख रही हैं। वो पूछ सकती हैं — आप कौन हैं, कहाँ से आई हैं।',
+    open:'नमस्ते। कौन हैं आप? पहले तो कभी देखा नहीं आपको।',
+    warmOpen:'नमस्ते बहन। आइए, बैठिए। कहिए, कैसे आना हुआ?' },
+  deworm:{ key:'deworm', icon:'pill', name:'कीड़े की दवा', en:'Deworming',
+    desc:'कृमिनाशक दवा के बारे में समझाना',
+    prep:'बकरीपालक कह सकती हैं कि दवा तो मुफ़्त आती है, फिर पैसे क्यों।',
+    open:'दवा तो मुफ़्त में आती है ना सरकार से। आप पैसे क्यों ले रही हैं?',
+    warmOpen:'अच्छा, कीड़े की दवा? हमने सुना तो है। ज़रा बताइए ना क्या करना होता है।' },
+  vacc:{ key:'vacc', icon:'syringe', name:'टीकाकरण', en:'Vaccination · PPR',
+    desc:'PPR के टीके के बारे में समझाना',
+    prep:'बकरीपालक कह सकती हैं कि बकरी तो अभी बिलकुल ठीक है, टीके की क्या ज़रूरत।',
+    open:'हमारी बकरी तो बिलकुल ठीक है। अभी सुई क्यों लगवाएँ?',
+    warmOpen:'टीका लगवाना है? अच्छा बताइए, कब लगता है और क्या फ़ायदा होता है।' },
+  curative:{ key:'curative', icon:'steth', name:'इलाज', en:'Curative care',
+    desc:'बीमार बकरी के इलाज के बारे में समझाना',
+    prep:'बकरीपालक कह सकती हैं कि वो पहले से किसी डॉक्टर को दिखाती हैं।',
+    open:'500 रुपये तो हम दूसरे डॉक्टर को देते हैं। उन्हीं से करा लेंगे।',
+    warmOpen:'बकरी दो दिन से चारा नहीं खा रही। आप कुछ कर सकती हैं क्या?' },
+  badhiya:{ key:'badhiya', icon:'scissors', name:'बधियाकरण', en:'Badhiyakaran',
+    desc:'बधियाकरण के फ़ायदे समझाना',
+    prep:'बकरीपालक कह सकती हैं कि इससे बकरे को तकलीफ़ होगी।',
+    open:'इससे तो बकरे को तकलीफ़ होगी। क्या फ़ायदा इसमें?',
+    warmOpen:'बधियाकरण? ये क्या होता है ज़रा समझाइए।' }
+};
+const SERVICES = ['deworm','vacc','curative','badhiya'];
+
+const FLOW = {
+first:[
+ {strong:{say:'नमस्ते दीदी। मैं फ़मीदा, इसी गाँव की हूँ। आशा किरण से जुड़ी हूँ, बकरियों की सेवा के लिए आई हूँ।',
+   reply:'अच्छा… आशा किरण? कोई डॉक्टर हैं क्या आप?',win:null},
+  weak:{say:'मैं बकरियों की दवा के लिए आई हूँ, तीस रुपये लगेंगे।',
+   reply:'अरे पहले ये तो बताओ आप हो कौन। सीधे पैसे की बात कर रही हो।',win:null},
+  short:{say:'जी… दवा…',reply:'क्या? ठीक से बोलिए।',win:null}},
+ {strong:{say:'डॉक्टर तो नहीं हूँ दीदी, पर इसी काम की ट्रेनिंग ली है मैंने। काग़ज़ भी दिखा देती हूँ। भोलू भैया को जानती हैं ना आप?',
+   reply:'हाँ भोलू को तो जानते हैं। अच्छा, बताओ फिर क्या करती हो।',
+   win:'डॉक्टर तो नहीं हूँ दीदी, पर इसी काम की ट्रेनिंग ली है मैंने। काग़ज़ भी दिखा देती हूँ'},
+  weak:{say:'भरोसा कीजिए, मैं सही बता रही हूँ।',reply:'भरोसा ऐसे थोड़ी होता है। कुछ दिखाओ तो।',win:null},
+  short:{say:'हाँ जी।',reply:'हाँ जी क्या? बताइए ना कुछ।',win:null}},
+ {strong:{say:'आपके घर में कितनी बकरियाँ हैं दीदी? कभी कोई बीमार पड़ी तो क्या करती हैं आप?',
+   reply:'छह हैं। पिछली बार तो एक मर ही गई थी, कुछ समझ नहीं आया था।',
+   win:'आपके घर में कितनी बकरियाँ हैं दीदी? कभी कोई बीमार पड़ी तो क्या करती हैं आप?'},
+  weak:{say:'तो दवा पिलवा लीजिए, अच्छी रहेगी।',reply:'देखते हैं… अभी घर में कोई नहीं है।',win:null},
+  short:{say:'ठीक है।',reply:'…',win:null}}],
+deworm:[
+ {strong:{say:'मुफ़्त की दवा का इंतज़ार लंबा हो जाता है दीदी, और तब तक कीड़े बकरी को कमज़ोर कर देते हैं। मैं दवा अपने पैसे से लाती हूँ, इसीलिए सिर्फ़ तीस रुपये लेती हूँ।',
+   reply:'अच्छा… पर कीड़े से होता क्या है?',
+   win:'मैं दवा अपने पैसे से लाती हूँ, इसीलिए सिर्फ़ तीस रुपये लेती हूँ'},
+  weak:{say:'तीस रुपये कोई ज़्यादा नहीं है दीदी।',reply:'ज़्यादा नहीं है तो मुफ़्त कर दो फिर।',win:null},
+  short:{say:'सस्ता ही है।',reply:'क्या सस्ता है? कुछ बताओ तो सही।',win:null}},
+ {strong:{say:'कीड़े पेट में हों तो बकरी जो खाती है वो लगती नहीं — वज़न नहीं बढ़ता, दूध कम हो जाता है। और टीका भी ठीक से असर नहीं करता।',
+   reply:'अरे! तो पहले कीड़े की दवा, फिर टीका?',
+   win:'कीड़े पेट में हों तो बकरी जो खाती है वो लगती नहीं — वज़न नहीं बढ़ता, दूध कम हो जाता है'},
+  weak:{say:'कीड़े बुरे होते हैं, दवा पिला दीजिए।',reply:'कैसे बुरे? कुछ ठीक से बताओ।',win:null},
+  short:{say:'हाँ…',reply:'हाँ क्या? बोलिए।',win:null}},
+ {strong:{say:'बिलकुल दीदी, पहले कीड़े की दवा। सलाह का मैं कोई पैसा नहीं लेती — सिर्फ़ सेवा का तीस रुपये।',
+   reply:'चलो ठीक है, कल आ जाओ।',
+   win:'सलाह का मैं कोई पैसा नहीं लेती — सिर्फ़ सेवा का तीस रुपये'},
+  weak:{say:'तीस रुपये दे दीजिए बस।',reply:'सोचती हूँ। बाद में आना।',win:null},
+  short:{say:'ठीक है।',reply:'…',win:null}}],
+vacc:[
+ {strong:{say:'यही तो सही समय है दीदी। PPR एक बार लग जाए तो इलाज नहीं होता — सिर्फ़ टीका ही बचाता है। बीमार होने के बाद देर हो जाती है।',
+   reply:'इलाज नहीं होता? सच में?',
+   win:'PPR एक बार लग जाए तो इलाज नहीं होता — सिर्फ़ टीका ही बचाता है'},
+  weak:{say:'टीका तो लगवाना ही चाहिए दीदी।',reply:'क्यों लगवाना चाहिए? कोई वजह तो बताओ।',win:null},
+  short:{say:'ज़रूरी है।',reply:'क्या ज़रूरी है? समझाइए ना।',win:null}},
+ {strong:{say:'जी दीदी। और ये पूरे झुंड में तेज़ी से फैलती है — एक बकरी से बाक़ी सबको लग जाती है। आपकी छह बकरियाँ हैं, सोचिए।',
+   reply:'हाय राम… सब को लग जाएगी?',
+   win:'ये पूरे झुंड में तेज़ी से फैलती है — एक बकरी से बाक़ी सबको लग जाती है'},
+  weak:{say:'बहुत ख़तरनाक बीमारी है।',reply:'हर कोई यही कहता है। कुछ और बताओ।',win:null},
+  short:{say:'हाँ जी।',reply:'…',win:null}},
+ {strong:{say:'साल में एक बार लगता है, और उससे पहले कीड़े की दवा देनी होती है ताकि टीका ठीक से असर करे।',
+   reply:'ठीक है, कब आ रही हो?',
+   win:'साल में एक बार लगता है, और उससे पहले कीड़े की दवा देनी होती है'},
+  weak:{say:'मैं लगा दूँगी, चिंता मत कीजिए।',reply:'कब? कैसे? कुछ बताओ तो।',win:null},
+  short:{say:'ठीक है।',reply:'…',win:null}}],
+curative:[
+ {strong:{say:'डॉक्टर पाँच सौ लेते हैं दीदी, मैं तीस रुपये लूँगी — और दवा वही है। ऊपर से मैं आपके घर आ जाती हूँ।',
+   reply:'अच्छा? वही दवा है सच में?',
+   win:'डॉक्टर पाँच सौ लेते हैं दीदी, मैं तीस रुपये लूँगी — और दवा वही है'},
+  weak:{say:'मैं सस्ता कर दूँगी दीदी।',reply:'कितना सस्ता? और भरोसा कैसे करें?',win:null},
+  short:{say:'हम भी कर देंगे।',reply:'क्या कर दोगी? ठीक से बताओ।',win:null}},
+ {strong:{say:'जी वही दवा है, मैं मेडिकल से ख़ुद लाती हूँ। और अगर बात मेरे बस से बाहर हुई, तो मैं साफ़ बता दूँगी — डॉक्टर को दिखाइए।',
+   reply:'ये अच्छी बात कही आपने। सब तो यही कहते हैं कि हम सब कर लेंगे।',
+   win:'अगर बात मेरे बस से बाहर हुई, तो मैं साफ़ बता दूँगी — डॉक्टर को दिखाइए'},
+  weak:{say:'सब कुछ मैं ही कर लूँगी दीदी।',reply:'सब कुछ? आप डॉक्टर तो हैं नहीं।',win:null},
+  short:{say:'हाँ।',reply:'…',win:null}},
+ {strong:{say:'सलाह का कोई पैसा नहीं लेती दीदी। बस दिखा दीजिए, बता दूँगी क्या करना है।',
+   reply:'चलो, देख लो ज़रा उसे।',
+   win:'सलाह का कोई पैसा नहीं लेती दीदी। बस दिखा दीजिए'},
+  weak:{say:'तीस रुपये दे दीजिए।',reply:'पहले देखो तो सही।',win:null},
+  short:{say:'ठीक है।',reply:'…',win:null}}],
+badhiya:[
+ {strong:{say:'तकलीफ़ की बात सही है दीदी, इसीलिए ये सही तरीक़े से और सही उम्र में किया जाता है। बधिया बकरा तेज़ी से वज़न पकड़ता है और बेचने पर दाम भी अच्छा मिलता है।',
+   reply:'दाम अच्छा मिलता है? कितना फ़र्क़ पड़ता है?',
+   win:'बधिया बकरा तेज़ी से वज़न पकड़ता है और बेचने पर दाम भी अच्छा मिलता है'},
+  weak:{say:'सब करवाते हैं दीदी, आप भी करवा लीजिए।',reply:'सब करवाते हैं तो हम भी करें? कुछ वजह बताओ।',win:null},
+  short:{say:'अच्छा रहता है।',reply:'क्या अच्छा रहता है? समझाइए।',win:null}},
+ {strong:{say:'बकरा लड़ाई-झगड़ा कम करता है, चारा ज़्यादा खाता है और मांस भी बेहतर होता है — इसीलिए ख़रीदार ज़्यादा दाम देता है।',
+   reply:'हम्म… सोचना पड़ेगा। दर्द तो नहीं होगा ना?',
+   win:'बकरा लड़ाई-झगड़ा कम करता है, चारा ज़्यादा खाता है — इसीलिए ख़रीदार ज़्यादा दाम देता है'},
+  weak:{say:'नहीं होगा, बिलकुल नहीं होगा।',reply:'आप कैसे कह सकती हैं? आपने किया है पहले?',win:null},
+  short:{say:'नहीं होगा।',reply:'…',win:null}},
+ {strong:{say:'ये काम मैं अकेले नहीं करती दीदी — इसके लिए मैं अपने सर को साथ लाती हूँ। आप चाहें तो पहले पूछ लीजिए किसी और से भी।',
+   reply:'ठीक है, बात करके बताती हूँ।',
+   win:'ये काम मैं अकेले नहीं करती दीदी — इसके लिए मैं अपने सर को साथ लाती हूँ'},
+  weak:{say:'कल कर देते हैं।',reply:'इतनी जल्दी क्या है।',win:null},
+  short:{say:'ठीक है।',reply:'…',win:null}}]
+};
+
+const OPT_LABEL={strong:'मज़बूत जवाब',weak:'कमज़ोर जवाब',short:'बहुत छोटा जवाब'};
+const OPT_HINT={strong:'साफ़ बात + वजह',weak:'सीधे बिक्री पर',short:'हिचकिचाहट'};
+
+const SAWAL=[
+ {q:'गाभिन बकरी को कीड़े की दवा दे सकते हैं?',
+  a:'यह जवाब हमारे पास पक्का नहीं है। अपने FE दीदी/सर से पूछ लीजिए। घर पर आप यह कह सकती हैं: "यह मैं पक्का करके कल बताऊँगी।"',esc:true},
+ {q:'PPR का टीका कब लगता है?',
+  a:'साल में एक बार। PPR तेज़ी से पूरे झुंड में फैलती है और एक बार हो जाए तो इलाज नहीं होता — सिर्फ़ टीका ही बचाता है।',esc:false},
+ {q:'कीड़े की दवा पहले या टीका पहले?',
+  a:'कीड़े की दवा पहले, टीका बाद में। पेट में कीड़े हों तो टीका ठीक से असर नहीं करता।',esc:false},
+ {q:'बकरी छत से गिर गई, क्या करें?',
+  a:'यह हमारी जाँची हुई सामग्री में नहीं है। तुरंत अपने FE दीदी/सर को फ़ोन कीजिए — अंदाज़े से कुछ करना ठीक नहीं होगा।',esc:true}];
+
+/* ============================ STATE ==================================== */
+const S={screen:'login',user:{gp:null,name:null},pickStage:'gp',ptype:null,key:null,
+  level:1,turn:0,weakRun:0,transcript:[],phrases:[],sessions:0,gaps:[],strongCount:0,
+  ended:null,done:{},notes:true,history:[],errRung:1,lastKey:null};
+
+/* ============================ NOTES ==================================== */
+const N={
+login:[
+ {pills:[['new','New screen']],
+  t:'Two fields, nothing else',
+  p:['Name and Gram Panchayat, typed. No phone number, no OTP, no password, no email. One button.'],
+  p2:['<b>One thing worth testing rather than deciding now.</b> Typing is the weakest skill in this cohort — 13 of 25 could type a YouTube search, 9 used voice input, 3 could not search at all. A picker version (tap your village, then tap your name from that village\'s list) needs zero keystrokes and cannot be misspelt.'],
+  p3:['Both are one screen and one button. Worth putting side by side in front of three PU in Round 2 and letting them settle it — it is a two-minute test and the answer is not obvious from a desk.']},
+ {pills:[['ev','Research']],
+  t:'What the research says, and what I applied',
+  p:['A 2023 systematic review of interfaces for low-literate users found <b>audio is the single most-recommended feature</b> (44% of 45 studies), followed by images and icons. It also states navigation must let users know <i>"where they have come from, where they are currently, and where they can go."</i>'],
+  p2:['So: every screen has a play button on its instruction, every icon carries a word, and there is a visible trail under the header showing the path she took. Nothing is more than two levels deep.']}
+],
+home:[
+ {pills:[['new','Renamed']],
+  t:'She is किरन दीदी now, not Coach Didi',
+  p:['A role title is abstract. A <b>name</b> is a person, and rural trust runs through named people — one PU\'s entire credibility technique is <i>"bholu ka naam btaya sir ka naam btaya."</i>'],
+  p2:['<b>किरन</b> comes from <b>Asha Kiran</b> — the programme name she already says out loud at a household door (<i>"मैं आशा किरण से आई हूँ"</i>). So the app sounds like part of the work she already trusts, not a separate tech thing. Two syllables, easy to say, and used across Hindu and Muslim families in UP, which matters in a cohort with both.'],
+  p3:['<b>Why not आशा दीदी</b>, which is the obvious pick from the same name: in rural UP "Asha didi" already means the ASHA health worker. That collision would confuse who she is talking to and imply medical authority the app must never claim.']},
+ {pills:[['fix','IA change']],
+  t:'The home screen answers "मुझे क्या करना है?" before she asks',
+  p:['Four actions, each one a complete sentence about what will happen. No "Explore", no "Continue", no "Next".'],
+  p2:['If she has practised before, the top card becomes a <b>one-tap resume</b> of that service — the research guidance to provide more than one route to the same place, and the answer to "can she quickly find something she used previously?"']},
+ {pills:[['ev','Tab 4 §6.2.2']],
+  t:'Kiran Didi greets her by name and offers the next step',
+  p:['A woman with five spare minutes should not have to decide what to practise. The greeting names her, names her village, and points at one thing.']}
+],
+ptype:[
+ {pills:[['new','New screen'],['fix','Splits a mixed screen']],
+  t:'One decision per screen — this fixes a flaw in v1',
+  p:['v1 put the practice level <i>and</i> the scenario on one screen: five cards, two unrelated decisions. That is exactly the cognitive load this user cannot spare.'],
+  p2:['Now: first "what kind of conversation" (2 cards), then "which service" (4 cards). Each screen asks one thing.']},
+ {pills:[['fix','Removed by request'],['ev','Content preserved']],
+  t:'Price and authority are gone as cards — the content is not gone',
+  p:['You asked to remove क़ीमत की बात and अधिकार पर सवाल. Removing the cards is right, and here is why it is better than it sounds.'],
+  p2:['Those two were <b>objection types</b> — our mental model. Services are <b>her</b> mental model: her work is organised into deworming drives and vaccination drives. She thinks "kal deworming hai," never "I need price-objection practice."'],
+  ev:'So the objections moved inside the services, where they actually happen. Price now opens the इलाज conversation ("500 रुपये तो हम दूसरे डॉक्टर को देते हैं" — Fameeda\'s real words) and the कीड़े की दवा one ("दवा तो मुफ़्त में आती है" — Tabassum\'s real words). The credential challenge opens पहली मुलाक़ात ("कोई डॉक्टर हैं क्या आप?" — Tabassum again).',
+  p3:['Nothing evidenced was lost. The axis changed from ours to hers.']}
+],
+services:[
+ {pills:[['fix','2 × 2 grid']],
+  t:'All four services in one view, no scrolling',
+  p:['A vertical list of four full-width cards ran off the bottom of the screen — she had to scroll to discover that a fourth option even existed. Now all four sit in a 2 × 2 grid, visible together.'],
+  p2:['Each tile is about 165 × 132 px — well over the 48dp minimum, comfortable for a thumb, and large enough that the icon reads at a glance. I dropped the description line and the button inside each tile: the screen title already says what tapping does, so repeating it four times was noise.'],
+  p3:['Four is also the ceiling Tab 4 §6.2.1 sets — "screens hold a maximum of four choices." A fifth service would need a different pattern, not a smaller tile.']},
+ {pills:[['fix','Hindi only']],
+  t:'The English sublabels are gone',
+  p:['DEWORMING, VACCINATION · PPR, CURATIVE CARE, BADHIYAKARAN under each name were doing nothing for her and adding a second line of text to every card. Same for Practice / Poocho / My own lines / Help on the home screen.'],
+  p2:['Every English annotation that was inside the phone — the logged-fields strip, the rung labels, the ceiling and rescue banners — has moved to this rail, where it belongs. <b>The phone is now pure Hindi.</b>']},
+ {pills:[['ev','Tab 4 §6.1.3']],
+  t:'Icon plus word, never icon alone',
+  p:['Every tile carries a line-drawn icon in the brand stroke style <i>and</i> the service name in Hindi. Icons aid recognition; they never carry meaning by themselves.'],
+  p2:['I replaced v1\'s emoji with a consistent SVG set — emoji render differently on every device and read as decoration.']},
+ {pills:[['warn','Content gap']],
+  t:'बधियाकरण has no vetted content behind it',
+  p:['Deworming, vaccination and curative all draw on real training material and real recorded objections. <b>Badhiyakaran appears in no interview and in no vetted content file.</b>'],
+  p2:['The conversation in this prototype is plausible and unverified. Before it ships: L&D writes the objection logic, and a vet signs off — the same content-safety gate the PRD sets for curative. It is a surgical procedure; this is not a card to ship on a plausible script.']}
+],
+intro:[
+ {pills:[['new','New screen'],['fix','Removes a decision']],
+  t:'The level is chosen for her, and she can still override',
+  p:['v1 made her choose between "पूरी बात कहिए" and "अब सवाल आएँगे". Understanding that difference is cognitive load she should not have to spend.'],
+  p2:['Now the app decides: her first time on a service is the warm, uninterrupted version. After she has done it once, it steps up. A quiet link lets her go back to the easy one any time.'],
+  p3:['<b>Decide for her, but never trap her.</b>']},
+ {pills:[['new','Safety line']],
+  t:'"यहाँ ग़लती हो जाए तो कोई बात नहीं"',
+  p:['You asked that this not feel like an exam. The reassurance has to arrive <i>before</i> she speaks, not in the feedback afterwards — by then she has already been nervous.'],
+  ev:'One PU on her first household visit: "Dar lga tha bus dhere dheere." Fear is the documented starting state, not an edge case.',
+  p2:['So this screen says three things plainly: nobody is listening, mistakes are fine, and she can stop whenever she wants. Then one large button.']},
+ {pills:[['ev','Research']],
+  t:'She is told what is about to happen',
+  p:['"बकरीपालक कह सकती हैं कि दवा तो मुफ़्त आती है…" — a one-line preview of the objection. Role-play with an invisible partner is a learned convention. Never assume she has met it.']}
+],
+convo:[
+ {pills:[['new','Handover']],
+  t:'Kiran Didi announces the role, and steps back out',
+  p:['The header changes to <b>बकरीपालक दीदी</b> while the role-play runs, and back to किरन दीदी when it ends. In the current build a stranger is simply rude to her with no framing.'],
+  p2:['Two lines of prompt. It teaches the convention, marks the turn-taking in a medium with no visual state, makes the pushback land as practice rather than insult, and keeps the person giving feedback the one she trusts.']},
+ {pills:[['fix','Prompt change']],
+  t:'Pick weak or very short replies — the household backs off',
+  p:['<b>Hostility ceiling:</b> after two struggling turns it softens instead of escalating. <b>Rescue rule:</b> after three, Kiran Didi steps out and ends warmly with an easier suggestion.'],
+  ev:'The shipped prompt says "stay skeptical and don\'t fully agree by the end" and "don\'t help her out of the exercise." For an experienced PU that is a fair sparring partner. For a week-one PU it is an unwinnable encounter with a rude stranger.'},
+ {pills:[['fix','Add end control']],
+  t:'She can stop at any point, and it is not framed as quitting',
+  p:['<code>MAX_PRACTICE_TURNS = 5</code> with no way out. If she wraps up naturally at turn three, the household keeps talking at her — the clearest possible signal that nobody is listening.']}
+],
+feedback:[
+ {pills:[['fix','Binding contract']],
+  t:'Three parts, always, in this order — validated in code',
+  p:['<b>1.</b> One specific thing that worked. <b>2.</b> One thing to change. <b>3.</b> The exact words to say next time.'],
+  ev:'v1 gave the model a calibration example. Of the four replies the live system actually sent, one followed the shape. One opened with a negation and stacked four corrections — no number in it, and still a report card.',
+  p2:['Now enforced before sending: must contain a quoted phrase, exactly one "अगली बार", zero banned rubric words, no performance digits.']},
+ {pills:[['new','Safety']],
+  t:'Part 1 is mandatory even when everything went badly',
+  p:['Run it again choosing only weak answers. Part 1 still names something real — she listened, she did not give up. In a weak session there always is something, and naming it truthfully is accuracy, not consolation.'],
+  p2:['The heading is <b>"जो अच्छा हुआ"</b>, and it is always first. She can never open the screen and see a correction before an acknowledgement.']},
+ {pills:[['ev','Interview']],
+  t:'Part 3 hands her the sentence',
+  p:['One PU re-reads training material to extract meaning: <i>"jo papaer me tha wo padh padh kr smjhate hai."</i> Abstract advice costs her twice — once to read, once to convert.'],
+  p2:['"क़ीमत बेहतर समझाइए" is not feedback. A sentence in quotation marks she can say tomorrow is.']}
+],
+phrases:[
+ {pills:[['new','Replaces the streak']],
+  t:'मेरी बातें is the progress screen, and it is hers',
+  p:['Tab 4 screen 7 was a practice count or a streak. A streak measures compliance, and for a woman with a shared phone and five spare minutes, breaking one punishes her for a circumstance she does not control.'],
+  ev:'Your own analysis: "this only goes well when she happens to land the right framing, and there\'s no way to make that reliable or repeatable."',
+  p2:['Every line here is <b>hers</b>, verbatim, with a play button. Growth by accumulation, no number anywhere, and zero reading cost because she already knows what her own sentences mean.']}
+],
+sawal:[
+ {pills:[['fix','Contradiction resolved']],
+  t:'Sawal-Jawab is in scope',
+  p:['The Context Handoff says Poocho "has been dropped — do not reintroduce it." Tab 4 says the app does two things and the first is bridging the knowledge gap. That <i>is</i> Ask. Tab 4 is canonical.']},
+ {pills:[['ev','2 interviews']],
+  t:'The escalation protects her standing, not just accuracy',
+  p:['Open the pregnant-goat question. The app does not answer it — it says so, points her to her FE, and hands her a face-saving line for the doorstep: <i>"यह मैं पक्का करके कल बताऊँगी।"</i>'],
+  ev:'One PU: "hum puri tarike se nh jante abhi sb." Another improvised ice from a freezer for an injured goat because training had never covered it.',
+  p2:['Not knowing is fine. <b>Looking</b> like you do not know, in front of a household already demanding your credentials, is not.']}
+],
+madad:[
+ {pills:[['ev','3 of 3 interviews']],
+  t:'A person, one tap from every screen',
+  p:['Three of three interviewed PU reach for a human when stuck. Fameeda goes to a peer, Tabassum calls her FE, and the highest-scoring PU, asked an open question about what help she would want, asked for a person:'],
+  ev:'"Koi saath mein mil jaaye… mentor-mentee wali practice se madad mili." — Neelam Pal, pitch score 5, no practice since training.',
+  p2:['The product should not compete with that. Its job is to be there when Sandhya didi is asleep.']}
+],
+error:[
+ {pills:[['fix','New ladder']],
+  t:'Four rungs, and none is skipped',
+  p:['<b>1</b> stays in character — the household asks her to speak up, so the practice never breaks. <b>2</b> steps out once and blames the noise. <b>3</b> offers text. <b>4</b> exits warmly.'],
+  ev:'The build has two error messages, both dead ends, both Roman script: "Aapki voice note samajh nahi payi. Kripya dobara bhejiye."',
+  p2:['<b>Every failure is attributed to the noise, the network or the app. Never to her.</b> A woman whose working life consists of proving who she is does not need a machine telling her three times that it did not understand her.']}
+],
+trainer:[
+ {pills:[['fix','Topic not rubric']],
+  t:'Built to your decision — named, topic-level, no scores',
+  p:['An FE reading <i>"अभी क़ीमत की बात पर काम चल रहा है"</i> is a coach. One reading "Rapport: Poor" is an inspector. Same information, opposite relationship.'],
+  p2:['No transcript, no audio, no number. Leave those columns out of the semantic model entirely so a future report author cannot surface them by accident.']},
+ {pills:[['fix','Hard-code it']],
+  t:'One hard exclusion',
+  p:['The credential-challenge signal never appears as a named weak spot. "Fameeda struggles with men," visible to male FEs, is a professional exposure she did not consent to. Filter it at the query layer, not the report page.']},
+ {pills:[['new','KPI D1']],
+  t:'Gap mix is the measure that changes what L&D does',
+  p:['High <b>Knowledge</b> in a block means the curriculum missed something and practice will not fix it. High <b>Skill</b> means practice. High <b>Mindset</b> means coaching. Three findings, three opposite responses, one app.']}
+]
+};
+
+/* ============================ HELPERS ================================== */
+const $=id=>document.getElementById(id);
+function go(s,push=true){if(push&&S.screen!==s)S.history.push(S.screen);S.screen=s;render();}
+function back(){const p=S.history.pop();S.screen=p||'home';render();}
+function toast(m){const t=$('toast');t.innerHTML=m;t.classList.add('show');
+  clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),3400);}
+function toggleNotes(){S.notes=!S.notes;$('btnNotes').textContent='Design notes: '+(S.notes?'on':'off');
+  $('btnNotes').classList.toggle('on',S.notes);renderRail();}
+function resetAll(){Object.assign(S,{screen:'login',user:{gp:null,name:null},pickStage:'gp',ptype:null,key:null,
+  level:1,turn:0,weakRun:0,transcript:[],phrases:[],sessions:0,gaps:[],strongCount:0,ended:null,done:{},
+  history:[],errRung:1,lastKey:null});render();}
+
+/* ============================ RENDER =================================== */
+function render(){
+  const isLogin=S.screen==='login';
+  const roleplay=(S.screen==='convo'&&S.turn>0&&!S.ended);
+  const trailTxt=getTrail();
+  $('chrome').innerHTML = isLogin ? '' : `
+    <div class="appbar">
+      <div class="avatar">${icon(roleplay?'goat':'person',19,'#693D30')}</div>
+      <div><div class="nm">${roleplay?'बकरीपालक दीदी':'किरन दीदी'}</div>
+        <div class="sub">${roleplay?'अभ्यास चल रहा है':(S.user.name?S.user.name+' · '+S.user.gp:'आपकी अभ्यास साथी')}</div></div>
+      <button class="iconbtn" style="margin-left:auto" onclick="go('home')" title="होम">${icon('home',20,'#fff')}</button>
+      ${S.screen!=='home'?`<button class="iconbtn" onclick="back()" title="वापस">${icon('back',20,'#fff')}</button>`:''}
+    </div>
+    ${trailTxt?`<div class="trail">${icon('chev',12)}<span>${trailTxt}</span></div>`:''}`;
+
+  const chromeH = isLogin?0:(trailTxt?57+31:57);
+  const sc=$('screen'); sc.style.height=(772-30-chromeH)+'px';
+  sc.innerHTML=({login:vLogin,home:vHome,ptype:vPtype,services:vServices,intro:vIntro,convo:vConvo,
+    feedback:vFeedback,phrases:vPhrases,sawal:vSawal,madad:vMadad,raay:vRaay,error:vError,trainer:vTrainer}
+    [S.screen]||vHome)();
+  sc.scrollTop=0;
+  $('sessInfo').textContent=`sessions: ${S.sessions} · मेरी बातें: ${S.phrases.length}`;
+  renderRail();
+}
+function getTrail(){
+  if(['ptype','services','intro','convo','feedback'].includes(S.screen)){
+    let t='<b>बातचीत का अभ्यास</b>';
+    if(S.key&&S.screen!=='ptype') t+=' › '+PRACTICE[S.key].name;
+    return t;
+  }
+  const m={phrases:'<b>मेरी बातें</b>',sawal:'<b>सवाल-जवाब</b>',madad:'<b>सहायता</b>',
+    raay:'<b>ऐप की राय</b>',error:'<b>आवाज़ की दिक़्क़त</b>'};
+  return m[S.screen]||'';
+}
+function liveNote(){
+  let out='';
+  if(S.screen==='convo'&&S.weakRun>=2&&!S.ended)
+    out+=`<div class="live"><b>Hostility ceiling fired.</b> Two struggling turns — the household softened
+      instead of pressing harder.</div>`;
+  if(S.screen==='convo'&&S.ended==='rescue')
+    out+=`<div class="live"><b>Rescue rule fired.</b> Three struggling turns. No rubric, no gap tags, no
+      correction — one warm sentence and an easier next step.</div>`;
+  if(S.screen==='feedback')
+    out+=`<div class="live"><b>Logged, never shown to her:</b> Introduction · Rapport${S.level===1?' <i>NotAssessable</i>':''}
+      · Service · gap tags [${(S.lastGaps||[]).length?S.lastGaps.join(', '):'—'}] · winning_phrase · prompt_version</div>`;
+  if(S.screen==='error'){
+    const L=['Rung 1 — stays in character. The practice never breaks.',
+             'Rung 2 — steps out once, blames the room. Never her.',
+             'Rung 3 — offers another way in.',
+             'Rung 4 — an exit that is a decision, not a defeat.'];
+    out+=`<div class="live"><b>${L[(S.errRung||1)-1]}</b><br><br>
+      What the build says today: “Aapki voice note samajh nahi payi. Kripya dobara bhejiye.”
+      Roman script, no reason, no way forward, and the failure is hers.</div>`;
+  }
+  return out;
+}
+function renderRail(){
+  const r=$('rail'); if(!S.notes){r.innerHTML='';return;}
+  const ns=N[S.screen]||N.home;
+  r.innerHTML=liveNote()+ns.map(n=>`<div class="note">
+    ${(n.pills||[]).map(p=>`<span class="pill ${p[0]}">${p[1]}</span>`).join('')}
+    <h3>${n.t}</h3>${(n.p||[]).map(x=>`<p>${x}</p>`).join('')}
+    ${n.ev?`<div class="ev">${n.ev}</div>`:''}${n.p2?`<p>${n.p2}</p>`:''}${n.p3?`<p>${n.p3}</p>`:''}
+  </div>`).join('');
+}
+
+/* ============================ SCREENS ================================== */
+function vLogin(){
+  return `<div style="padding:26px 6px 0">
+    <div style="text-align:center;margin-bottom:30px">
+      <div style="width:66px;height:66px;border-radius:50%;background:var(--beige);display:grid;place-items:center;margin:0 auto 12px">
+        ${icon('goat',33,'#693D30')}</div>
+      <div style="font-family:var(--fd);font-size:25px;font-weight:600">पिच साथी</div>
+      <div style="font-family:var(--fd);font-size:13.5px;color:var(--brown-lt);margin-top:2px">आपकी अभ्यास साथी</div>
+    </div>
+    <div class="dsub" style="text-align:center;margin-bottom:20px">शुरू करने के लिए बस दो बातें लिखिए</div>
+
+    <div class="fieldlbl">${icon('person',18)} पशु सखी का नाम</div>
+    <input class="tf" id="inName" type="text" placeholder="अपना नाम लिखिए" value="${S.user.name||''}">
+
+    <div class="fieldlbl" style="margin-top:16px">${icon('pin',18)} ग्राम पंचायत</div>
+    <input class="tf" id="inGp" type="text" placeholder="अपनी ग्राम पंचायत लिखिए" value="${S.user.gp||''}">
+
+    <button class="cta" style="margin-top:24px" onclick="doLogin()">आगे बढ़ें ${icon('chev',18,'#fff')}</button>
+  </div>`;
+}
+function doLogin(){
+  const n=($('inName').value||'').trim(), g=($('inGp').value||'').trim();
+  if(!n||!g){ toast('कृपया अपना नाम और ग्राम पंचायत दोनों लिखिए'); return; }
+  S.user.name=n; S.user.gp=g; go('home');
+}
+function vHome(){
+  const first=S.sessions===0;
+  const greet=first
+    ? `नमस्ते ${S.user.name} जी! मैं किरन दीदी हूँ। जब भी आपका मन हो, हम यहाँ अकेले में बातचीत का अभ्यास कर सकते हैं।`
+    : `नमस्ते ${S.user.name} जी! आज फिर थोड़ा अभ्यास कर लें?`;
+  const resume = S.lastKey ? `
+    <div class="card big" onclick="S.ptype='${S.lastKey==='first'?'first':'service'}';S.key='${S.lastKey}';go('intro')">
+      <div class="ic">${icon(PRACTICE[S.lastKey].icon,24)}</div>
+      <div><div class="t">फिर से — ${PRACTICE[S.lastKey].name}</div>
+        <div class="d">पिछली बार आपने यही अभ्यास किया था</div>
+        <div class="cta-in">${icon('again',15)} फिर से कीजिए</div></div>
+      <div class="ch">${icon('chev',20)}</div></div>` : '';
+  return `
+  <div class="bubble coach">${greet}
+    <button class="play" onclick="toast('▶ हर लिखी बात के साथ आवाज़ भी चलेगी')">${icon('play',12)} सुनिए</button></div>
+  ${resume}
+  <div class="dsub" style="margin-top:14px">आज क्या करना चाहेंगी?</div>
+  <div class="card" onclick="go('ptype')"><div class="ic">${icon('mic',24)}</div>
+    <div><div class="t">बातचीत का अभ्यास</div><div class="d">बकरीपालक से बात कीजिए, जैसे आप उनके घर गई हैं</div></div>
+    <div class="ch">${icon('chev',20)}</div></div>
+  <div class="card" onclick="go('sawal')"><div class="ic">${icon('chat',24)}</div>
+    <div><div class="t">सवाल-जवाब</div><div class="d">कोई सवाल जिसका जवाब याद नहीं आ रहा</div></div>
+    <div class="ch">${icon('chev',20)}</div></div>
+  <div class="card" onclick="go('phrases')"><div class="ic">${icon('star',24)}</div>
+    <div><div class="t">मेरी बातें</div><div class="d">${S.phrases.length?S.phrases.length+' बातें जमा हैं':'आपकी अपनी अच्छी बातें यहाँ जमा होंगी'}</div></div>
+    <div class="ch">${icon('chev',20)}</div></div>
+  <div class="card beige" onclick="go('madad')"><div class="ic">${icon('phone',24)}</div>
+    <div><div class="t">सहायता</div><div class="d">टेली कॉलर दीदी से सीधे बात कीजिए</div></div>
+    <div class="ch">${icon('chev',20)}</div></div>
+  <button class="linkbtn" onclick="go('raay')">ऐप के बारे में अपनी राय दीजिए</button>`;
+}
+
+function vPtype(){
+  const p=PRACTICE.first;
+  return `<div class="dtitle">किस तरह की बातचीत?</div>
+  <div class="dsub">दोनों में से जो करना हो चुनिए</div>
+  <div class="card big" onclick="S.ptype='first';S.key='first';go('intro')">
+    <div class="ic">${icon('wave',24)}</div>
+    <div><div class="t">${p.name} ${S.done.first?'<span class="badge">की हुई है</span>':''}</div>
+      <div class="d">${p.desc}</div>
+      <div class="cta-in">${icon('mic',15)} अभ्यास शुरू करें</div></div>
+    <div class="ch">${icon('chev',20)}</div></div>
+  <div class="card big" onclick="S.ptype='service';go('services')">
+    <div class="ic">${icon('goat',24)}</div>
+    <div><div class="t">सेवा के बारे में बातचीत</div><div class="d">कीड़े की दवा, टीका, इलाज या बधियाकरण</div>
+      <div class="cta-in">${icon('chev',15)} सेवा चुनिए</div></div>
+    <div class="ch">${icon('chev',20)}</div></div>
+  <div class="safe" style="margin-top:14px">${icon('shield',18,'#693D30')}<div>पहली बार कर रही हैं? “पहली मुलाक़ात” से शुरू करना आसान रहता है।</div></div>`;
+}
+
+function vServices(){
+  return `<div class="dtitle">किस सेवा के बारे में?</div>
+  <div class="dsub">जिस पर अभ्यास करना है, उसे चुनिए</div>
+  <div class="grid2">
+  ${SERVICES.map(k=>{const p=PRACTICE[k];const d=S.done[k];
+    return `<div class="tile ${d?'done':''}" onclick="S.key='${k}';go('intro')">
+      <div class="tic">${icon(p.icon,28)}</div>
+      <div class="tname">${p.name}</div>
+      ${d?'<div class="tdone">की हुई है</div>':''}
+    </div>`;}).join('')}
+  </div>`;
+}
+function vIntro(){
+  const p=PRACTICE[S.key];
+  const auto = S.done[S.key] ? 2 : 1;
+  if(S.forceLevel===null||S.forceLevel===undefined) S.level=auto; else S.level=S.forceLevel;
+  const lv=S.level;
+  return `<div style="display:flex;gap:12px;align-items:center;margin-bottom:6px">
+      <div class="ic" style="width:52px;height:52px;border-radius:12px;background:var(--beige);display:grid;place-items:center">
+        ${icon(p.icon,26)}</div>
+      <div class="dtitle" style="margin:0">${p.name}</div>
+    </div>
+  <div class="bubble coach" style="margin-top:12px">${p.prep}
+    <button class="play" onclick="toast('▶ किरन दीदी बोलकर समझाएँगी')">${icon('play',12)} सुनिए</button></div>
+
+  <div class="safe">${icon('shield',18,'#693D30')}
+    <div><b>यहाँ ग़लती हो जाए तो कोई बात नहीं।</b> यह सिर्फ़ अभ्यास है — कोई नहीं सुन रहा, और आप जब चाहें रोक सकती हैं।</div></div>
+
+  <div class="card beige" style="cursor:default">
+    <div class="ic">${icon(lv===1?'chat':'mic',22)}</div>
+    <div><div class="t" style="font-size:14.5px">${lv===1?'पूरी बात एक बार में कहिए':'अब बीच में सवाल आएँगे'}</div>
+      <div class="d">${lv===1?'कोई टोकेगा नहीं — जैसे आप घर पर बोलतीं, वैसे बोलिए':'बकरीपालक जवाब देंगी, आप बात आगे बढ़ाइए'}</div></div></div>
+
+  <button class="cta" onclick="startConvo()">${icon('mic',19,'#fff')} अभ्यास शुरू करें</button>
+  ${S.done[S.key]?`<button class="linkbtn" onclick="S.forceLevel=${lv===1?2:1};render()">
+    ${lv===1?'सवाल वाला अभ्यास कीजिए':'आसान वाला फिर से कीजिए'}</button>`:''}`;
+}
+
+function startConvo(){S.turn=0;S.weakRun=0;S.transcript=[];S.gaps=[];S.strongCount=0;S.ended=null;go('convo');}
+
+function vConvo(){
+  const p=PRACTICE[S.key];
+  const warm = S.level===1;
+  let h=`<div class="bubble coach"><div class="who">किरन दीदी</div>
+    ठीक है ${S.user.name} जी। अब मैं <b>बकरीपालक दीदी</b> बनकर बात करूँगी — आप ऐसे बोलिए जैसे आप सच में उनके घर पहुँची हैं।</div>`;
+
+  if(S.level===1&&S.turn===0&&!S.ended){
+    h+=`<div class="bubble"><div class="who">बकरीपालक दीदी</div>${p.warmOpen}</div>
+      <div class="miccap" style="margin-top:18px">पूरी बात एक बार में कहिए</div>
+      <button class="mic" onclick="lvl1()">${icon('mic',34,'#fff',2)}</button>
+      <div class="miccap">बोलने के लिए दबाएँ</div>
+      <button class="cta ghost" style="margin-top:12px" onclick="endSession('pu_closed')">${icon('stop',16)} रोक दीजिए</button>`;
+    return h;
+  }
+  S.transcript.forEach(t=>{h+= t.who==='pu'
+    ?`<div class="bubble me"><div class="who" style="color:rgba(255,255,255,.6)">आप</div>${t.text}</div>`
+    :`<div class="bubble"><div class="who">बकरीपालक दीदी</div>${t.text}</div>`;});
+  if(S.ended) return h+endBlock();
+
+  if(S.turn===0) h+=`<div class="bubble"><div class="who">बकरीपालक दीदी</div>${p.open}</div>`;
+
+  h+=`<div class="miccap" style="margin-top:16px">बोलने के लिए दबाएँ</div>
+    <button class="mic" onclick="showOpts()">${icon('mic',34,'#fff',2)}</button>
+    <div id="optbox"></div>
+    <button class="cta ghost" style="margin-top:12px" onclick="endSession('pu_closed')">${icon('stop',16)} बात यहीं ख़त्म करें</button>`;
+  return h;
+}
+function showOpts(){
+  const step=FLOW[S.key][Math.min(S.turn,FLOW[S.key].length-1)];
+  $('optbox').innerHTML=`<div class="choose"><div class="lbl">demo · वो क्या बोलीं, चुनिए</div>
+    ${['strong','weak','short'].map(k=>`<button class="opt" onclick="say('${k}')">
+      <span class="tag">${OPT_LABEL[k]} · ${OPT_HINT[k]}</span>${step[k].say}</button>`).join('')}</div>`;
+}
+function lvl1(){
+  const f=FLOW[S.key];
+  S.transcript.push({who:'pu',text:f[0].strong.say+' '+(f[1]?f[1].strong.say:'')});
+  S.transcript.push({who:'hh',text:'अच्छा… ठीक है, समझ आ गया। कल आ जाइए।'});
+  S.strongCount=2;
+  if(f[1]&&f[1].strong.win) S.pendingWin=f[1].strong.win;
+  endSession('completed');
+}
+function say(kind){
+  const step=FLOW[S.key][Math.min(S.turn,FLOW[S.key].length-1)];
+  const o=step[kind];
+  S.transcript.push({who:'pu',text:o.say});
+  if(kind==='strong'){S.weakRun=0;S.strongCount++;} else S.weakRun++;
+  if(o.win) S.pendingWin=o.win;
+  if(kind==='weak') S.gaps.push('Skill');
+  if(kind==='short') S.gaps.push('Mindset');
+  if(S.weakRun>=3){S.transcript.push({who:'hh',text:'…'});S.ended='rescue';render();return;}
+  let reply=o.reply;
+  if(S.weakRun===2) reply='अच्छा अच्छा… ठीक है, आराम से बताइए।';
+  S.transcript.push({who:'hh',text:reply});
+  S.turn++;
+  if(S.turn>=FLOW[S.key].length){endSession('completed');return;}
+  render();
+}
+function endSession(r){S.ended=r;render();}
+function endBlock(){
+  if(S.ended==='rescue') return `<div class="bubble coach"><div class="who">किरन दीदी</div>
+    कोई बात नहीं ${S.user.name} जी, आज इतना ही। अगली बार “पहली मुलाक़ात” वाला अभ्यास करते हैं, वो थोड़ा आसान रहेगा।</div>
+    <button class="cta" onclick="finish()">${icon('check',18,'#fff')} ठीक है</button>`;
+  return `<div class="bubble coach"><div class="who">किरन दीदी</div>ठीक है, अब मैं फिर से किरन दीदी हूँ।</div>
+    <button class="cta" onclick="finish()">${icon('chev',18,'#fff')} देखिए मैंने क्या सुना</button>`;
+}
+function finish(){
+  S.sessions++; S.done[S.key]=(S.done[S.key]||0)+1; S.lastKey=S.key; S.forceLevel=null;
+  if(S.pendingWin&&!S.phrases.some(p=>p.q===S.pendingWin)){
+    S.phrases.push({q:S.pendingWin,svc:PRACTICE[S.key].name}); S.newPhrase=true;
+  } else S.newPhrase=false;
+  S.pendingWin=null;
+  if(S.ended==='rescue'){go('home');toast('आज का अभ्यास पूरा हुआ। कल फिर मिलते हैं।');return;}
+  go('feedback');
+}
+
+function vFeedback(){
+  const strong=S.strongCount>=2, k=S.key;
+  const F={
+   first:{s:['आपने साफ़ बताया कि आप इसी गाँव की हैं और आपने ट्रेनिंग ली है — यही बात सबसे जल्दी भरोसा बनाती है।',
+             'अगली बार शुरुआत में ही संस्था का नाम भी जोड़ दीजिए।',
+             'मैं आशा किरण से आई हूँ, इसी गाँव की हूँ, और इसी काम की ट्रेनिंग ली है।'],
+          w:['आपने बकरीपालक की बात ध्यान से सुनी — जब उन्होंने सवाल किया, आप बीच में नहीं बोलीं। यह अच्छी आदत है।',
+             'शुरुआत में एक बात छूट गई — आपने यह नहीं बताया कि आप किस संस्था से आई हैं।',
+             'मैं आशा किरण से आई हूँ, बकरियों की सेवा के लिए।']},
+   deworm:{s:['आपने बताया कि दवा आप अपने पैसे से लाती हैं — इसी से बकरीपालक को समझ आता है कि तीस रुपये क्यों लगते हैं।',
+              'अगली बार यह कहने के बाद थोड़ा रुक जाइए, उन्हें सोचने का समय दीजिए।',
+              'दवा मैं अपने पैसे से लाती हूँ, इसीलिए सिर्फ़ तीस रुपये लेती हूँ।'],
+           w:['आपने बात शुरू की और पीछे नहीं हटीं — यह अच्छी बात है।',
+              'एक बात छूट गई — आपने यह नहीं बताया कि कीड़े से बकरी को होता क्या है।',
+              'कीड़े पेट में हों तो बकरी का वज़न नहीं बढ़ता और दूध कम हो जाता है।']},
+   vacc:{s:['आपने साफ़ कहा कि PPR का इलाज नहीं होता, सिर्फ़ टीका बचाता है — यही बात सबसे ज़्यादा असर करती है।',
+            'अगली बार यह भी जोड़ दीजिए कि टीका साल में एक बार लगता है।',
+            'PPR का इलाज नहीं होता दीदी — सिर्फ़ टीका ही बचाता है, और वो साल में एक बार लगता है।'],
+         w:['आपने बात को छोड़ा नहीं, समझाने की कोशिश करती रहीं। यह अच्छी बात है।',
+            'एक बात छूट गई — आपने यह नहीं बताया कि PPR पूरे झुंड में फैलती है।',
+            'ये बीमारी एक बकरी से पूरे झुंड में फैल जाती है दीदी।']},
+   curative:{s:['आपने डॉक्टर की पाँच सौ फ़ीस से तुलना करके अपनी तीस रुपये की बात एकदम साफ़ रखी — यह सबसे जल्दी समझ आती है।',
+                'अगली बार यह भी कह दीजिए कि आप उनके घर आ जाती हैं।',
+                'डॉक्टर पाँच सौ लेते हैं, मैं तीस लूँगी — दवा वही है, और मैं आपके घर आ जाऊँगी।'],
+             w:['आपने बकरीपालक की बात सुनी और चिढ़ी नहीं — यह अच्छी बात है।',
+                'एक बात छूट गई — आपने अपनी और डॉक्टर की फ़ीस की तुलना नहीं की।',
+                'डॉक्टर पाँच सौ लेते हैं दीदी, मैं तीस रुपये लूँगी — दवा वही है।']},
+   badhiya:{s:['आपने पहले उनकी चिंता को सही माना, फिर फ़ायदा बताया — यही तरीक़ा सही है।',
+               'अगली बार यह भी बता दीजिए कि यह काम आप अकेले नहीं करतीं।',
+               'यह काम मैं अकेले नहीं करती दीदी, इसके लिए सर को साथ लाती हूँ।'],
+            w:['आपने बात शुरू की और घबराईं नहीं। यह अच्छी बात है।',
+               'एक बात छूट गई — आपने उनकी चिंता को पहले माना नहीं, सीधे फ़ायदा बताने लगीं।',
+               'आपकी बात सही है दीदी, इसीलिए यह सही उम्र में और सही तरीक़े से किया जाता है।']}
+  };
+  const t=(F[k]||F.first)[strong?'s':'w'];
+  S.lastGaps=[...new Set(S.gaps)];
+  return `
+  <div class="dtitle">आपकी बातचीत के बारे में</div>
+  <div class="dsub">यह सिर्फ़ आपके लिए है — कोई और नहीं देखता</div>
+  <div class="fbblock">
+    <div class="fbpart p1"><div class="h">${icon('check',13,'#2E9935')} जो अच्छा हुआ</div><div class="b">${t[0]}</div></div>
+    <div class="fbpart p2"><div class="h">${icon('again',13,'#C99E89')} अगली बार</div><div class="b">${t[1]}</div></div>
+    <div class="fbpart p3"><div class="h">${icon('chat',13,'#693D30')} ये शब्द काम आएँगे</div>
+      <div class="quoteline">“${t[2]}”</div>
+      <button class="play" onclick="toast('▶ यह लाइन बोलकर सुनाई जाएगी')">${icon('play',12)} सुनिए</button></div>
+  </div>
+  ${S.newPhrase?`<div class="escal" style="border-left-color:var(--green)">
+    ${icon('star',14,'#2E9935')} आपकी एक अच्छी बात <b>मेरी बातें</b> में जुड़ गई।</div>`:''}
+  <button class="cta" onclick="go('phrases')">${icon('star',18,'#fff')} मेरी बातें देखिए</button>
+  <button class="cta ghost" style="margin-top:9px" onclick="S.forceLevel=null;go('intro')">${icon('again',17)} फिर से अभ्यास कीजिए</button>
+  <button class="cta ghost" style="margin-top:9px" onclick="go('services')">दूसरी सेवा पर अभ्यास कीजिए</button>
+  `;
+}
+
+function vPhrases(){
+  const head=S.phrases.length>=2
+    ?`${S.user.name} जी, ये सब बातें आपकी अपनी हैं — अभ्यास में आपने ख़ुद कही थीं। आज किसी घर पर यही तरीक़ा इस्तेमाल करके देखिएगा।`
+    :(S.phrases.length===1?'यह बात आपने ख़ुद कही थी और बहुत अच्छी थी — इसे याद रखिए।':'');
+  const list=S.phrases.length
+    ? S.phrases.map(p=>`<div class="phrase"><div class="q">“${p.q}”</div>
+        <div class="m">${icon('star',12)} आपकी अपनी बात · ${p.svc}
+        <button class="play" style="margin-top:0" onclick="toast('▶ आपकी अपनी आवाज़ में')">${icon('play',11)}</button></div></div>`).join('')
+    : `<div class="empty">${S.user.name} जी, यहाँ आपकी अपनी अच्छी बातें जमा होंगी — जो आप अभ्यास में ख़ुद कहेंगी।<br><br>
+       एक अभ्यास करके देखिए, फिर यहाँ आपकी पहली बात आ जाएगी।</div>`;
+  return `<div class="dtitle">मेरी बातें</div><div class="dsub">आपकी अपनी अच्छी बातें — सिर्फ़ आपके लिए</div>
+    ${head?`<div class="bubble coach">${head}</div>`:''}${list}
+    <button class="cta ghost" style="margin-top:10px" onclick="go('ptype')">${icon('mic',17)} और अभ्यास कीजिए</button>`;
+}
+
+function vSawal(){
+  return `<div class="dtitle">सवाल-जवाब</div><div class="dsub">कोई सवाल जिसका जवाब याद नहीं आ रहा</div>
+    ${SAWAL.map((s,i)=>`<div class="qa" id="qa${i}">
+      <div class="q" onclick="document.getElementById('qa${i}').classList.toggle('open')">
+        ${icon('chat',18)}<span>${s.q}</span><span class="ch">${icon('chev',16)}</span></div>
+      <div class="a">${s.a}
+        <button class="play" onclick="toast('▶ जवाब बोलकर सुनाया जाएगा')">${icon('play',12)} सुनिए</button>
+        ${s.esc?`<div class="escal">अंदाज़े से बताना ठीक नहीं होता।
+          <button class="play" style="background:var(--brown);color:#fff" onclick="go('madad')">${icon('phone',12,'#fff')} FE से पूछिए</button></div>`:''}
+      </div></div>`).join('')}`;
+}
+
+function vMadad(){
+  return `<div class="dtitle">सहायता</div><div class="dsub">कोई भी सवाल हो तो सीधे बात कीजिए</div>
+    <div class="card beige" style="flex-direction:column;align-items:flex-start;cursor:default">
+      <div style="display:flex;gap:13px;align-items:center;width:100%">
+        <div class="ic" style="background:var(--rose)">${icon('person',24)}</div>
+        <div><div class="t">सुनीता दीदी</div><div class="d">टेली कॉलर · सुबह 9 से शाम 6</div></div></div>
+      <button class="cta" style="margin-top:14px" onclick="toast('कॉल लग रही है… (प्रोटोटाइप)')">${icon('phone',18,'#fff')} कॉल करें</button></div>
+    <div class="card beige" style="cursor:default"><div class="ic">${icon('person',24)}</div>
+      <div><div class="t">अपने FE दीदी/सर से</div><div class="d">आपके ब्लॉक की फ़ील्ड टीम</div></div></div>
+    <div class="safe" style="margin-top:16px">${icon('shield',18,'#693D30')}
+      <div>आपकी अभ्यास की बातें किसी को सुनाई नहीं जातीं। FE दीदी को सिर्फ़ इतना दिखता है कि आपने अभ्यास किया और
+      किस बात पर काम चल रहा है — ताकि वो आपकी मदद कर सकें।</div></div>`;
+}
+
+function vRaay(){
+  return `<div class="dtitle">ऐप कैसा लगा?</div><div class="dsub">आपकी राय से हम इसे बेहतर बनाएँगे</div>
+    <div style="display:flex;gap:14px;justify-content:center;margin:24px 0">
+      ${['🙁','😐','🙂'].map(e=>`<button style="font-size:38px;background:var(--beige);border:none;width:70px;height:70px;
+        border-radius:14px;cursor:pointer" onclick="toast('धन्यवाद ${S.user.name} जी!')">${e}</button>`).join('')}</div>
+    <div class="dsub" style="text-align:center">क्या अभ्यास करके आपको थोड़ी हिम्मत मिली?</div>
+    <button class="cta" onclick="go('home')">${icon('check',18,'#fff')} भेजिए</button>`;
+}
+
+function errDemo(){S.errRung=1;go('error');}
+function vError(){
+  const r=S.errRung||1;
+  const rungs=[
+   {who:'बकरीपालक दीदी',cls:'',txt:'थोड़ा ज़ोर से बोलिए दीदी, ठीक से सुनाई नहीं दिया।'},
+   {who:'किरन दीदी',cls:'coach',txt:'थोड़ा शोर आ रहा है — एक बार फिर से बोलिएगा?'},
+   {who:'किरन दीदी',cls:'coach',txt:'आप चाहें तो लिखकर भी भेज सकती हैं।'},
+   {who:'किरन दीदी',cls:'coach',txt:'अभी रहने दीजिए दीदी, बाद में आराम से करेंगे।'}];
+  return `<div class="dtitle">जब आवाज़ ठीक से न पहुँचे</div><div class="dsub">चार सीढ़ियाँ — एक भी छोड़ी नहीं जाती</div>
+    ${rungs.slice(0,r).map(x=>`<div class="bubble ${x.cls}"><div class="who">${x.who}</div>${x.txt}</div>`).join('')}
+    ${r<4?`<button class="cta" onclick="S.errRung=${r+1};render()">फिर भी सुनाई नहीं दिया ${icon('chev',16,'#fff')}</button>`
+        :`<button class="cta ghost" onclick="go('home')">${icon('home',17)} होम पर जाएँ</button>`}
+    `;
+}
+
+function vTrainer(){
+  return `<div style="font-family:var(--fl);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--rule);margin-bottom:10px">
+      Not the PU app — FE / L&amp;D view</div>
+    <div class="dtitle" style="font-family:var(--f);font-weight:600;font-size:17px">Amraudha — this week</div>
+    <div class="dsub" style="font-family:var(--f)">Coaching view. Topic only.</div>
+    <table><tr><th>PU</th><th>Last practised</th><th>Working on</th></tr>
+      <tr><td>तबस्सुम</td><td>Today</td><td style="font-family:var(--fd)">इलाज — क़ीमत की बात</td></tr>
+      <tr><td>फ़मीदा</td><td>2 days ago</td><td style="font-family:var(--fd)">पहली मुलाक़ात — परिचय</td></tr>
+      <tr><td>निशा</td><td style="color:#B4453A">6 days ago</td><td>—</td></tr>
+      <tr><td>सुषमा</td><td>Yesterday</td><td style="font-family:var(--fd)">टीकाकरण</td></tr></table>
+    <div class="note-in">No score. No transcript. No audio. No credential-challenge tag, ever.<br><br>
+      <b>Block gap mix:</b> Knowledge 24% · Skill 61% · Mindset 15% → this block needs practice, not curriculum.</div>`;
+}
+
+render();
+</script>
+</body>
+</html>

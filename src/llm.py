@@ -28,65 +28,86 @@ def _extract_text(response, fallback=None):
     text block instead of assuming content[0] is it.
 
     If max_tokens is too small, thinking can consume the whole budget and
-    leave no text block at all (stop_reason "max_tokens"). When a fallback
-    is given, return that instead of crashing the conversation.
+    leave no text block at all (stop_reason "max_tokens"). Rarely, a text
+    block is present but empty/whitespace-only - treat that the same way.
+    When a fallback is given, return that instead of crashing the
+    conversation.
     """
     for block in response.content:
-        if block.type == "text":
+        if block.type == "text" and block.text.strip():
             return block.text.strip()
     if fallback is not None:
         return fallback
-    raise RuntimeError(f"No text block in Claude's response (stop_reason={response.stop_reason})")
+    raise RuntimeError(f"No usable text block in Claude's response (stop_reason={response.stop_reason})")
 
 
 PRACTICE_PROMPT = None
 MERA_MADAD_PROMPT = None
 
 
-def practice_persona_reply(scenario, turns):
+def _system_for(ptype, level):
+    global PRACTICE_PROMPT
+    if PRACTICE_PROMPT is None:
+        PRACTICE_PROMPT = _load_prompt("practice.txt")
+    return f"{PRACTICE_PROMPT}\n\nActive practice type: {ptype}\nActive level: {level}"
+
+
+def practice_persona_reply(ptype, level, turns):
     """
     turns: [{"role": "user"|"assistant", "text": "..."}]
-    Returns the household persona's next line (plain text, to be sent as-is).
-    """
-    global PRACTICE_PROMPT
-    if PRACTICE_PROMPT is None:
-        PRACTICE_PROMPT = _load_prompt("practice.txt")
+    Returns {"household_reply": str, "turn_quality": "strong"|"weak"|"short"}.
 
+    Division of labour, deliberate: the model ONLY classifies this turn's
+    quality and writes a natural in-character reply - it is not asked to
+    manage the hostility-ceiling or rescue-rule THRESHOLDS itself. Verified
+    in testing that asking the model to self-count "how many in a row" is
+    unreliable (a real 3rd-consecutive-weak-turn failed to self-trigger
+    rescue; asking it to pre-emptively soften also landed inconsistently,
+    since the softened turn is sometimes the same one rescue discards a
+    moment later). The caller (demo/server.py) tracks weak_run from
+    turn_quality with plain code and OVERRIDES the displayed text with a
+    scripted ceiling line or rescue message at the exact right count -
+    both are fixed strings, not model output, so they never misfire.
+    """
     messages = [{"role": t["role"], "content": t["text"]} for t in turns]
-    system = f"{PRACTICE_PROMPT}\n\nActive scenario for this session: {scenario}"
 
     response = _get_client().messages.create(
         model="claude-sonnet-5",
         max_tokens=1024,
-        system=system,
+        system=_system_for(ptype, level),
         messages=messages,
     )
-    return _extract_text(
-        response,
-        fallback="Maaf kijiye, thoda ruk kar dobara boliye — samajh nahi paayi.",
-    )
+    raw = _extract_text(response, fallback="")
+    try:
+        parsed = json.loads(raw) if raw else {}
+    except (json.JSONDecodeError, TypeError):
+        # Rare: an occasional API hiccup returns a text block that's empty
+        # or not valid JSON despite the fallback above. Never let a parsing
+        # miss break the conversation - degrade to a safe, in-character-ish
+        # line instead of a hard failure.
+        parsed = {}
+    return {
+        "household_reply": parsed.get("household_reply") or "Maaf kijiye, thoda ruk kar dobara boliye — samajh nahi paayi.",
+        "turn_quality": parsed.get("turn_quality", "weak"),
+    }
 
 
-def practice_score_session(scenario, turns):
+def practice_score_session(ptype, level, turns):
     """
-    Sends the [END_OF_SESSION] control message per the system prompt's
-    contract. Returns the parsed dict:
-      {introduction, rapport, service, gap_tag, pu_feedback_hindi}
-    Only "pu_feedback_hindi" should ever reach the PU; the rest is for the
-    logging sheet.
+    Sends the [END_OF_SESSION] control message. Returns:
+      {topic, gap_category, good, next_time, exact_phrase}
+    None of these are raw numbers/scores - topic and gap_category are for
+    the trainer/L&D view only; good/next_time/exact_phrase are what the PU
+    actually sees, assembled by the caller into the 3-part feedback shown
+    on screen.
     """
-    global PRACTICE_PROMPT
-    if PRACTICE_PROMPT is None:
-        PRACTICE_PROMPT = _load_prompt("practice.txt")
-
     messages = [{"role": t["role"], "content": t["text"]} for t in turns]
     messages.append({"role": "user", "content": "[END_OF_SESSION — SCORE THIS CONVERSATION]"})
-    system = f"{PRACTICE_PROMPT}\n\nActive scenario for this session: {scenario}"
 
     response = _get_client().messages.create(
         model="claude-sonnet-5",
         max_tokens=1024,
-        system=system,
+        system=_system_for(ptype, level),
         messages=messages,
     )
     raw = _extract_text(response)

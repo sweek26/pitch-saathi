@@ -3,149 +3,147 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pitch Saathi — Demo</title>
+<title>पिच साथी</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --wa-header: #1f2c26;
-    --wa-header-accent: #25d366;
-    --wa-chat-bg: #efe9e0;
-    --wa-sent: #d9fdd3;
-    --wa-received: #ffffff;
-    --wa-system: #fef3c7;
-    --ink: #1f2937;
-    --muted: #6b7280;
-    --line: #d8d2c6;
-    --danger: #b3261e;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: #0b141a;
-    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
-    color: var(--ink);
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 24px 12px;
-  }
-  .phone {
-    width: 100%;
-    max-width: 430px;
-    background: var(--wa-chat-bg);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-    display: flex;
-    flex-direction: column;
-    height: 90vh;
-    max-height: 800px;
-  }
-  header {
-    background: var(--wa-header);
-    color: #fff;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-  header .avatar {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: var(--wa-header-accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem;
-  }
-  header .titles { flex: 1; min-width: 0; }
-  header .name { font-weight: 600; font-size: 0.95rem; }
-  header .status { font-size: 0.75rem; color: #b7c2bd; }
-  header button.back {
-    background: none; border: none; color: #fff; font-size: 1.2rem;
-    cursor: pointer; padding: 4px 8px;
-  }
+:root {
+  --brown: #693D30; --brown-dk: #4E2C23; --brown-lt: #8A5748;
+  --tint: #DDD0CC; --beige: #F1E9E5; --cream: #FBF7F5;
+  --rose: #D4A496; --tan: #C99E89; --rule: #ADB6BE; --ink: #160601; --green: #2E9935;
+  --danger: #B4453A;
+  --fd: 'Noto Sans Devanagari', 'Montserrat', sans-serif;
+  --f: 'Montserrat', 'Noto Sans Devanagari', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--f); color: var(--brown); background: #0b0705;
+  display: flex; justify-content: center; min-height: 100vh; padding: 24px 12px;
+}
+.phone {
+  width: 100%; max-width: 400px; background: var(--cream); border-radius: 28px;
+  overflow: hidden; box-shadow: 0 24px 60px rgba(35,25,20,.4); display: flex;
+  flex-direction: column; height: 90vh; max-height: 820px;
+}
+header {
+  background: var(--brown); color: #fff; padding: 12px 14px; display: flex;
+  align-items: center; gap: 11px; flex-shrink: 0;
+}
+header .avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--tint);
+  display: flex; align-items: center; justify-content: center; flex: none; font-size: 1.1rem;
+}
+header .titles { flex: 1; min-width: 0; }
+header .nm { font-family: var(--fd); font-size: 0.95rem; font-weight: 600; }
+header .sub { font-family: var(--fd); font-size: 0.72rem; opacity: .85; }
+header button.back {
+  background: none; border: none; color: #fff; cursor: pointer; padding: 4px 8px;
+  opacity: .9; display: flex; align-items: center;
+}
 
-  .screen { flex: 1; overflow-y: auto; display: none; flex-direction: column; }
-  .screen.active { display: flex; }
+.screen { flex: 1; overflow-y: auto; display: none; flex-direction: column; }
+.screen.active { display: flex; }
 
-  /* Picker + onboarding screens */
-  .picker { padding: 28px 20px; gap: 14px; display: flex; flex-direction: column; }
-  .picker h2 { font-size: 1.05rem; margin: 0 0 4px; }
-  .picker p.hint { color: var(--muted); font-size: 0.85rem; margin: 0 0 12px; }
-  .option-card {
-    background: #fff; border: 1px solid var(--line); border-radius: 10px;
-    padding: 16px; cursor: pointer; text-align: left; font-size: 0.95rem;
-    display: flex; flex-direction: column; gap: 4px;
-  }
-  .option-card:hover { border-color: var(--wa-header-accent); }
-  .option-card .sub { color: var(--muted); font-size: 0.8rem; }
+.picker { padding: 22px 18px 26px; }
+.dtitle { font-family: var(--fd); font-size: 1.2rem; font-weight: 600; line-height: 1.4; margin-bottom: 4px; }
+.dsub { font-family: var(--fd); font-size: 0.85rem; color: var(--brown-lt); margin-bottom: 16px; line-height: 1.5; }
 
-  .onboarding { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 32px 24px; gap: 18px; }
-  .onboarding .emoji { font-size: 2.4rem; text-align: center; }
-  .onboarding h2 { font-size: 1.15rem; text-align: center; margin: 0; }
-  .onboarding input[type="text"] {
-    width: 100%; padding: 13px 14px; border-radius: 10px; border: 1px solid var(--line);
-    font-family: inherit; font-size: 1rem; background: #fff;
-  }
-  .onboarding input[type="text"]:focus { outline: 2px solid var(--wa-header-accent); border-color: var(--wa-header-accent); }
-  .footer-link {
-    text-align: center; margin-top: auto; padding-top: 18px; font-size: 0.75rem;
-    color: var(--muted); text-decoration: underline; cursor: pointer; background: none; border: none;
-  }
+.card {
+  background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 11px; cursor: pointer;
+  box-shadow: 0 0 20px rgba(35,35,35,.07); border: 1.5px solid transparent; display: flex;
+  gap: 12px; align-items: center; min-height: 60px;
+}
+.card:hover { border-color: var(--tan); }
+.card .ic {
+  width: 44px; height: 44px; border-radius: 11px; background: var(--beige);
+  display: flex; align-items: center; justify-content: center; flex: none; font-size: 1.3rem;
+}
+.card .t { font-family: var(--fd); font-size: 1rem; font-weight: 600; line-height: 1.35; }
+.card .d { font-family: var(--fd); font-size: 0.78rem; color: var(--brown-lt); margin-top: 2px; line-height: 1.45; }
+.card .ch { margin-left: auto; color: var(--tan); flex: none; font-size: 1.2rem; }
+.badge { font-family: var(--fd); font-size: 0.65rem; background: var(--tint); color: var(--brown); padding: 2px 8px; border-radius: 20px; margin-left: 6px; }
+.badge.warn { background: #f3ddd8; color: var(--danger); }
 
-  /* Chat screen */
-  .messages { flex: 1; overflow-y: auto; padding: 14px 12px; display: flex; flex-direction: column; gap: 8px; }
-  .bubble-row { display: flex; }
-  .bubble-row.sent { justify-content: flex-end; }
-  .bubble {
-    max-width: 78%; padding: 8px 11px; border-radius: 9px; font-size: 0.9rem; line-height: 1.4;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.08);
-  }
-  .sent .bubble { background: var(--wa-sent); border-top-right-radius: 2px; }
-  .received .bubble { background: var(--wa-received); border-top-left-radius: 2px; }
-  .system .bubble { background: var(--wa-system); margin: 0 auto; text-align: center; max-width: 90%; }
-  .bubble .meta { font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
-  .bubble.error { background: #fde2e1; color: var(--danger); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile {
+  background: #fff; border-radius: 14px; padding: 16px 10px; cursor: pointer;
+  box-shadow: 0 0 20px rgba(35,35,35,.07); border: 1.5px solid transparent; text-align: center;
+  min-height: 118px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+}
+.tile:hover { border-color: var(--tan); }
+.tile .tic { width: 50px; height: 50px; border-radius: 13px; background: var(--beige); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+.tile .tname { font-family: var(--fd); font-size: 0.92rem; font-weight: 600; line-height: 1.3; }
 
-  .composer {
-    flex-shrink: 0; padding: 10px 12px; background: #f0f0f0;
-    display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--line);
-  }
-  .composer .label { flex: 1; color: var(--muted); font-size: 0.85rem; }
-  .end-btn {
-    background: none; border: 1px solid var(--danger); color: var(--danger);
-    border-radius: 16px; padding: 6px 12px; font-size: 0.78rem; cursor: pointer; flex-shrink: 0;
-  }
-  .mic-btn {
-    width: 46px; height: 46px; border-radius: 50%; border: none;
-    background: var(--wa-header-accent); color: #fff; font-size: 1.2rem;
-    cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-  }
-  .mic-btn.recording { background: var(--danger); animation: pulse 1.2s infinite; }
-  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(179,38,30,0.4); } 50% { box-shadow: 0 0 0 10px rgba(179,38,30,0); } }
+.onboarding { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 30px 24px; gap: 14px; }
+.onboarding .emoji { font-size: 2.2rem; text-align: center; margin-bottom: 4px; }
+.onboarding .apptitle { font-family: var(--fd); font-size: 1.5rem; font-weight: 600; text-align: center; }
+.onboarding .apptag { font-family: var(--fd); font-size: 0.85rem; color: var(--brown-lt); text-align: center; margin-bottom: 8px; }
+.fieldlbl { font-family: var(--fd); font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; margin-top: 10px; }
+.tf {
+  width: 100%; font-family: var(--fd); font-size: 1rem; color: var(--brown); background: #fff;
+  border: 1.5px solid var(--tint); border-radius: 11px; padding: 13px 14px; outline: none;
+}
+.tf:focus { border-color: var(--brown); }
+.tf::placeholder { color: #bba79f; }
 
-  /* Results screen */
-  .results { padding: 20px; overflow-y: auto; }
-  .results h2 { font-size: 1rem; margin: 0 0 12px; }
-  .feedback-card {
-    background: var(--wa-sent); border-radius: 10px; padding: 14px; font-size: 0.92rem; line-height: 1.5;
-  }
-  .trainer-toggle {
-    margin-top: 18px; font-size: 0.82rem; color: var(--muted); cursor: pointer;
-    text-decoration: underline; background: none; border: none; padding: 0;
-  }
-  .trainer-view {
-    display: none; margin-top: 12px; background: #fff; border: 1px dashed var(--line);
-    border-radius: 8px; padding: 12px; font-size: 0.85rem;
-  }
-  .trainer-view.open { display: block; }
-  .trainer-view .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; }
-  .trainer-view .warn { color: var(--muted); font-size: 0.78rem; margin-top: 8px; }
-  .restart-btn, .primary-btn {
-    margin-top: 18px; width: 100%; padding: 12px; border-radius: 8px; border: none;
-    background: var(--wa-header-accent); color: #fff; font-size: 0.9rem; cursor: pointer;
-  }
-  .log-row { margin-top: 14px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+.bubble {
+  background: #fff; border-radius: 12px 12px 12px 3px; padding: 11px 13px; margin-bottom: 10px;
+  font-family: var(--fd); font-size: 0.9rem; line-height: 1.55; box-shadow: 0 0 14px rgba(35,35,35,.06);
+  max-width: 86%;
+}
+.bubble.me { background: var(--brown); color: #fff; border-radius: 12px 12px 3px 12px; margin-left: auto; }
+.bubble.coach { background: var(--beige); box-shadow: none; border-left: 3px solid var(--brown); max-width: 100%; }
+.bubble.rescue { background: var(--beige); box-shadow: none; border-left: 3px solid var(--tan); max-width: 100%; margin: 0 auto; }
+.bubble.error { background: #f8dedb; color: var(--danger); }
+.who { font-family: var(--f); font-size: 0.62rem; letter-spacing: .5px; text-transform: uppercase; color: var(--rule); margin-bottom: 4px; }
+.bubble.me .who { color: rgba(255,255,255,.65); }
 
-  .status-line { text-align: center; color: var(--muted); font-size: 0.82rem; padding: 8px; }
+.messages { flex: 1; overflow-y: auto; padding: 14px 14px 6px; }
+.mic-wrap { padding: 10px 16px 18px; text-align: center; flex-shrink: 0; }
+.miccap { font-family: var(--fd); font-size: 0.8rem; color: var(--brown-lt); margin-bottom: 2px; }
+.mic {
+  width: 76px; height: 76px; border-radius: 50%; background: var(--brown); color: #fff; border: none;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 8px auto;
+  box-shadow: 0 8px 22px rgba(105,61,48,.35); font-size: 1.8rem; transition: .15s;
+}
+.mic.recording { background: var(--danger); animation: pulse 1.2s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(180,69,58,.4); } 50% { box-shadow: 0 0 0 12px rgba(180,69,58,0); } }
+.stop-link {
+  background: none; border: 1.5px solid var(--danger); color: var(--danger); border-radius: 18px;
+  padding: 7px 16px; font-family: var(--fd); font-size: 0.8rem; cursor: pointer; margin-top: 8px;
+}
+
+.safe {
+  background: var(--beige); border-radius: 10px; padding: 11px 13px; font-family: var(--fd);
+  font-size: 0.82rem; line-height: 1.55; display: flex; gap: 9px; align-items: flex-start; margin-bottom: 14px;
+}
+.safe .sic { flex: none; font-size: 1.1rem; }
+
+.results { padding: 20px 18px; overflow-y: auto; }
+.fbblock { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 0 20px rgba(35,35,35,.07); margin-bottom: 12px; }
+.fbpart { margin-bottom: 13px; padding-left: 11px; border-left: 3px solid var(--tint); }
+.fbpart:last-child { margin-bottom: 0; }
+.fbpart.p1 { border-color: var(--green); } .fbpart.p2 { border-color: var(--tan); } .fbpart.p3 { border-color: var(--brown); }
+.fbpart .h { font-family: var(--fd); font-size: 0.72rem; font-weight: 600; color: var(--brown-lt); margin-bottom: 4px; }
+.fbpart .b { font-family: var(--fd); font-size: 0.9rem; line-height: 1.6; }
+.quoteline { background: var(--beige); border-radius: 9px; padding: 10px 12px; font-family: var(--fd); font-size: 0.9rem; line-height: 1.55; margin-top: 6px; font-weight: 600; }
+
+.cta { width: 100%; background: var(--brown); color: #fff; border: none; padding: 14px; font-family: var(--fd); font-size: 0.95rem; font-weight: 600; cursor: pointer; border-radius: 10px; margin-top: 8px; }
+.cta:hover { background: var(--brown-dk); }
+.cta.ghost { background: transparent; color: var(--brown); border: 1.5px solid var(--brown); }
+.cta.ghost:hover { background: var(--beige); }
+.linkbtn { display: block; width: 100%; text-align: center; background: none; border: none; color: var(--brown-lt); font-family: var(--fd); font-size: 0.8rem; text-decoration: underline; cursor: pointer; margin-top: 10px; padding: 6px; }
+
+.trainer-toggle { margin-top: 16px; font-size: 0.78rem; color: var(--brown-lt); cursor: pointer; text-decoration: underline; background: none; border: none; padding: 0; font-family: var(--fd); }
+.trainer-view { display: none; margin-top: 10px; background: #fff; border: 1px dashed var(--tint); border-radius: 8px; padding: 11px; font-size: 0.82rem; font-family: var(--fd); }
+.trainer-view.open { display: block; }
+.trainer-view .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--beige); }
+.trainer-view .warn { color: var(--brown-lt); font-size: 0.75rem; margin-top: 8px; }
+.log-row { margin-top: 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; font-family: var(--fd); }
+
+.status-line { text-align: center; color: var(--brown-lt); font-family: var(--fd); font-size: 0.8rem; padding: 8px; }
+.footer-note { text-align: center; font-family: var(--fd); font-size: 0.68rem; color: var(--rule); padding: 10px 20px 4px; }
 </style>
 </head>
 <body>
@@ -153,282 +151,309 @@
 <div class="phone">
   <header>
     <button class="back" id="backBtn" style="visibility:hidden">‹</button>
-    <div class="avatar">🐐</div>
+    <div class="avatar" id="headerAvatar">🐐</div>
     <div class="titles">
-      <div class="name" id="headerName">Pitch Saathi</div>
-      <div class="status" id="headerStatus">Aapki abhyas saathi</div>
+      <div class="nm" id="headerName">किरन दीदी</div>
+      <div class="sub" id="headerStatus">आपकी अभ्यास साथी</div>
     </div>
   </header>
 
-  <!-- Onboarding (first-time only) -->
+  <!-- Onboarding -->
   <div class="screen active" id="screen-onboarding">
     <div class="onboarding">
-      <div class="emoji">🙏</div>
-      <h2 id="onboardName">आपका नाम क्या है?</h2>
-      <input type="text" id="onboardNameInput" placeholder="अपना नाम लिखिए">
-      <button class="primary-btn" id="onboardNameNext">आगे बढ़ें</button>
+      <div class="emoji">🐐</div>
+      <div class="apptitle">पिच साथी</div>
+      <div class="apptag">आपकी अभ्यास साथी</div>
+      <div class="dsub" style="text-align:center;margin-bottom:0">शुरू करने के लिए बस दो बातें लिखिए</div>
 
-      <div id="onboardPanchayatBlock" style="display:none;">
-        <h2>आपकी पंचायत का नाम क्या है?</h2>
-        <input type="text" id="onboardPanchayatInput" placeholder="पंचायत का नाम लिखिए" style="margin-top:12px;">
-        <button class="primary-btn" id="onboardPanchayatNext">शुरू करें</button>
-        <button class="footer-link" id="onboardBackToName" style="margin-top:10px;">‹ Apna naam badlein</button>
-      </div>
+      <div class="fieldlbl">👤 पशु सखी का नाम</div>
+      <input type="text" class="tf" id="onboardNameInput" placeholder="अपना नाम लिखिए">
+
+      <div class="fieldlbl">📍 ग्राम पंचायत</div>
+      <input type="text" class="tf" id="onboardGpInput" placeholder="अपनी ग्राम पंचायत लिखिए">
+
+      <button class="cta" id="onboardSubmit">आगे बढ़ें ›</button>
     </div>
   </div>
 
-  <!-- Module picker -->
-  <div class="screen" id="screen-module">
+  <!-- Home -->
+  <div class="screen" id="screen-home">
     <div class="picker">
-      <h2>Kya karna chahengi?</h2>
-      <div class="option-card" onclick="showScenarioPicker()">
-        <strong>Abhyas karein</strong>
-        <span class="sub">Bakripalak se baat kijiye, jaise aap unke ghar gayi hain</span>
+      <div class="bubble coach" id="homeGreeting"></div>
+      <div class="dsub" style="margin-top:14px;margin-bottom:10px">आज क्या करना चाहेंगी?</div>
+      <div class="card" onclick="go('screen-ptype')">
+        <div class="ic">🎙️</div>
+        <div><div class="t">बातचीत का अभ्यास</div><div class="d">बकरीपालक से बात कीजिए, जैसे आप उनके घर गई हैं</div></div>
+        <div class="ch">›</div>
       </div>
-      <div class="option-card" onclick="startMeraMadad()">
-        <strong>Mera Madad</strong>
-        <span class="sub">Apni pichhli practice se salah paayein</span>
-      </div>
-      <button class="footer-link" id="editProfileLink">‹ Apna naam ya panchayat badlein</button>
-      <button class="footer-link" onclick="showScreen('screen-ask')">Internal: Ask Test Mode (sirf team ke liye)</button>
+      <button class="linkbtn" id="editProfileLink">‹ अपना नाम या ग्राम पंचायत बदलें</button>
     </div>
   </div>
 
-  <!-- Ask test mode -->
-  <div class="screen" id="screen-ask">
+  <!-- Practice type -->
+  <div class="screen" id="screen-ptype">
     <div class="picker">
-      <h2>Ask — Test Mode</h2>
-      <p class="hint">Koi bhi technical sawaal type kijiye (jaise: "bakri chhat se gir gayi, kya karein"). Teeno jawab side-by-side dikhenge, taaki aap compare kar sakein — final approach abhi tay nahi hai.</p>
-      <textarea id="askQuestion" rows="3" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);font-family:inherit;font-size:0.9rem;" placeholder="Apna sawaal yahan likhiye..."></textarea>
-      <button class="primary-btn" id="askSubmitBtn">Teeno jawab dekhiye</button>
-      <div class="status-line" id="askStatusLine"></div>
-
-      <div id="askResults" style="display:none; margin-top:16px;">
-        <div style="margin-bottom:14px;">
-          <div style="font-size:0.78rem;font-weight:700;color:#2e7d32;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">🟢 Safe — abhi ka default</div>
-          <div class="feedback-card" id="askSafeText" style="background:#e8f5e9;"></div>
-        </div>
-        <div style="margin-bottom:14px;">
-          <div style="font-size:0.78rem;font-weight:700;color:#b9793a;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">🟡 Vetted retrieval — sirf asli handout se</div>
-          <div class="feedback-card" id="askVettedText" style="background:#fff3e0;"></div>
-        </div>
-        <div style="margin-bottom:14px;">
-          <div style="font-size:0.78rem;font-weight:700;color:#b3261e;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">🔴 Experimental — unvetted, AI-generated</div>
-          <div class="feedback-card" id="askExperimentalText" style="background:#fdecea;"></div>
-        </div>
+      <div class="dtitle">किस तरह की बातचीत?</div>
+      <div class="dsub">दोनों में से जो करना हो चुनिए</div>
+      <div class="card" onclick="selectPtype('first')">
+        <div class="ic">👋</div>
+        <div><div class="t">पहली मुलाक़ात</div><div class="d">नए घर पर पहली बार जाना — अपना परिचय देना</div></div>
+        <div class="ch">›</div>
       </div>
-
-      <button class="restart-btn" id="askRestartBtn">Wapas jaayein</button>
+      <div class="card" onclick="go('screen-services')">
+        <div class="ic">🐐</div>
+        <div><div class="t">सेवा के बारे में बातचीत</div><div class="d">कीड़े की दवा, टीका, इलाज या बधियाकरण</div></div>
+        <div class="ch">›</div>
+      </div>
+      <div class="safe"><span class="sic">🛡️</span><div>पहली बार कर रही हैं? "पहली मुलाक़ात" से शुरू करना आसान रहता है।</div></div>
     </div>
   </div>
 
-  <!-- Scenario picker -->
-  <div class="screen" id="screen-scenario">
+  <!-- Services grid -->
+  <div class="screen" id="screen-services">
     <div class="picker">
-      <h2>Scenario chuniye</h2>
-      <div class="option-card" onclick="startPractice('basic_pitch')">
-        <strong>Basic pitch</strong>
-        <span class="sub">Pehli baar bakripalak ko seva samjhaiye</span>
-      </div>
-      <div class="option-card" onclick="startPractice('price_objection')">
-        <strong>Price objection</strong>
-        <span class="sub">Bakripalak daam ko lekar sawaal poochh rahi hain</span>
+      <div class="dtitle">किस सेवा के बारे में?</div>
+      <div class="dsub">जिस पर अभ्यास करना है, उसे चुनिए</div>
+      <div class="grid2">
+        <div class="tile" onclick="selectPtype('deworm')"><div class="tic">💊</div><div class="tname">कीड़े की दवा</div></div>
+        <div class="tile" onclick="selectPtype('vacc')"><div class="tic">💉</div><div class="tname">टीकाकरण</div></div>
+        <div class="tile" onclick="selectPtype('curative')"><div class="tic">🩺</div><div class="tname">इलाज</div></div>
+        <div class="tile" onclick="selectPtype('badhiya')"><div class="tic">✂️</div><div class="tname">बधियाकरण<br><span class="badge warn">कंटेंट पेंडिंग</span></div></div>
       </div>
     </div>
   </div>
 
-  <!-- Chat screen -->
-  <div class="screen" id="screen-chat">
+  <!-- Intro -->
+  <div class="screen" id="screen-intro">
+    <div class="picker">
+      <div style="display:flex;gap:11px;align-items:center;margin-bottom:10px">
+        <div class="ic" style="width:48px;height:48px;border-radius:12px;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:1.4rem" id="introIcon"></div>
+        <div class="dtitle" style="margin:0" id="introTitle"></div>
+      </div>
+      <div class="bubble coach" id="introPrep"></div>
+      <div class="safe"><span class="sic">🛡️</span><div><b>यहाँ ग़लती हो जाए तो कोई बात नहीं।</b> यह सिर्फ़ अभ्यास है — कोई नहीं सुन रहा, और आप जब चाहें रोक सकती हैं।</div></div>
+      <div class="card" style="cursor:default" id="introLevelCard">
+        <div class="ic" id="introLevelIcon"></div>
+        <div><div class="t" style="font-size:0.92rem" id="introLevelTitle"></div><div class="d" id="introLevelDesc"></div></div>
+      </div>
+      <button class="cta" id="startConvoBtn">🎙️ अभ्यास शुरू करें</button>
+      <button class="linkbtn" id="switchLevelLink" style="display:none"></button>
+    </div>
+  </div>
+
+  <!-- Conversation -->
+  <div class="screen" id="screen-convo">
     <div class="messages" id="messages"></div>
     <div class="status-line" id="statusLine"></div>
-    <div class="composer">
-      <button class="end-btn" id="endBtn">Baat khatam karein</button>
-      <span class="label" id="composerLabel">Bolne ke liye mic dabaiye</span>
-      <button class="mic-btn" id="micBtn">🎤</button>
+    <div class="mic-wrap">
+      <div class="miccap" id="composerLabel">बोलने के लिए दबाएँ</div>
+      <button class="mic" id="micBtn">🎙️</button>
+      <div><button class="stop-link" id="stopBtn">⏹ बात यहीं ख़त्म करें</button></div>
     </div>
   </div>
 
-  <!-- Results screen -->
-  <div class="screen" id="screen-results">
+  <!-- Rescue ending -->
+  <div class="screen" id="screen-rescue">
     <div class="results">
-      <h2>Aapka feedback</h2>
-      <div class="feedback-card" id="feedbackText"></div>
+      <div class="bubble rescue" id="rescueMessage"></div>
+      <button class="cta" id="rescueDoneBtn">✓ ठीक है</button>
+    </div>
+  </div>
 
-      <button class="trainer-toggle" id="trainerToggle">Trainer / L&amp;D view dikhaiye ▾</button>
-      <div class="trainer-view" id="trainerView">
-        <div class="row"><span>Introduction</span><strong id="tIntro"></strong></div>
-        <div class="row"><span>Rapport</span><strong id="tRapport"></strong></div>
-        <div class="row"><span>Service</span><strong id="tService"></strong></div>
-        <div class="row"><span>Gap tag</span><strong id="tGap"></strong></div>
-        <div class="warn">PU isko kabhi nahi dekhti — sirf upar wala qualitative feedback dekhti hai.</div>
-        <label class="log-row"><input type="checkbox" id="logCheckbox"> Iss session ko real Sheet mein log karein</label>
+  <!-- Feedback -->
+  <div class="screen" id="screen-feedback">
+    <div class="results">
+      <div class="dtitle">आपकी बातचीत के बारे में</div>
+      <div class="dsub">यह सिर्फ़ आपके लिए है — कोई और नहीं देखता</div>
+      <div class="fbblock">
+        <div class="fbpart p1"><div class="h">✓ जो अच्छा हुआ</div><div class="b" id="fbGood"></div></div>
+        <div class="fbpart p2"><div class="h">↻ अगली बार</div><div class="b" id="fbNext"></div></div>
+        <div class="fbpart p3"><div class="h">💬 ये शब्द काम आएँगे</div><div class="quoteline" id="fbPhrase"></div></div>
       </div>
 
-      <button class="restart-btn" id="restartBtn">Isi scenario ko phir se try karein</button>
-      <button class="footer-link" id="changeScenarioBtn" style="margin-top:10px;">Doosra scenario try karein</button>
-    </div>
-  </div>
+      <button class="trainer-toggle" id="trainerToggle">Trainer / L&amp;D view दिखाइए ▾</button>
+      <div class="trainer-view" id="trainerView">
+        <div class="row"><span>Topic</span><strong id="tTopic"></strong></div>
+        <div class="row"><span>Gap category</span><strong id="tGap"></strong></div>
+        <div class="warn">PU इसको कभी नहीं देखती — सिर्फ़ ऊपर वाला feedback देखती है।</div>
+        <label class="log-row"><input type="checkbox" id="logCheckbox"> इस session को real Sheet में log करें</label>
+      </div>
 
-  <!-- Mera Madad results -->
-  <div class="screen" id="screen-madad">
-    <div class="results">
-      <h2>Mera Madad</h2>
-      <div class="feedback-card" id="madadText"></div>
-      <button class="restart-btn" id="madadRestartBtn">Wapas jaayein</button>
+      <button class="cta" id="retryBtn">↻ फिर से अभ्यास कीजिए</button>
+      <button class="linkbtn" id="otherServiceBtn">दूसरी सेवा पर अभ्यास कीजिए</button>
     </div>
   </div>
 </div>
 
 <script>
+const PRACTICE = {
+  first: { icon: '👋', name: 'पहली मुलाक़ात', desc: 'नए घर पर पहली बार जाना — अपना परिचय देना',
+    prep: 'बकरीपालक आपको पहली बार देख रही हैं। वो पूछ सकती हैं — आप कौन हैं, कहाँ से आई हैं।' },
+  deworm: { icon: '💊', name: 'कीड़े की दवा', desc: 'कृमिनाशक दवा के बारे में समझाना',
+    prep: 'बकरीपालक कह सकती हैं कि दवा तो मुफ़्त आती है, फिर पैसे क्यों।' },
+  vacc: { icon: '💉', name: 'टीकाकरण', desc: 'PPR के टीके के बारे में समझाना',
+    prep: 'बकरीपालक कह सकती हैं कि बकरी तो अभी बिलकुल ठीक है, टीके की क्या ज़रूरत।' },
+  curative: { icon: '🩺', name: 'इलाज', desc: 'बीमार बकरी के इलाज के बारे में समझाना',
+    prep: 'बकरीपालक कह सकती हैं कि वो पहले से किसी डॉक्टर को दिखाती हैं।' },
+  badhiya: { icon: '✂️', name: 'बधियाकरण', desc: 'बधियाकरण के फ़ायदे समझाना (कंटेंट अभी वेट सत्यापन के इंतज़ार में है)',
+    prep: 'बकरीपालक कह सकती हैं कि इससे बकरे को तकलीफ़ होगी।' },
+};
+
 const sessionId = "WEBDEMO_" + crypto.randomUUID();
-let currentScenario = null;
+let currentPtype = null;
+let currentLevel = 1;
 let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
 
-const screens = ["screen-onboarding", "screen-module", "screen-scenario", "screen-chat", "screen-results", "screen-madad", "screen-ask"];
-function showScreen(id) {
+const screens = ["screen-onboarding", "screen-home", "screen-ptype", "screen-services",
+  "screen-intro", "screen-convo", "screen-rescue", "screen-feedback"];
+function go(id) {
   screens.forEach(s => document.getElementById(s).classList.toggle("active", s === id));
-  document.getElementById("backBtn").style.visibility = (id === "screen-module" || id === "screen-onboarding") ? "hidden" : "visible";
-  // Header should always show her name once known, never a leftover status
-  // from whatever screen was open before - fixed centrally here so every
-  // path back to the home screen resets it correctly.
-  if (id === "screen-module") {
-    const name = localStorage.getItem("ps_name");
-    if (name) applyProfileToHeader(name);
+  document.getElementById("backBtn").style.visibility =
+    (id === "screen-home" || id === "screen-onboarding") ? "hidden" : "visible";
+  if (id === "screen-home") {
+    setHomeIdentity();
+    renderHome();
   }
 }
+document.getElementById("backBtn").onclick = () => go("screen-home");
 
-document.getElementById("backBtn").onclick = () => {
-  showScreen("screen-module");
-};
-
-// --- Onboarding: name + panchayat, once per browser ---
-function applyProfileToHeader(name) {
-  document.getElementById("headerStatus").textContent = "Namaste, " + name + " 👋";
+function setHomeIdentity() {
+  document.getElementById("headerAvatar").textContent = "🐐";
+  document.getElementById("headerName").textContent = "किरन दीदी";
+  document.getElementById("headerStatus").textContent = "आपकी अभ्यास साथी";
+}
+function setRoleplayIdentity() {
+  document.getElementById("headerAvatar").textContent = "👩";
+  document.getElementById("headerName").textContent = "बकरीपालक दीदी";
+  document.getElementById("headerStatus").textContent = "अभ्यास चल रहा है";
 }
 
+// --- Onboarding ---
 const savedName = localStorage.getItem("ps_name");
-const savedPanchayat = localStorage.getItem("ps_panchayat");
+const savedGp = localStorage.getItem("ps_gp");
 
-document.getElementById("onboardNameNext").onclick = () => {
+document.getElementById("onboardSubmit").onclick = () => {
   const name = document.getElementById("onboardNameInput").value.trim();
-  if (!name) return;
+  const gp = document.getElementById("onboardGpInput").value.trim();
+  if (!name || !gp) return;
   localStorage.setItem("ps_name", name);
-  document.getElementById("onboardName").textContent = "Namaste, " + name + "!";
-  document.getElementById("onboardNameInput").style.display = "none";
-  document.getElementById("onboardNameNext").style.display = "none";
-  document.getElementById("onboardPanchayatBlock").style.display = "block";
+  localStorage.setItem("ps_gp", gp);
+  go("screen-home");
 };
-
-document.getElementById("onboardBackToName").onclick = () => {
-  document.getElementById("onboardPanchayatBlock").style.display = "none";
-  document.getElementById("onboardName").textContent = "आपका नाम क्या है?";
-  document.getElementById("onboardNameInput").style.display = "block";
-  document.getElementById("onboardNameNext").style.display = "block";
-  document.getElementById("onboardNameInput").focus();
-};
+[document.getElementById("onboardNameInput"), document.getElementById("onboardGpInput")].forEach(inp => {
+  inp.addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("onboardSubmit").click(); });
+});
 
 document.getElementById("editProfileLink").onclick = () => {
   document.getElementById("onboardNameInput").value = localStorage.getItem("ps_name") || "";
-  document.getElementById("onboardPanchayatInput").value = localStorage.getItem("ps_panchayat") || "";
-  document.getElementById("onboardName").textContent = "आपका नाम क्या है?";
-  document.getElementById("onboardNameInput").style.display = "block";
-  document.getElementById("onboardNameNext").style.display = "block";
-  document.getElementById("onboardPanchayatBlock").style.display = "none";
-  showScreen("screen-onboarding");
+  document.getElementById("onboardGpInput").value = localStorage.getItem("ps_gp") || "";
+  go("screen-onboarding");
 };
 
-document.getElementById("onboardPanchayatNext").onclick = () => {
-  const panchayat = document.getElementById("onboardPanchayatInput").value.trim();
-  if (!panchayat) return;
-  localStorage.setItem("ps_panchayat", panchayat);
-  applyProfileToHeader(localStorage.getItem("ps_name"));
-  showScenarioPicker();
-};
-
-// Mobile keyboards show "Go"/"Next" as the Enter key - pressing it should
-// act like tapping the visible button, not do nothing.
-document.getElementById("onboardNameInput").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") document.getElementById("onboardNameNext").click();
-});
-document.getElementById("onboardPanchayatInput").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") document.getElementById("onboardPanchayatNext").click();
-});
-
-if (savedName && savedPanchayat) {
-  applyProfileToHeader(savedName);
-  showScreen("screen-module");
+if (savedName && savedGp) {
+  go("screen-home");
 }
 
-function showScenarioPicker() {
-  showScreen("screen-scenario");
+// --- Home ---
+function getSessionsCount() { return parseInt(localStorage.getItem("ps_sessions") || "0", 10); }
+function getDone(ptype) { return localStorage.getItem("ps_done_" + ptype) === "1"; }
+function markDone(ptype) {
+  localStorage.setItem("ps_done_" + ptype, "1");
+  localStorage.setItem("ps_sessions", String(getSessionsCount() + 1));
 }
 
-async function startPractice(scenario) {
-  currentScenario = scenario;
+function renderHome() {
+  const name = localStorage.getItem("ps_name") || "";
+  const first = getSessionsCount() === 0;
+  document.getElementById("homeGreeting").textContent = first
+    ? `नमस्ते ${name} जी! मैं किरन दीदी हूँ। जब भी आपका मन हो, हम यहाँ अकेले में बातचीत का अभ्यास कर सकते हैं।`
+    : `नमस्ते ${name} जी! आज फिर थोड़ा अभ्यास कर लें?`;
+}
+
+// --- Practice type / service selection ---
+function selectPtype(ptype) {
+  currentPtype = ptype;
+  currentLevel = getDone(ptype) ? 2 : 1;
+  showIntro();
+}
+
+function showIntro() {
+  const p = PRACTICE[currentPtype];
+  document.getElementById("introIcon").textContent = p.icon;
+  document.getElementById("introTitle").textContent = p.name;
+  document.getElementById("introPrep").textContent = p.prep;
+
+  const lvl1 = currentLevel === 1;
+  document.getElementById("introLevelIcon").textContent = lvl1 ? "💬" : "🎙️";
+  document.getElementById("introLevelTitle").textContent = lvl1 ? "पूरी बात एक बार में कहिए" : "अब बीच में सवाल आएँगे";
+  document.getElementById("introLevelDesc").textContent = lvl1
+    ? "कोई टोकेगा नहीं — जैसे आप घर पर बोलतीं, वैसे बोलिए"
+    : "बकरीपालक जवाब देंगी, आप बात आगे बढ़ाइए";
+
+  const switchLink = document.getElementById("switchLevelLink");
+  if (getDone(currentPtype)) {
+    switchLink.style.display = "block";
+    switchLink.textContent = lvl1 ? "सवाल वाला अभ्यास कीजिए" : "आसान वाला फिर से कीजिए";
+    switchLink.onclick = () => { currentLevel = lvl1 ? 2 : 1; showIntro(); };
+  } else {
+    switchLink.style.display = "none";
+  }
+
+  go("screen-intro");
+}
+
+document.getElementById("startConvoBtn").onclick = startConvo;
+
+async function startConvo() {
   document.getElementById("messages").innerHTML = "";
+  document.getElementById("statusLine").textContent = "";
   try {
     await fetch("/api/practice/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ session_id: sessionId, scenario }),
+      body: JSON.stringify({ session_id: sessionId, ptype: currentPtype, level: currentLevel }),
     });
   } catch (err) {
-    showScreen("screen-module");
+    go("screen-home");
     return;
   }
-  showScreen("screen-chat");
-  const introText = scenario === "basic_pitch"
-    ? "Chaliye shuru karein! Ek bakripalak se pehli baar mulakaat ho rahi hai — apna parichay dijiye aur unhe apni seva ke baare mein samjhaiye, jaise aap khud unke ghar gayi hain. Aap achhe se kar paayengi!"
-    : "Ab thoda mushkil scenario — ye bakripalak daam ko lekar sawaal utha rahi hain. Dheeraj se, achhe se samjhaiye. Aap sambhal sakti hain!";
-  addBubble("system", introText);
-}
+  setRoleplayIdentity();
+  go("screen-convo");
 
-async function startMeraMadad() {
-  document.getElementById("madadText").textContent = "Recap laa rahe hain...";
-  showScreen("screen-madad");
-  let data;
-  try {
-    const resp = await fetch("/api/mera_madad", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ session_id: sessionId }),
-    });
-    data = await resp.json();
-  } catch (err) {
-    document.getElementById("madadText").textContent = "Kuch dikkat aayi. Dobara try kijiye.";
-    return;
-  }
-  if (data.no_history) {
-    document.getElementById("madadText").textContent =
-      "Abhi tak koi Practice session nahi hua hai. Pehle Practice try kijiye aur 'log to Sheet' tick kijiye, phir yahan wapas aayein.";
-  } else if (data.error) {
-    document.getElementById("madadText").textContent = "Kuch dikkat aayi. Dobara try kijiye.";
+  addBubble("coach", `ठीक है ${localStorage.getItem("ps_name") || ""} जी। अब मैं बकरीपालक दीदी बनकर बात करूँगी — आप ऐसे बोलिए जैसे आप सच में उनके घर पहुँची हैं।`);
+
+  const label = document.getElementById("composerLabel");
+  const stopBtn = document.getElementById("stopBtn");
+  if (currentLevel === 1) {
+    label.textContent = "पूरी बात एक बार में कहिए";
+    stopBtn.style.display = "none";
   } else {
-    document.getElementById("madadText").textContent = data.reply;
+    label.textContent = "बोलने के लिए दबाएँ";
+    stopBtn.style.display = "inline-block";
   }
 }
-document.getElementById("madadRestartBtn").onclick = () => showScreen("screen-module");
 
-function addBubble(kind, text, meta) {
+function addBubble(kind, text) {
   const row = document.createElement("div");
-  row.className = "bubble-row " + (kind === "pu" ? "sent" : kind === "household" ? "received" : "system");
-  const bubble = document.createElement("div");
-  bubble.className = "bubble" + (kind === "error" ? " error" : "");
-  bubble.textContent = text;
-  if (meta) {
-    const m = document.createElement("div");
-    m.className = "meta";
-    m.textContent = meta;
-    bubble.appendChild(m);
+  row.className = "bubble " + kind;
+  row.textContent = text;
+  if (kind === "me" || kind === "household") {
+    const who = document.createElement("div");
+    who.className = "who";
+    who.textContent = kind === "me" ? "आप" : "बकरीपालक दीदी";
+    row.textContent = "";
+    row.appendChild(who);
+    row.appendChild(document.createTextNode(text));
   }
-  row.appendChild(bubble);
+  row.className = "bubble " + (kind === "me" ? "me" : kind === "household" ? "" : kind);
   const messages = document.getElementById("messages");
   messages.appendChild(row);
   messages.scrollTop = messages.scrollHeight;
 }
 
+// --- Recording ---
 const micBtn = document.getElementById("micBtn");
 const composerLabel = document.getElementById("composerLabel");
 const statusLine = document.getElementById("statusLine");
@@ -444,16 +469,16 @@ micBtn.onclick = async () => {
       mediaRecorder.start();
       isRecording = true;
       micBtn.classList.add("recording");
-      composerLabel.textContent = "Recording... rokne ke liye mic dabaiye";
+      composerLabel.textContent = "रोकने के लिए दबाएँ";
     } catch (err) {
-      statusLine.textContent = "Microphone access nahi mila.";
+      statusLine.textContent = "माइक की अनुमति नहीं मिली।";
     }
   } else {
     mediaRecorder.stop();
     mediaRecorder.stream.getTracks().forEach(t => t.stop());
     isRecording = false;
     micBtn.classList.remove("recording");
-    composerLabel.textContent = "Process ho raha hai...";
+    composerLabel.textContent = "रुकिए...";
   }
 };
 
@@ -461,43 +486,58 @@ async function onRecordingStop() {
   const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
   const form = new FormData();
   form.append("session_id", sessionId);
+  form.append("name", localStorage.getItem("ps_name") || "");
   form.append("audio", blob, "turn.webm");
 
-  statusLine.textContent = "Sun rahe hain...";
+  statusLine.textContent = "सुन रहे हैं...";
   let data;
   try {
     const resp = await fetch("/api/practice/turn", { method: "POST", body: form });
     data = await resp.json();
   } catch (err) {
     statusLine.textContent = "";
-    composerLabel.textContent = "Bolne ke liye mic dabaiye";
-    addBubble("error", "Network mein dikkat aayi. Dobara boliye.");
+    composerLabel.textContent = "बोलने के लिए दबाएँ";
+    addBubble("error", "नेटवर्क में दिक्कत आई। दोबारा बोलिए।");
     return;
   }
   statusLine.textContent = "";
-  composerLabel.textContent = "Bolne ke liye mic dabaiye";
+  composerLabel.textContent = "बोलने के लिए दबाएँ";
 
   if (data.error === "too_long") {
-    addBubble("error", "Ye recording thodi lambi thi. Thodi chhoti recording try kijiye.");
+    addBubble("error", "यह रिकॉर्डिंग थोड़ी लंबी थी। थोड़ी छोटी रिकॉर्डिंग की कोशिश कीजिए।");
     return;
   }
   if (data.error === "empty_transcript") {
-    addBubble("error", "Kuch sunayi nahi diya. Dobara try kijiye.");
+    addBubble("error", "कुछ सुनाई नहीं दिया। दोबारा कोशिश कीजिए।");
     return;
   }
   if (data.error) {
-    addBubble("error", "Samajhne mein dikkat aayi. Dobara try kijiye.");
+    addBubble("error", "समझने में दिक्कत आई। दोबारा कोशिश कीजिए।");
     return;
   }
 
-  addBubble("pu", data.transcript);
+  addBubble("me", data.transcript);
+
+  if (data.rescue) {
+    document.getElementById("rescueMessage").textContent = data.message;
+    setHomeIdentity();
+    go("screen-rescue");
+    return;
+  }
+
   addBubble("household", data.reply);
+
+  if (data.level1_complete) {
+    markDone(currentPtype);
+    setTimeout(() => finishAndScore(), 900);
+  }
 }
 
-let lastScore = null;
+document.getElementById("stopBtn").onclick = () => finishAndScore();
+document.getElementById("rescueDoneBtn").onclick = () => go("screen-home");
 
-document.getElementById("endBtn").onclick = async () => {
-  statusLine.textContent = "Ek minute...";
+async function finishAndScore() {
+  statusLine.textContent = "एक मिनट...";
   let data;
   try {
     const resp = await fetch("/api/practice/end", {
@@ -508,100 +548,64 @@ document.getElementById("endBtn").onclick = async () => {
     data = await resp.json();
   } catch (err) {
     statusLine.textContent = "";
-    addBubble("error", "Kuch dikkat aayi. Dobara try kijiye.");
+    addBubble("error", "कुछ दिक्कत आई। दोबारा try कीजिए।");
     return;
   }
   statusLine.textContent = "";
 
   if (data.error === "no_turns") {
-    addBubble("error", "Pehle kam se kam ek baar boliye, phir baat khatam kijiye.");
+    addBubble("error", "पहले कम से कम एक बार बोलिए, फिर बात ख़त्म कीजिए।");
     return;
   }
   if (data.error) {
-    addBubble("error", "Score karne mein dikkat aayi. Dobara try kijiye.");
+    addBubble("error", "जवाब तैयार करने में दिक्कत आई। दोबारा कोशिश कीजिए।");
     return;
   }
 
-  lastScore = data;
-  document.getElementById("feedbackText").textContent = data.pu_feedback_hindi;
-  document.getElementById("tIntro").textContent = data.introduction;
-  document.getElementById("tRapport").textContent = data.rapport;
-  document.getElementById("tService").textContent = data.service;
-  document.getElementById("tGap").textContent = data.gap_tag;
+  markDone(currentPtype);
+  showFeedback(data);
+}
+
+let lastFeedback = null;
+
+function showFeedback(data) {
+  lastFeedback = data;
+  document.getElementById("fbGood").textContent = data.good;
+  document.getElementById("fbNext").textContent = data.next_time;
+  document.getElementById("fbPhrase").textContent = "“" + data.exact_phrase + "”";
+  document.getElementById("tTopic").textContent = data.topic;
+  document.getElementById("tGap").textContent = data.gap_category;
   document.getElementById("trainerView").classList.remove("open");
-  document.getElementById("trainerToggle").textContent = "Trainer / L&D view dikhaiye ▾";
+  document.getElementById("trainerToggle").textContent = "Trainer / L&D view दिखाइए ▾";
 
   const logCheckbox = document.getElementById("logCheckbox");
   logCheckbox.checked = false;
   logCheckbox.disabled = false;
   logCheckbox.onchange = async (e) => {
-    if (e.target.checked && lastScore) {
+    if (e.target.checked && lastFeedback) {
       logCheckbox.disabled = true;
       await fetch("/api/practice/log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session_id: sessionId, ...lastScore }),
+        body: JSON.stringify({ session_id: sessionId, ...lastFeedback }),
       });
-      document.querySelector(".log-row").insertAdjacentHTML("beforeend", ' <span style="color:var(--muted)">— logged ✓</span>');
+      document.querySelector(".log-row").insertAdjacentHTML("beforeend", ' <span style="color:var(--brown-lt)">— logged ✓</span>');
     }
   };
-  showScreen("screen-results");
-};
+
+  setHomeIdentity();
+  go("screen-feedback");
+}
 
 document.getElementById("trainerToggle").onclick = () => {
   const view = document.getElementById("trainerView");
   view.classList.toggle("open");
   document.getElementById("trainerToggle").textContent =
-    view.classList.contains("open") ? "Trainer / L&D view chhupaiye ▴" : "Trainer / L&D view dikhaiye ▾";
+    view.classList.contains("open") ? "Trainer / L&D view छुपाइए ▴" : "Trainer / L&D view दिखाइए ▾";
 };
 
-document.getElementById("restartBtn").onclick = () => startPractice(currentScenario);
-document.getElementById("changeScenarioBtn").onclick = () => showScreen("screen-module");
-
-document.getElementById("askSubmitBtn").onclick = async () => {
-  const question = document.getElementById("askQuestion").value.trim();
-  if (!question) return;
-
-  const askStatusLine = document.getElementById("askStatusLine");
-  const results = document.getElementById("askResults");
-  results.style.display = "none";
-  askStatusLine.textContent = "Teeno jawab generate ho rahe hain...";
-
-  let data;
-  try {
-    const resp = await fetch("/api/ask_test", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question }),
-    });
-    data = await resp.json();
-  } catch (err) {
-    askStatusLine.textContent = "Kuch dikkat aayi. Dobara try kijiye.";
-    return;
-  }
-  askStatusLine.textContent = "";
-
-  if (data.error === "empty_question") {
-    askStatusLine.textContent = "Sawaal likhiye pehle.";
-    return;
-  }
-  if (data.error) {
-    askStatusLine.textContent = "Kuch dikkat aayi. Dobara try kijiye.";
-    return;
-  }
-
-  document.getElementById("askSafeText").textContent = data.safe;
-  document.getElementById("askVettedText").textContent = data.vetted;
-  document.getElementById("askExperimentalText").textContent = data.experimental;
-  results.style.display = "block";
-};
-
-document.getElementById("askRestartBtn").onclick = () => {
-  document.getElementById("askQuestion").value = "";
-  document.getElementById("askResults").style.display = "none";
-  document.getElementById("askStatusLine").textContent = "";
-  showScreen("screen-module");
-};
+document.getElementById("retryBtn").onclick = () => showIntro();
+document.getElementById("otherServiceBtn").onclick = () => go("screen-ptype");
 </script>
 </body>
 </html>
