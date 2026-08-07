@@ -172,6 +172,7 @@
         <h2>आपकी पंचायत का नाम क्या है?</h2>
         <input type="text" id="onboardPanchayatInput" placeholder="पंचायत का नाम लिखिए" style="margin-top:12px;">
         <button class="primary-btn" id="onboardPanchayatNext">शुरू करें</button>
+        <button class="footer-link" id="onboardBackToName" style="margin-top:10px;">‹ Apna naam badlein</button>
       </div>
     </div>
   </div>
@@ -310,6 +311,14 @@ document.getElementById("onboardNameNext").onclick = () => {
   document.getElementById("onboardNameInput").style.display = "none";
   document.getElementById("onboardNameNext").style.display = "none";
   document.getElementById("onboardPanchayatBlock").style.display = "block";
+};
+
+document.getElementById("onboardBackToName").onclick = () => {
+  document.getElementById("onboardPanchayatBlock").style.display = "none";
+  document.getElementById("onboardName").textContent = "आपका नाम क्या है?";
+  document.getElementById("onboardNameInput").style.display = "block";
+  document.getElementById("onboardNameNext").style.display = "block";
+  document.getElementById("onboardNameInput").focus();
 };
 
 document.getElementById("onboardPanchayatNext").onclick = () => {
