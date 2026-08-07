@@ -351,11 +351,16 @@ async function startPractice(scenario) {
   currentScenario = scenario;
   document.getElementById("messages").innerHTML = "";
   document.getElementById("headerStatus").textContent = scenario === "basic_pitch" ? "Pehli mulakaat" : "Daam ki baat";
-  await fetch("/api/practice/start", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ session_id: sessionId, scenario }),
-  });
+  try {
+    await fetch("/api/practice/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, scenario }),
+    });
+  } catch (err) {
+    showScreen("screen-module");
+    return;
+  }
   showScreen("screen-chat");
   const introText = scenario === "basic_pitch"
     ? "Aap ek bakripalak ke ghar pahunchi hain jo pehli baar aapki seva ke baare mein sun rahi hain. Namaste bol kar shuru kijiye."
@@ -366,15 +371,23 @@ async function startPractice(scenario) {
 async function startMeraMadad() {
   document.getElementById("madadText").textContent = "Recap laa rahe hain...";
   showScreen("screen-madad");
-  const resp = await fetch("/api/mera_madad", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ session_id: sessionId }),
-  });
-  const data = await resp.json();
+  let data;
+  try {
+    const resp = await fetch("/api/mera_madad", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId }),
+    });
+    data = await resp.json();
+  } catch (err) {
+    document.getElementById("madadText").textContent = "Kuch dikkat aayi. Dobara try kijiye.";
+    return;
+  }
   if (data.no_history) {
     document.getElementById("madadText").textContent =
       "Abhi tak koi Practice session nahi hua hai. Pehle Practice try kijiye aur 'log to Sheet' tick kijiye, phir yahan wapas aayein.";
+  } else if (data.error) {
+    document.getElementById("madadText").textContent = "Kuch dikkat aayi. Dobara try kijiye.";
   } else {
     document.getElementById("madadText").textContent = data.reply;
   }
@@ -434,8 +447,16 @@ async function onRecordingStop() {
   form.append("audio", blob, "turn.webm");
 
   statusLine.textContent = "Sun rahe hain...";
-  const resp = await fetch("/api/practice/turn", { method: "POST", body: form });
-  const data = await resp.json();
+  let data;
+  try {
+    const resp = await fetch("/api/practice/turn", { method: "POST", body: form });
+    data = await resp.json();
+  } catch (err) {
+    statusLine.textContent = "";
+    composerLabel.textContent = "Bolne ke liye mic dabaiye";
+    addBubble("error", "Network mein dikkat aayi. Dobara boliye.");
+    return;
+  }
   statusLine.textContent = "";
   composerLabel.textContent = "Bolne ke liye mic dabaiye";
 
@@ -529,16 +550,26 @@ document.getElementById("askSubmitBtn").onclick = async () => {
   results.style.display = "none";
   askStatusLine.textContent = "Teeno jawab generate ho rahe hain...";
 
-  const resp = await fetch("/api/ask_test", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question }),
-  });
-  const data = await resp.json();
+  let data;
+  try {
+    const resp = await fetch("/api/ask_test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question }),
+    });
+    data = await resp.json();
+  } catch (err) {
+    askStatusLine.textContent = "Kuch dikkat aayi. Dobara try kijiye.";
+    return;
+  }
   askStatusLine.textContent = "";
 
-  if (data.error) {
+  if (data.error === "empty_question") {
     askStatusLine.textContent = "Sawaal likhiye pehle.";
+    return;
+  }
+  if (data.error) {
+    askStatusLine.textContent = "Kuch dikkat aayi. Dobara try kijiye.";
     return;
   }
 

@@ -21,11 +21,30 @@ from dotenv import load_dotenv  # noqa: E402
 load_dotenv()
 
 from flask import Flask, jsonify, request, send_from_directory  # noqa: E402
+from werkzeug.exceptions import HTTPException  # noqa: E402
 
 from src import llm, sheets_logger, state_store, stt  # noqa: E402
 from src.stt import AudioTooLongError, TranscriptionError  # noqa: E402
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), "static"))
+
+
+@app.errorhandler(Exception)
+def handle_unexpected_error(exc):
+    """Safety net for every route below. Without this, any unhandled
+    exception (a flaky Anthropic API call, a network blip) would reach the
+    client as Flask's HTML debug page instead of JSON - the frontend's
+    resp.json() would then throw uncaught, and the user would see the app
+    silently do nothing with no explanation.
+
+    Normal HTTP exceptions (404 for a stray /favicon.ico, 405, etc.) are
+    expected routing outcomes, not failures - let Flask handle those as
+    usual instead of logging them as errors and masking their real status
+    code behind a generic 500."""
+    if isinstance(exc, HTTPException):
+        return exc
+    app.logger.exception("Unhandled error in %s", request.path)
+    return jsonify({"error": "unexpected_error"}), 500
 
 
 @app.route("/")
