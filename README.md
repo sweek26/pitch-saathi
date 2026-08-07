@@ -33,7 +33,25 @@ household, scores against the rubric, tags Knowledge vs Confidence) and
    `sheets_logger.py` reads/writes):
    `phone_number | timestamp | module | scenario | transcript | transcript_confidence | introduction | rapport | service | gap_tag | reply_text`
 
-## Run locally
+## Testing without WhatsApp (current default — WhatsApp isn't connected yet)
+
+Three ways to exercise the real pipeline (same `llm.py`/`stt.py`/`sheets_logger.py`
+code the WhatsApp path will use) without needing WhatsApp at all:
+
+- `python -m scripts.console_test` — type as the PU in a terminal, fastest
+  way to test prompt/scoring behavior.
+- `python -m scripts.voice_test` — speak into your mic, get real Sarvam
+  transcription + a reply. Closest thing to the real experience.
+- `python -m demo.server` then open `http://localhost:5050` — a
+  browser-based WhatsApp-style chat demo with onboarding (name +
+  panchayat), Practice, and Mera Madad. Good for showing the concept to
+  others. Includes an **"Ask — Test Mode"** screen for internally
+  comparing three approaches to answering technical/medical questions
+  (safe-default / vetted-retrieval / experimental-generation) — this is
+  explicitly a team-evaluation tool, not part of the real product, and
+  is not wired into `router.py`/`webhook.py`.
+
+## Run against real WhatsApp (once connected)
 
 ```
 python -m src.webhook
@@ -70,7 +88,11 @@ pipeline is runnable. Flag anything you want changed:
 
 ## Not yet built
 
+- WhatsApp itself isn't connected yet — decision pending on a fresh Meta
+  Developer app vs. the org's existing Gupshup/Glific WhatsApp setup.
 - PU consent flow / enrollment.
 - Low-confidence transcript review queue (Sarvam returns a confidence
   score; it's logged per row but nothing acts on it yet).
-- Any retry/error-recovery beyond a logged exception per message.
+- `router.py`'s module-selection flow doesn't yet have the name/panchayat
+  onboarding the demo app prototypes — deferred until it's testable
+  against real WhatsApp messages.
