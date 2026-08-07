@@ -83,7 +83,12 @@ def practice_end():
     if not session.get("turns"):
         return jsonify({"error": "no_turns"}), 400
 
-    score = llm.practice_score_session(session["scenario"], session["turns"])
+    try:
+        score = llm.practice_score_session(session["scenario"], session["turns"])
+    except Exception:
+        app.logger.exception("Scoring failed for session %s", session_id)
+        return jsonify({"error": "scoring_failed"}), 500
+
     score["scenario"] = session["scenario"]
     state_store.clear_session(session_id)
     return jsonify(score)

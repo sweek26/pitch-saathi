@@ -460,16 +460,27 @@ let lastScore = null;
 
 document.getElementById("endBtn").onclick = async () => {
   statusLine.textContent = "Ek minute...";
-  const resp = await fetch("/api/practice/end", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ session_id: sessionId }),
-  });
-  const data = await resp.json();
+  let data;
+  try {
+    const resp = await fetch("/api/practice/end", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId }),
+    });
+    data = await resp.json();
+  } catch (err) {
+    statusLine.textContent = "";
+    addBubble("error", "Kuch dikkat aayi. Dobara try kijiye.");
+    return;
+  }
   statusLine.textContent = "";
 
-  if (data.error) {
+  if (data.error === "no_turns") {
     addBubble("error", "Pehle kam se kam ek baar boliye, phir baat khatam kijiye.");
+    return;
+  }
+  if (data.error) {
+    addBubble("error", "Score karne mein dikkat aayi. Dobara try kijiye.");
     return;
   }
 
