@@ -182,13 +182,14 @@
     <div class="picker">
       <h2>Kya karna chahengi?</h2>
       <div class="option-card" onclick="showScenarioPicker()">
-        <strong>Practice</strong>
+        <strong>Abhyas karein</strong>
         <span class="sub">Bakripalak se baat kijiye, jaise aap unke ghar gayi hain</span>
       </div>
       <div class="option-card" onclick="startMeraMadad()">
         <strong>Mera Madad</strong>
         <span class="sub">Apni pichhli practice se salah paayein</span>
       </div>
+      <button class="footer-link" id="editProfileLink">‹ Apna naam ya panchayat badlein</button>
       <button class="footer-link" onclick="showScreen('screen-ask')">Internal: Ask Test Mode (sirf team ke liye)</button>
     </div>
   </div>
@@ -289,6 +290,13 @@ const screens = ["screen-onboarding", "screen-module", "screen-scenario", "scree
 function showScreen(id) {
   screens.forEach(s => document.getElementById(s).classList.toggle("active", s === id));
   document.getElementById("backBtn").style.visibility = (id === "screen-module" || id === "screen-onboarding") ? "hidden" : "visible";
+  // Header should always show her name once known, never a leftover status
+  // from whatever screen was open before - fixed centrally here so every
+  // path back to the home screen resets it correctly.
+  if (id === "screen-module") {
+    const name = localStorage.getItem("ps_name");
+    if (name) applyProfileToHeader(name);
+  }
 }
 
 document.getElementById("backBtn").onclick = () => {
@@ -321,6 +329,16 @@ document.getElementById("onboardBackToName").onclick = () => {
   document.getElementById("onboardNameInput").focus();
 };
 
+document.getElementById("editProfileLink").onclick = () => {
+  document.getElementById("onboardNameInput").value = localStorage.getItem("ps_name") || "";
+  document.getElementById("onboardPanchayatInput").value = localStorage.getItem("ps_panchayat") || "";
+  document.getElementById("onboardName").textContent = "आपका नाम क्या है?";
+  document.getElementById("onboardNameInput").style.display = "block";
+  document.getElementById("onboardNameNext").style.display = "block";
+  document.getElementById("onboardPanchayatBlock").style.display = "none";
+  showScreen("screen-onboarding");
+};
+
 document.getElementById("onboardPanchayatNext").onclick = () => {
   const panchayat = document.getElementById("onboardPanchayatInput").value.trim();
   if (!panchayat) return;
@@ -350,7 +368,6 @@ function showScenarioPicker() {
 async function startPractice(scenario) {
   currentScenario = scenario;
   document.getElementById("messages").innerHTML = "";
-  document.getElementById("headerStatus").textContent = scenario === "basic_pitch" ? "Pehli mulakaat" : "Daam ki baat";
   try {
     await fetch("/api/practice/start", {
       method: "POST",
@@ -363,8 +380,8 @@ async function startPractice(scenario) {
   }
   showScreen("screen-chat");
   const introText = scenario === "basic_pitch"
-    ? "Aap ek bakripalak ke ghar pahunchi hain jo pehli baar aapki seva ke baare mein sun rahi hain. Namaste bol kar shuru kijiye."
-    : "Bakripalak seva ko samajhti hain, par daam ko lekar sawaal utha rahi hain. Unhe samjhaiye.";
+    ? "Chaliye shuru karein! Ek bakripalak se pehli baar mulakaat ho rahi hai — apna parichay dijiye aur unhe apni seva ke baare mein samjhaiye, jaise aap khud unke ghar gayi hain. Aap achhe se kar paayengi!"
+    : "Ab thoda mushkil scenario — ye bakripalak daam ko lekar sawaal utha rahi hain. Dheeraj se, achhe se samjhaiye. Aap sambhal sakti hain!";
   addBubble("system", introText);
 }
 
