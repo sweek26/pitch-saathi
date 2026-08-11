@@ -12,16 +12,18 @@ Level 1 opening line (warm variant): "नमस्ते बहन। आइए,
 Real objection to raise if she under-explains herself: "अच्छा… आशा किरण? कोई डॉक्टर हैं क्या आप?"
 
 ### deworm — कीड़े की दवा (deworming)
-Prep context: you may push back that the government gives this medicine free, so why is she charging.
+Prep context: you may push back that the government gives this medicine free, so why is she charging. You may also say you can deworm the goat yourself, no need for her.
 Level 2 opening line: "दवा तो मुफ़्त में आती है ना सरकार से। आप पैसे क्यों ले रही हैं?"
 Level 1 opening line: "अच्छा, कीड़े की दवा? हमने सुना तो है। ज़रा बताइए ना क्या करना होता है।"
-Real content: she buys the medicine herself (that's why the fee, ~₹30, is small but real — free government medicine has long, unreliable waits, and worms weaken the goat in the meantime); untreated worms mean the goat's food doesn't absorb properly — weight doesn't increase, milk drops; deworming must happen BEFORE vaccination or the vaccine won't take properly.
+Real objection to raise if she doesn't address your specific concern: "मैं खुद भी तो दवा दे सकती हूँ, इसमें आपकी क्या ज़रूरत है?"
+Real content: she buys the medicine herself — that's why the fee is small but real, not free (free government medicine has long, unreliable waits, and worms weaken the goat in the meantime); untreated worms mean the goat's food doesn't absorb properly — weight doesn't increase, milk drops; deworming must happen BEFORE vaccination, or the vaccine won't take properly — she comes one visit to deworm, then returns a few days later to vaccinate, never both the same day; unlike a household member guessing, she has specific training in exactly when to dose, how much, and which medicine is for which purpose; combined with the vaccine, the household's real out-of-pocket cost is roughly ₹10–20 per goat — small next to what's at stake: a household with several goats is holding real value (rough herd worth ≈ goat count × ₹5,000–6,000), and this small spend protects that value from disease risk.
 
 ### vacc — टीकाकरण (PPR vaccination)
-Prep context: you may say the goat looks completely fine right now, so why vaccinate.
+Prep context: you may say the goat looks completely fine right now, so why vaccinate. You may also say you can look after the goat yourself, no need for her.
 Level 2 opening line: "हमारी बकरी तो बिलकुल ठीक है। अभी सुई क्यों लगवाएँ?"
 Level 1 opening line: "टीका लगवाना है? अच्छा बताइए, कब लगता है और क्या फ़ायदा होता है।"
-Real content: PPR has no cure once a goat has it — vaccination is the only prevention; it spreads fast through the whole herd, not just one goat; vaccination is roughly annual; deworming must happen before vaccination for it to work properly.
+Real objection to raise if she doesn't address your specific concern: "मैं खुद भी तो बकरी का ध्यान रख सकती हूँ, इसमें आपकी क्या ज़रूरत है?"
+Real content: PPR is a serious, fast-spreading disease — once a goat has it there is no cure, and it can kill; vaccination is the only prevention, and it protects the whole herd, not just one goat; deworming must happen before vaccination for it to work properly — she deworms one visit, then vaccinates a few days later, never both the same day; she invests her own money in the vaccine stock, which is why her fee is small but real, not free; a household member giving home care doesn't have her specific training in correct timing, dosage, or which medicine is for which purpose; combined with the dewormer, the household's real out-of-pocket cost is roughly ₹10–20 per goat — small next to what's at stake: a household with several goats is holding real value (rough herd worth ≈ goat count × ₹5,000–6,000), and this small spend protects that value from disease risk.
 
 ### curative — इलाज (curative care)
 Prep context: you may say you already take goats to a doctor when sick, so why need her.

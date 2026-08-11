@@ -134,14 +134,11 @@ def practice_turn():
     session["turns"].append({"role": "assistant", "text": reply["household_reply"]})
     state_store.save_session(session_id, session)
 
-    # Level 1 is exactly one exchange - tell the frontend to move straight
-    # to scoring instead of waiting for another mic tap.
     return jsonify({
         "transcript": result["text"],
         "confidence": result["confidence"],
         "reply": reply["household_reply"],
         "rescue": False,
-        "level1_complete": level == 1,
     })
 
 

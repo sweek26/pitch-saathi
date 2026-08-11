@@ -248,7 +248,7 @@ header button.back {
     <div class="mic-wrap">
       <div class="miccap" id="composerLabel">बोलने के लिए दबाएँ</div>
       <button class="mic" id="micBtn">🎙️</button>
-      <div><button class="stop-link" id="stopBtn">⏹ बात यहीं ख़त्म करें</button></div>
+      <div><button class="stop-link" id="stopBtn">⏹ बातचीत ख़त्म करें</button></div>
     </div>
   </div>
 
@@ -426,13 +426,8 @@ async function startConvo() {
 
   const label = document.getElementById("composerLabel");
   const stopBtn = document.getElementById("stopBtn");
-  if (currentLevel === 1) {
-    label.textContent = "पूरी बात एक बार में कहिए";
-    stopBtn.style.display = "none";
-  } else {
-    label.textContent = "बोलने के लिए दबाएँ";
-    stopBtn.style.display = "inline-block";
-  }
+  stopBtn.style.display = "inline-block";
+  label.textContent = currentLevel === 1 ? "पूरी बात एक बार में कहिए" : "बोलने के लिए दबाएँ";
 }
 
 function addBubble(kind, text) {
@@ -526,11 +521,6 @@ async function onRecordingStop() {
   }
 
   addBubble("household", data.reply);
-
-  if (data.level1_complete) {
-    markDone(currentPtype);
-    setTimeout(() => finishAndScore(), 900);
-  }
 }
 
 document.getElementById("stopBtn").onclick = () => finishAndScore();
