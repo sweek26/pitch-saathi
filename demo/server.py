@@ -19,6 +19,7 @@ follow-up pass. llm.mera_madad_reply itself is untouched and ready to reuse
 once that's rebuilt.
 """
 import os
+import random
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -30,7 +31,7 @@ load_dotenv()
 from flask import Flask, jsonify, request, send_from_directory  # noqa: E402
 from werkzeug.exceptions import HTTPException  # noqa: E402
 
-from src import llm, sheets_logger, state_store, stt  # noqa: E402
+from src import llm, qa_bank, sheets_logger, state_store, stt  # noqa: E402
 from src.stt import AudioTooLongError, TranscriptionError  # noqa: E402
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), "static"))
@@ -41,6 +42,75 @@ RESCUE_MESSAGE_TEMPLATE = (
     "कोई बात नहीं {name} जी, आज इतना ही। अगली बार \"पहली मुलाक़ात\" वाला अभ्यास "
     "करते हैं, वो थोड़ा आसान रहेगा।"
 )
+
+# Must stay in sync with practice.txt's per-type "Concepts" lists - code
+# owns deciding WHICH concept is still missing and WHEN to surface it
+# (same reasoning as weak_run/rescue below); the model only owns HOW to
+# phrase a natural opening for whichever key it's given.
+TYPE_CONCEPTS = {
+    "first": ["who_and_org", "credentials", "curiosity_about_goats"],
+    "deworm": ["why_not_free", "problem_if_untreated", "sequencing", "self_care_rebuttal", "roi_framing"],
+    "vacc": ["no_cure_prevention_only", "herd_spread", "sequencing", "why_not_free", "self_care_rebuttal", "roi_framing"],
+    "curative": ["cost_comparison", "honesty_about_limits"],
+    "badhiya": ["benefits_illustrative", "not_alone"],
+}
+
+# Scenario variants exist only for these two types so far (see
+# practice.txt) - auto-assigned per your call, not PU-selected. They
+# flavor HOW the household approaches the same objection, not what the
+# objection is, so Level 1 (always warm, uninterrupted) never gets one.
+SCENARIO_PTYPES = ("deworm", "vacc")
+SCENARIOS = ["first_meeting", "many_questions", "refused_before"]
+
+NUDGE_CADENCE = 3  # consecutive-strong-turns-ish gap between nudges; see _maybe_pick_nudge
+_NUDGES_PATH = os.path.join(os.path.dirname(__file__), "..", "system_prompts", "motivation_nudges.md")
+_NUDGES = None
+
+
+def _load_nudges():
+    global _NUDGES
+    if _NUDGES is None:
+        lines = []
+        with open(_NUDGES_PATH, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("- "):
+                    lines.append(line[2:].strip())
+        _NUDGES = lines
+    return _NUDGES
+
+
+def _next_concept_hint(ptype, covered):
+    for key in TYPE_CONCEPTS.get(ptype, []):
+        if key not in covered:
+            return key
+    return None
+
+
+def _maybe_pick_nudge(session, turn_quality):
+    """Nudges are plain code picking from a fixed list, not model output -
+    same reasoning as the ceiling/rescue lines. Only fires on a genuinely
+    strong turn, at most once every NUDGE_CADENCE turns, and avoids
+    repeating the immediately-previous nudge."""
+    if turn_quality != "strong":
+        session["turns_since_nudge"] = session.get("turns_since_nudge", 0) + 1
+        return None
+
+    session["turns_since_nudge"] = session.get("turns_since_nudge", 0) + 1
+    if session["turns_since_nudge"] < NUDGE_CADENCE:
+        return None
+
+    pool = _load_nudges()
+    if not pool:
+        return None
+    choice = random.choice(pool)
+    for _retry in range(5):
+        if choice != session.get("last_nudge") or len(pool) == 1:
+            break
+        choice = random.choice(pool)
+    session["last_nudge"] = choice
+    session["turns_since_nudge"] = 0
+    return choice
 
 
 @app.errorhandler(Exception)
@@ -68,8 +138,14 @@ def practice_start():
     session_id = data["session_id"]
     ptype = data["ptype"]
     level = int(data["level"])
+
+    scenario = None
+    if level == 2 and ptype in SCENARIO_PTYPES:
+        scenario = random.choice(SCENARIOS)
+
     state_store.save_session(session_id, {
         "module": "practice", "ptype": ptype, "level": level, "turns": [], "weak_run": 0,
+        "covered_concepts": [], "turns_since_nudge": 0, "last_nudge": None, "scenario": scenario,
     })
     return jsonify({"ok": True})
 
@@ -100,7 +176,18 @@ def practice_turn():
     level = session["level"]
     session["turns"].append({"role": "user", "text": result["text"]})
 
-    reply = llm.practice_persona_reply(ptype, level, session["turns"])
+    # Concept-opening, like the ceiling/rescue below, is code-timed: we
+    # decide here (from concepts covered so far) whether a topic is still
+    # missing, and only pass its key through for the model to work in IF
+    # it fits naturally that turn. Level 1 is a single warm reply and never
+    # steers toward a missing concept.
+    concept_hint = None
+    if level == 2:
+        concept_hint = _next_concept_hint(ptype, set(session.get("covered_concepts", [])))
+
+    reply = llm.practice_persona_reply(
+        ptype, level, session["turns"], concept_hint=concept_hint, scenario=session.get("scenario"),
+    )
 
     # Both the ceiling softening and the rescue ending are FIXED strings
     # triggered by plain code counting turn_quality, not model output -
@@ -131,6 +218,13 @@ def practice_turn():
     if level == 2 and weak_run == 2:
         reply["household_reply"] = "अच्छा अच्छा… ठीक है, आराम से बताइए।"
 
+    nudge = None
+    if level == 2:
+        covered = set(session.get("covered_concepts", []))
+        covered.update(reply.get("concepts_covered") or [])
+        session["covered_concepts"] = sorted(covered)
+        nudge = _maybe_pick_nudge(session, reply["turn_quality"])
+
     session["turns"].append({"role": "assistant", "text": reply["household_reply"]})
     state_store.save_session(session_id, session)
 
@@ -139,6 +233,7 @@ def practice_turn():
         "confidence": result["confidence"],
         "reply": reply["household_reply"],
         "rescue": False,
+        "nudge": nudge,
     })
 
 
@@ -155,7 +250,10 @@ def practice_end():
         return jsonify({"error": "no_turns"}), 400
 
     try:
-        feedback = llm.practice_score_session(session["ptype"], session["level"], session["turns"])
+        feedback = llm.practice_score_session(
+            session["ptype"], session["level"], session["turns"],
+            covered_concepts=session.get("covered_concepts"), scenario=session.get("scenario"),
+        )
     except Exception:
         app.logger.exception("Scoring failed for session %s", session_id)
         return jsonify({"error": "scoring_failed"}), 500
@@ -190,6 +288,85 @@ def practice_log():
         ended_via="scored",
     )
     return jsonify({"ok": True})
+
+
+@app.route("/api/qa/services", methods=["GET"])
+def qa_services():
+    """Only services with real vetted Q&A content behind them - see
+    src/qa_bank.py's docstring."""
+    return jsonify({"services": qa_bank.services_available()})
+
+
+@app.route("/api/qa/start", methods=["POST"])
+def qa_start():
+    data = request.get_json()
+    session_id = data["session_id"]
+    service = data["service"]
+
+    order = qa_bank.new_question_order(service)
+    if not order:
+        return jsonify({"error": "no_questions"}), 400
+
+    state_store.save_session(session_id, {
+        "module": "qa", "service": service, "order": order, "position": 0,
+    })
+    q = qa_bank.get_question(order[0])
+    return jsonify({"question": q["question"], "position": 1, "total": len(order)})
+
+
+@app.route("/api/qa/answer", methods=["POST"])
+def qa_answer():
+    """Returns her transcript next to the fixed approved answer for the
+    CURRENT question - does not advance. /api/qa/next advances, so she can
+    sit with the comparison before moving on."""
+    session_id = request.form["session_id"]
+    audio_file = request.files["audio"]
+    audio_bytes = audio_file.read()
+    mime_type = audio_file.mimetype or "audio/webm"
+
+    session = state_store.get_session(session_id)
+    if session.get("module") != "qa":
+        return jsonify({"error": "no_session"}), 400
+
+    try:
+        result = stt.transcribe(audio_bytes, mime_type=mime_type)
+    except AudioTooLongError:
+        return jsonify({"error": "too_long"}), 400
+    except TranscriptionError as e:
+        return jsonify({"error": "transcription_failed", "detail": str(e)}), 400
+
+    if not result["text"].strip():
+        return jsonify({"error": "empty_transcript"}), 400
+
+    order = session["order"]
+    q = qa_bank.get_question(order[session["position"]])
+
+    return jsonify({
+        "transcript": result["text"],
+        "approved_answer": q["answer"],
+    })
+
+
+@app.route("/api/qa/next", methods=["POST"])
+def qa_next():
+    data = request.get_json()
+    session_id = data["session_id"]
+
+    session = state_store.get_session(session_id)
+    if session.get("module") != "qa":
+        return jsonify({"error": "no_session"}), 400
+
+    order = session["order"]
+    position = session["position"] + 1
+
+    if position >= len(order):
+        state_store.clear_session(session_id)
+        return jsonify({"done": True})
+
+    session["position"] = position
+    state_store.save_session(session_id, session)
+    q = qa_bank.get_question(order[position])
+    return jsonify({"question": q["question"], "position": position + 1, "total": len(order)})
 
 
 @app.route("/api/ask_test", methods=["POST"])

@@ -45,14 +45,22 @@ PRACTICE_PROMPT = None
 MERA_MADAD_PROMPT = None
 
 
-def _system_for(ptype, level):
+def _system_for(ptype, level, concept_hint=None, scenario=None):
     global PRACTICE_PROMPT
     if PRACTICE_PROMPT is None:
         PRACTICE_PROMPT = _load_prompt("practice.txt")
-    return f"{PRACTICE_PROMPT}\n\nActive practice type: {ptype}\nActive level: {level}"
+    system = f"{PRACTICE_PROMPT}\n\nActive practice type: {ptype}\nActive level: {level}"
+    if scenario:
+        system += f"\nActive scenario variant: {scenario}"
+    if concept_hint:
+        system += (
+            f"\nTry to create a natural opening for this still-missing concept this "
+            f"turn, if it fits: {concept_hint}"
+        )
+    return system
 
 
-def practice_persona_reply(ptype, level, turns):
+def practice_persona_reply(ptype, level, turns, concept_hint=None, scenario=None):
     """
     turns: [{"role": "user"|"assistant", "text": "..."}]
     Returns {"household_reply": str, "turn_quality": "strong"|"weak"|"short"}.
@@ -74,9 +82,16 @@ def practice_persona_reply(ptype, level, turns):
     through, which made truncation before the text block (stop_reason
     "max_tokens") more likely on later turns and showed up as the
     character going generic/unresponsive mid-conversation.
+
+    concept_hint: an optional concept key (from practice.txt's per-type
+    Concepts list) that demo/server.py has determined is still missing for
+    this session. Passed through to the system prompt as a soft nudge for
+    the model to work into its reply IF it fits naturally - server.py owns
+    the decision of WHEN to pass one (same pattern as weak_run/rescue),
+    the model only owns HOW to phrase it in character.
     """
     messages = [{"role": t["role"], "content": t["text"]} for t in turns]
-    system = _system_for(ptype, level)
+    system = _system_for(ptype, level, concept_hint=concept_hint, scenario=scenario)
 
     parsed = {}
     for _attempt in range(2):
@@ -96,10 +111,11 @@ def practice_persona_reply(ptype, level, turns):
     return {
         "household_reply": parsed.get("household_reply") or "माफ़ कीजिए, थोड़ा रुक कर दोबारा बोलिए — समझ नहीं पाई।",
         "turn_quality": parsed.get("turn_quality", "weak"),
+        "concepts_covered": parsed.get("concepts_covered") or [],
     }
 
 
-def practice_score_session(ptype, level, turns):
+def practice_score_session(ptype, level, turns, covered_concepts=None, scenario=None):
     """
     Sends the [END_OF_SESSION] control message. Returns:
       {topic, gap_category, good, next_time, exact_phrase}
@@ -107,14 +123,21 @@ def practice_score_session(ptype, level, turns):
     the trainer/L&D view only; good/next_time/exact_phrase are what the PU
     actually sees, assembled by the caller into the 3-part feedback shown
     on screen.
+
+    covered_concepts: the concept keys demo/server.py accumulated over the
+    session from each turn's concepts_covered - passed in as a grounding
+    sanity check for scoring, not the sole basis for it.
     """
     messages = [{"role": t["role"], "content": t["text"]} for t in turns]
-    messages.append({"role": "user", "content": "[END_OF_SESSION — SCORE THIS CONVERSATION]"})
+    end_message = "[END_OF_SESSION — SCORE THIS CONVERSATION]"
+    if covered_concepts:
+        end_message += f"\nConcepts already tracked as covered this session: {', '.join(covered_concepts)}"
+    messages.append({"role": "user", "content": end_message})
 
     response = _get_client().messages.create(
         model="claude-sonnet-5",
         max_tokens=2048,
-        system=_system_for(ptype, level),
+        system=_system_for(ptype, level, scenario=scenario),
         messages=messages,
     )
     raw = _extract_text(response)

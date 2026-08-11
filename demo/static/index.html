@@ -65,6 +65,18 @@ header button.back {
 .badge { font-family: var(--fd); font-size: 0.65rem; background: var(--tint); color: var(--brown); padding: 2px 8px; border-radius: 20px; margin-left: 6px; }
 .badge.warn { background: #f3ddd8; color: var(--danger); }
 
+#introLevelChoice { display: flex; flex-direction: column; }
+.levelcard.selected { border-color: var(--brown); background: var(--beige); }
+
+.qprogress { font-family: var(--fd); font-size: 0.78rem; color: var(--brown-lt); margin-bottom: 8px; }
+.qablock { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 0 20px rgba(35,35,35,.07); margin-bottom: 12px; }
+.qapart { margin-bottom: 13px; padding-left: 11px; border-left: 3px solid var(--tint); }
+.qapart:last-child { margin-bottom: 0; }
+.qapart.mine { border-color: var(--tan); }
+.qapart.approved { border-color: var(--green); }
+.qapart .h { font-family: var(--fd); font-size: 0.72rem; font-weight: 600; color: var(--brown-lt); margin-bottom: 4px; }
+.qapart .b { font-family: var(--fd); font-size: 0.9rem; line-height: 1.6; }
+
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .tile {
   background: #fff; border-radius: 14px; padding: 16px 10px; cursor: pointer;
@@ -183,7 +195,12 @@ header button.back {
       <div class="dsub" style="margin-top:14px;margin-bottom:10px">आज क्या करना चाहेंगी?</div>
       <div class="card" onclick="go('screen-ptype')">
         <div class="ic">🎙️</div>
-        <div><div class="t">बातचीत का अभ्यास</div><div class="d">बकरीपालक से बात कीजिए, जैसे आप उनके घर गई हैं</div></div>
+        <div><div class="t">बोलने का अभ्यास</div><div class="d">बकरीपालक से बात कीजिए, जैसे आप उनके घर गई हैं</div></div>
+        <div class="ch">›</div>
+      </div>
+      <div class="card" onclick="openQaServices()">
+        <div class="ic">❓</div>
+        <div><div class="t">सवाल-जवाब</div><div class="d">सवालों के सही जवाब बोलकर अभ्यास कीजिए</div></div>
         <div class="ch">›</div>
       </div>
       <button class="linkbtn" id="editProfileLink">‹ अपना नाम या ग्राम पंचायत बदलें</button>
@@ -232,12 +249,17 @@ header button.back {
       </div>
       <div class="bubble coach" id="introPrep"></div>
       <div class="safe"><span class="sic">🛡️</span><div><b>यहाँ ग़लती हो जाए तो कोई बात नहीं।</b> यह सिर्फ़ अभ्यास है — कोई नहीं सुन रहा, और आप जब चाहें रोक सकती हैं।</div></div>
-      <div class="card" style="cursor:default" id="introLevelCard">
-        <div class="ic" id="introLevelIcon"></div>
-        <div><div class="t" style="font-size:0.92rem" id="introLevelTitle"></div><div class="d" id="introLevelDesc"></div></div>
+      <div id="introLevelChoice">
+        <div class="card levelcard" id="introLevel1Card" onclick="chooseLevel(1)">
+          <div class="ic">💬</div>
+          <div><div class="t" style="font-size:0.92rem">पूरी बात कहिए</div><div class="d">कोई टोकेगा नहीं — जैसे आप घर पर बोलतीं, वैसे बोलिए</div></div>
+        </div>
+        <div class="card levelcard" id="introLevel2Card" onclick="chooseLevel(2)" style="display:none">
+          <div class="ic">🎙️</div>
+          <div><div class="t" style="font-size:0.92rem">अब बीच में सवाल आएँगे</div><div class="d">बकरीपालक जवाब देंगी, आप बात आगे बढ़ाइए</div></div>
+        </div>
       </div>
       <button class="cta" id="startConvoBtn">🎙️ अभ्यास शुरू करें</button>
-      <button class="linkbtn" id="switchLevelLink" style="display:none"></button>
     </div>
   </div>
 
@@ -283,6 +305,48 @@ header button.back {
       <button class="linkbtn" id="otherServiceBtn">दूसरी सेवा पर अभ्यास कीजिए</button>
     </div>
   </div>
+
+  <!-- Sawal-Jawab: service picker -->
+  <div class="screen" id="screen-qa-service">
+    <div class="picker">
+      <div class="dtitle">किस सेवा के सवाल?</div>
+      <div class="dsub">जिस पर अभ्यास करना है, उसे चुनिए</div>
+      <div id="qaServiceList"></div>
+    </div>
+  </div>
+
+  <!-- Sawal-Jawab: question -->
+  <div class="screen" id="screen-qa-question">
+    <div class="picker">
+      <div class="qprogress" id="qaProgress"></div>
+      <div class="bubble coach" id="qaQuestionText" style="max-width:100%"></div>
+    </div>
+    <div class="mic-wrap">
+      <div class="miccap" id="qaComposerLabel">जवाब बोलने के लिए दबाएँ</div>
+      <button class="mic" id="qaMicBtn">🎙️</button>
+    </div>
+  </div>
+
+  <!-- Sawal-Jawab: result -->
+  <div class="screen" id="screen-qa-result">
+    <div class="results">
+      <div class="qablock">
+        <div class="qapart mine"><div class="h">आपने कहा</div><div class="b" id="qaMyAnswer"></div></div>
+        <div class="qapart approved"><div class="h">✓ सही जवाब</div><div class="b" id="qaApprovedAnswer"></div></div>
+      </div>
+      <button class="cta" id="qaNextBtn">अगला सवाल ›</button>
+    </div>
+  </div>
+
+  <!-- Sawal-Jawab: done -->
+  <div class="screen" id="screen-qa-done">
+    <div class="results">
+      <div class="dtitle">बहुत बढ़िया!</div>
+      <div class="dsub">आपने इस सेवा के सारे सवाल पूरे कर लिए।</div>
+      <button class="cta" id="qaDoneRetryBtn">↻ फिर से अभ्यास कीजिए</button>
+      <button class="linkbtn" id="qaDoneHomeBtn">‹ होम पर जाइए</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -307,7 +371,8 @@ let audioChunks = [];
 let isRecording = false;
 
 const screens = ["screen-onboarding", "screen-home", "screen-ptype", "screen-services",
-  "screen-intro", "screen-convo", "screen-rescue", "screen-feedback"];
+  "screen-intro", "screen-convo", "screen-rescue", "screen-feedback",
+  "screen-qa-service", "screen-qa-question", "screen-qa-result", "screen-qa-done"];
 function go(id) {
   screens.forEach(s => document.getElementById(s).classList.toggle("active", s === id));
   document.getElementById("backBtn").style.visibility =
@@ -385,23 +450,20 @@ function showIntro() {
   document.getElementById("introTitle").textContent = p.name;
   document.getElementById("introPrep").textContent = p.prep;
 
-  const lvl1 = currentLevel === 1;
-  document.getElementById("introLevelIcon").textContent = lvl1 ? "💬" : "🎙️";
-  document.getElementById("introLevelTitle").textContent = lvl1 ? "पूरी बात कहिए" : "अब बीच में सवाल आएँगे";
-  document.getElementById("introLevelDesc").textContent = lvl1
-    ? "कोई टोकेगा नहीं — जैसे आप घर पर बोलतीं, वैसे बोलिए"
-    : "बकरीपालक जवाब देंगी, आप बात आगे बढ़ाइए";
-
-  const switchLink = document.getElementById("switchLevelLink");
-  if (getDone(currentPtype)) {
-    switchLink.style.display = "block";
-    switchLink.textContent = lvl1 ? "सवाल वाला अभ्यास कीजिए" : "आसान वाला फिर से कीजिए";
-    switchLink.onclick = () => { currentLevel = lvl1 ? 2 : 1; showIntro(); };
-  } else {
-    switchLink.style.display = "none";
-  }
+  document.getElementById("introLevel2Card").style.display = getDone(currentPtype) ? "flex" : "none";
+  renderLevelCards();
 
   go("screen-intro");
+}
+
+function chooseLevel(level) {
+  currentLevel = level;
+  renderLevelCards();
+}
+
+function renderLevelCards() {
+  document.getElementById("introLevel1Card").classList.toggle("selected", currentLevel === 1);
+  document.getElementById("introLevel2Card").classList.toggle("selected", currentLevel === 2);
 }
 
 document.getElementById("startConvoBtn").onclick = startConvo;
@@ -521,6 +583,10 @@ async function onRecordingStop() {
   }
 
   addBubble("household", data.reply);
+
+  if (data.nudge) {
+    addBubble("coach", data.nudge);
+  }
 }
 
 document.getElementById("stopBtn").onclick = () => finishAndScore();
@@ -591,6 +657,149 @@ document.getElementById("trainerToggle").onclick = () => {
 
 document.getElementById("retryBtn").onclick = () => showIntro();
 document.getElementById("otherServiceBtn").onclick = () => go("screen-ptype");
+
+// --- Sawal-Jawab (Knowledge Practice) ---
+const QA_SERVICES = {
+  curative: { icon: '🩺', name: 'इलाज' },
+  vacc: { icon: '💉', name: 'टीकाकरण' },
+};
+
+let qaService = null;
+
+async function openQaServices() {
+  setHomeIdentity();
+  const list = document.getElementById("qaServiceList");
+  list.innerHTML = '<div class="dsub">लोड हो रहा है...</div>';
+  go("screen-qa-service");
+
+  let services = [];
+  try {
+    const resp = await fetch("/api/qa/services");
+    const data = await resp.json();
+    services = data.services || [];
+  } catch (err) {
+    list.innerHTML = '<div class="dsub">लोड करने में दिक्कत आई। दोबारा कोशिश कीजिए।</div>';
+    return;
+  }
+
+  list.innerHTML = "";
+  services.forEach(svc => {
+    const meta = QA_SERVICES[svc];
+    if (!meta) return;
+    const card = document.createElement("div");
+    card.className = "card";
+    card.onclick = () => startQa(svc);
+    card.innerHTML = `<div class="ic">${meta.icon}</div><div><div class="t">${meta.name}</div></div><div class="ch">›</div>`;
+    list.appendChild(card);
+  });
+}
+
+async function startQa(service) {
+  qaService = service;
+  let data;
+  try {
+    const resp = await fetch("/api/qa/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, service }),
+    });
+    data = await resp.json();
+  } catch (err) {
+    return;
+  }
+  showQaQuestion(data);
+}
+
+function showQaQuestion(data) {
+  document.getElementById("qaProgress").textContent = `सवाल ${data.position} / ${data.total}`;
+  document.getElementById("qaQuestionText").textContent = data.question;
+  document.getElementById("qaComposerLabel").textContent = "जवाब बोलने के लिए दबाएँ";
+  go("screen-qa-question");
+}
+
+const qaMicBtn = document.getElementById("qaMicBtn");
+const qaComposerLabel = document.getElementById("qaComposerLabel");
+
+qaMicBtn.onclick = async () => {
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+      mediaRecorder.onstop = onQaRecordingStop;
+      mediaRecorder.start();
+      isRecording = true;
+      qaMicBtn.classList.add("recording");
+      qaComposerLabel.textContent = "रोकने के लिए दबाएँ";
+    } catch (err) {
+      qaComposerLabel.textContent = "माइक की अनुमति नहीं मिली।";
+    }
+  } else {
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    isRecording = false;
+    qaMicBtn.classList.remove("recording");
+    qaComposerLabel.textContent = "रुकिए...";
+  }
+};
+
+async function onQaRecordingStop() {
+  const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+  const form = new FormData();
+  form.append("session_id", sessionId);
+  form.append("audio", blob, "answer.webm");
+
+  qaComposerLabel.textContent = "सुन रहे हैं...";
+  let data;
+  try {
+    const resp = await fetch("/api/qa/answer", { method: "POST", body: form });
+    data = await resp.json();
+  } catch (err) {
+    qaComposerLabel.textContent = "नेटवर्क में दिक्कत आई। दोबारा बोलिए।";
+    return;
+  }
+  qaComposerLabel.textContent = "जवाब बोलने के लिए दबाएँ";
+
+  if (data.error === "too_long") {
+    qaComposerLabel.textContent = "यह रिकॉर्डिंग थोड़ी लंबी थी। थोड़ी छोटी रिकॉर्डिंग की कोशिश कीजिए।";
+    return;
+  }
+  if (data.error === "empty_transcript") {
+    qaComposerLabel.textContent = "कुछ सुनाई नहीं दिया। दोबारा कोशिश कीजिए।";
+    return;
+  }
+  if (data.error) {
+    qaComposerLabel.textContent = "समझने में दिक्कत आई। दोबारा कोशिश कीजिए।";
+    return;
+  }
+
+  document.getElementById("qaMyAnswer").textContent = data.transcript;
+  document.getElementById("qaApprovedAnswer").textContent = data.approved_answer;
+  go("screen-qa-result");
+}
+
+document.getElementById("qaNextBtn").onclick = async () => {
+  let data;
+  try {
+    const resp = await fetch("/api/qa/next", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId }),
+    });
+    data = await resp.json();
+  } catch (err) {
+    return;
+  }
+  if (data.done) {
+    go("screen-qa-done");
+    return;
+  }
+  showQaQuestion(data);
+};
+
+document.getElementById("qaDoneRetryBtn").onclick = () => startQa(qaService);
+document.getElementById("qaDoneHomeBtn").onclick = () => go("screen-home");
 </script>
 </body>
 </html>
