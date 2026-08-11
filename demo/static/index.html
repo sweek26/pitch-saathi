@@ -276,7 +276,7 @@ header button.back {
         <div class="row"><span>Topic</span><strong id="tTopic"></strong></div>
         <div class="row"><span>Gap category</span><strong id="tGap"></strong></div>
         <div class="warn">PU इसको कभी नहीं देखती — सिर्फ़ ऊपर वाला feedback देखती है।</div>
-        <label class="log-row"><input type="checkbox" id="logCheckbox"> इस session को real Sheet में log करें</label>
+        <div class="log-row" id="logStatus" style="display:none">✓ यह बातचीत अपने आप Sheet में सेव हो गई</div>
       </div>
 
       <button class="cta" id="retryBtn">↻ फिर से अभ्यास कीजिए</button>
@@ -288,15 +288,15 @@ header button.back {
 <script>
 const PRACTICE = {
   first: { icon: '👋', name: 'पहली मुलाक़ात', desc: 'नए घर पर पहली बार जाना — अपना परिचय देना',
-    prep: 'बकरीपालक आपको पहली बार देख रही हैं। वो पूछ सकती हैं — आप कौन हैं, कहाँ से आई हैं।' },
+    prep: 'आप एक नए घर पर पहली बार जा रही हैं, अपना परिचय देने।' },
   deworm: { icon: '💊', name: 'कीड़े की दवा', desc: 'कृमिनाशक दवा के बारे में समझाना',
-    prep: 'बकरीपालक कह सकती हैं कि दवा तो मुफ़्त आती है, फिर पैसे क्यों।' },
+    prep: 'आप एक बकरीपालक से कीड़े की दवा के बारे में बात करने जा रही हैं।' },
   vacc: { icon: '💉', name: 'टीकाकरण', desc: 'PPR के टीके के बारे में समझाना',
-    prep: 'बकरीपालक कह सकती हैं कि बकरी तो अभी बिलकुल ठीक है, टीके की क्या ज़रूरत।' },
+    prep: 'आप एक बकरीपालक से टीकाकरण के बारे में बात करने जा रही हैं।' },
   curative: { icon: '🩺', name: 'इलाज', desc: 'बीमार बकरी के इलाज के बारे में समझाना',
-    prep: 'बकरीपालक कह सकती हैं कि वो पहले से किसी डॉक्टर को दिखाती हैं।' },
+    prep: 'आप एक बकरीपालक से बीमार बकरी के इलाज के बारे में बात करने जा रही हैं।' },
   badhiya: { icon: '✂️', name: 'बधियाकरण', desc: 'बधियाकरण के फ़ायदे समझाना (कंटेंट अभी वेट सत्यापन के इंतज़ार में है)',
-    prep: 'बकरीपालक कह सकती हैं कि इससे बकरे को तकलीफ़ होगी।' },
+    prep: 'आप एक बकरीपालक से बधियाकरण के बारे में बात करने जा रही हैं।' },
 };
 
 const sessionId = "WEBDEMO_" + crypto.randomUUID();
@@ -387,7 +387,7 @@ function showIntro() {
 
   const lvl1 = currentLevel === 1;
   document.getElementById("introLevelIcon").textContent = lvl1 ? "💬" : "🎙️";
-  document.getElementById("introLevelTitle").textContent = lvl1 ? "पूरी बात एक बार में कहिए" : "अब बीच में सवाल आएँगे";
+  document.getElementById("introLevelTitle").textContent = lvl1 ? "पूरी बात कहिए" : "अब बीच में सवाल आएँगे";
   document.getElementById("introLevelDesc").textContent = lvl1
     ? "कोई टोकेगा नहीं — जैसे आप घर पर बोलतीं, वैसे बोलिए"
     : "बकरीपालक जवाब देंगी, आप बात आगे बढ़ाइए";
@@ -427,7 +427,7 @@ async function startConvo() {
   const label = document.getElementById("composerLabel");
   const stopBtn = document.getElementById("stopBtn");
   stopBtn.style.display = "inline-block";
-  label.textContent = currentLevel === 1 ? "पूरी बात एक बार में कहिए" : "बोलने के लिए दबाएँ";
+  label.textContent = currentLevel === 1 ? "पूरी बात कहिए" : "बोलने के लिए दबाएँ";
 }
 
 function addBubble(kind, text) {
@@ -538,7 +538,7 @@ async function finishAndScore() {
     data = await resp.json();
   } catch (err) {
     statusLine.textContent = "";
-    addBubble("error", "कुछ दिक्कत आई। दोबारा try कीजिए।");
+    addBubble("error", "कुछ दिक्कत आई। दोबारा कोशिश कीजिए।");
     return;
   }
   statusLine.textContent = "";
@@ -554,12 +554,21 @@ async function finishAndScore() {
 
   markDone(currentPtype);
   showFeedback(data);
+
+  try {
+    await fetch("/api/practice/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, ...data }),
+    });
+    document.getElementById("logStatus").style.display = "block";
+  } catch (err) {
+    // Sheet logging is best-effort - a failure here shouldn't take away
+    // the feedback the PU is already looking at.
+  }
 }
 
-let lastFeedback = null;
-
 function showFeedback(data) {
-  lastFeedback = data;
   document.getElementById("fbGood").textContent = data.good;
   document.getElementById("fbNext").textContent = data.next_time;
   document.getElementById("fbPhrase").textContent = "“" + data.exact_phrase + "”";
@@ -567,21 +576,7 @@ function showFeedback(data) {
   document.getElementById("tGap").textContent = data.gap_category;
   document.getElementById("trainerView").classList.remove("open");
   document.getElementById("trainerToggle").textContent = "Trainer / L&D view दिखाइए ▾";
-
-  const logCheckbox = document.getElementById("logCheckbox");
-  logCheckbox.checked = false;
-  logCheckbox.disabled = false;
-  logCheckbox.onchange = async (e) => {
-    if (e.target.checked && lastFeedback) {
-      logCheckbox.disabled = true;
-      await fetch("/api/practice/log", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session_id: sessionId, ...lastFeedback }),
-      });
-      document.querySelector(".log-row").insertAdjacentHTML("beforeend", ' <span style="color:var(--brown-lt)">— logged ✓</span>');
-    }
-  };
+  document.getElementById("logStatus").style.display = "none";
 
   setHomeIdentity();
   go("screen-feedback");

@@ -68,26 +68,33 @@ def practice_persona_reply(ptype, level, turns):
     turn_quality with plain code and OVERRIDES the displayed text with a
     scripted ceiling line or rescue message at the exact right count -
     both are fixed strings, not model output, so they never misfire.
+
+    Retries once on an empty/unparseable response before giving up - a
+    longer Level 2 conversation gives the model more history to think
+    through, which made truncation before the text block (stop_reason
+    "max_tokens") more likely on later turns and showed up as the
+    character going generic/unresponsive mid-conversation.
     """
     messages = [{"role": t["role"], "content": t["text"]} for t in turns]
+    system = _system_for(ptype, level)
 
-    response = _get_client().messages.create(
-        model="claude-sonnet-5",
-        max_tokens=1024,
-        system=_system_for(ptype, level),
-        messages=messages,
-    )
-    raw = _extract_text(response, fallback="")
-    try:
-        parsed = json.loads(raw) if raw else {}
-    except (json.JSONDecodeError, TypeError):
-        # Rare: an occasional API hiccup returns a text block that's empty
-        # or not valid JSON despite the fallback above. Never let a parsing
-        # miss break the conversation - degrade to a safe, in-character-ish
-        # line instead of a hard failure.
-        parsed = {}
+    parsed = {}
+    for _attempt in range(2):
+        response = _get_client().messages.create(
+            model="claude-sonnet-5",
+            max_tokens=2048,
+            system=system,
+            messages=messages,
+        )
+        raw = _extract_text(response, fallback="")
+        try:
+            parsed = json.loads(raw) if raw else {}
+        except (json.JSONDecodeError, TypeError):
+            parsed = {}
+        if parsed.get("household_reply"):
+            break
     return {
-        "household_reply": parsed.get("household_reply") or "Maaf kijiye, thoda ruk kar dobara boliye — samajh nahi paayi.",
+        "household_reply": parsed.get("household_reply") or "माफ़ कीजिए, थोड़ा रुक कर दोबारा बोलिए — समझ नहीं पाई।",
         "turn_quality": parsed.get("turn_quality", "weak"),
     }
 
@@ -106,7 +113,7 @@ def practice_score_session(ptype, level, turns):
 
     response = _get_client().messages.create(
         model="claude-sonnet-5",
-        max_tokens=1024,
+        max_tokens=2048,
         system=_system_for(ptype, level),
         messages=messages,
     )
