@@ -19,6 +19,7 @@ and has not been updated yet - it's paused, not broken by accident, until
 its replacement (मेरी बातें) is built in a follow-up pass.
 """
 import datetime
+import json
 import os
 
 import gspread
@@ -29,12 +30,22 @@ _client = None
 _sheet = None
 
 
+def _load_credentials():
+    """GOOGLE_SERVICE_ACCOUNT_JSON is a file path locally (service_account.json
+    on disk, gitignored) but a cloud host like Render has no persistent file
+    to point at - there, the same env var instead holds the key file's raw
+    JSON content, pasted directly into the platform's secret env var UI.
+    Detect which one we got rather than needing two separate env vars."""
+    raw = os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]
+    if os.path.isfile(raw):
+        return Credentials.from_service_account_file(raw, scopes=_SCOPES)
+    return Credentials.from_service_account_info(json.loads(raw), scopes=_SCOPES)
+
+
 def _get_sheet():
     global _client, _sheet
     if _sheet is None:
-        creds = Credentials.from_service_account_file(
-            os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"], scopes=_SCOPES
-        )
+        creds = _load_credentials()
         _client = gspread.authorize(creds)
         _sheet = _client.open_by_key(os.environ["GOOGLE_SHEET_ID"]).sheet1
     return _sheet

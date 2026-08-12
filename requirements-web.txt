@@ -1,0 +1,13 @@
+# Dependencies for running demo/server.py as a deployed web service (Render
+# et al). Deliberately narrower than requirements.txt: leaves out
+# sounddevice/numpy, which scripts/voice_test.py needs for local mic testing
+# but which pull in system audio libraries a cloud build image doesn't have
+# and the web app never imports. Adds gunicorn, the production server the
+# web deploy actually runs (demo/server.py's own app.run() is dev-only).
+flask
+python-dotenv
+requests
+anthropic
+gspread
+google-auth
+gunicorn

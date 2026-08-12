@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: pitch-saathi
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-web.txt
+    startCommand: python -m gunicorn demo.server:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: GOOGLE_SHEET_ID
+        sync: false

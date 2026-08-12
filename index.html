@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>पिच साथी</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brown: #693D30; --brown-dk: #4E2C23; --brown-lt: #8A5748;
+  --tint: #DDD0CC; --beige: #F1E9E5; --cream: #FBF7F5;
+  --fd: 'Noto Sans Devanagari', 'Montserrat', sans-serif;
+  --f: 'Montserrat', 'Noto Sans Devanagari', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--f); color: var(--brown); background: var(--cream);
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.card {
+  max-width: 480px; width: 100%; background: #fff; border-radius: 20px; padding: 40px 32px;
+  box-shadow: 0 24px 60px rgba(35,25,20,.12); text-align: center;
+}
+.emoji { font-size: 2.6rem; margin-bottom: 6px; }
+h1 { font-family: var(--fd); font-size: 1.6rem; font-weight: 600; margin-bottom: 6px; }
+.tag { font-family: var(--fd); font-size: 0.95rem; color: var(--brown-lt); margin-bottom: 22px; }
+p.desc { font-family: var(--fd); font-size: 0.9rem; line-height: 1.65; color: var(--brown); margin-bottom: 26px; }
+.cta {
+  display: inline-block; background: var(--brown); color: #fff; text-decoration: none;
+  font-family: var(--fd); font-size: 1rem; font-weight: 600; padding: 15px 34px;
+  border-radius: 10px; transition: background .15s;
+}
+.cta:hover { background: var(--brown-dk); }
+.note { font-family: var(--fd); font-size: 0.78rem; color: var(--brown-lt); margin-top: 22px; line-height: 1.6; }
+.pill { display: inline-block; background: var(--beige); color: var(--brown); font-family: var(--fd);
+  font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="emoji">🐐</div>
+  <h1>पिच साथी</h1>
+  <div class="tag">आपकी अभ्यास साथी</div>
+  <p class="desc">
+    Pashu Udhyami के लिए एक अभ्यास ऐप — बोलने का अभ्यास (household से बातचीत का रोलप्ले)
+    और सवाल-जवाब (ज्ञान का अभ्यास), असली आवाज़ पहचान और AI के साथ।
+  </p>
+  <a class="cta" href="https://REPLACE-WITH-YOUR-RENDER-URL.onrender.com" id="openAppLink">ऐप खोलें ›</a>
+  <div><span class="pill">पायलट डेमो</span></div>
+  <div class="note">
+    यह पेज सिर्फ़ एक लिंक है — असली ऐप ऊपर दिए बटन पर चलता है, इस वेबसाइट पर नहीं।<br>
+    Source: <a href="https://github.com/sweek26/pitch-saathi" style="color:var(--brown-lt)">github.com/sweek26/pitch-saathi</a>
+  </div>
+</div>
+</body>
+</html>
