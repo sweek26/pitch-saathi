@@ -33,7 +33,9 @@ header {
 header .avatar {
   width: 34px; height: 34px; border-radius: 50%; background: var(--tint);
   display: flex; align-items: center; justify-content: center; flex: none; font-size: 1.1rem;
+  overflow: hidden;
 }
+header .avatar img { width: 100%; height: 100%; object-fit: cover; }
 header .titles { flex: 1; min-width: 0; }
 header .nm { font-family: var(--fd); font-size: 0.95rem; font-weight: 600; }
 header .sub { font-family: var(--fd); font-size: 0.72rem; opacity: .85; }
@@ -87,11 +89,43 @@ header button.back {
 .tile .tic { width: 50px; height: 50px; border-radius: 13px; background: var(--beige); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
 .tile .tname { font-family: var(--fd); font-size: 0.92rem; font-weight: 600; line-height: 1.3; }
 
-.onboarding { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 30px 24px; gap: 14px; }
-.onboarding .emoji { font-size: 2.2rem; text-align: center; margin-bottom: 4px; }
-.onboarding .apptitle { font-family: var(--fd); font-size: 1.5rem; font-weight: 600; text-align: center; }
-.onboarding .apptag { font-family: var(--fd); font-size: 0.85rem; color: var(--brown-lt); text-align: center; margin-bottom: 8px; }
+.onboarding { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 16px 22px; gap: 9px; overflow-y: auto; }
 .fieldlbl { font-family: var(--fd); font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; margin-top: 10px; }
+.fieldcol .fieldlbl { margin-top: 0; }
+
+.onboard-hero-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.onboard-hero { max-width: 185px; max-height: 160px; width: auto; height: auto; display: block; border-radius: 12px; object-fit: cover; }
+.onboard-mini-icons { display: flex; flex-direction: column; gap: 8px; flex: none; }
+.mini-ic {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--beige); color: var(--tan);
+  border: 1.5px dashed var(--tan); display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+}
+
+.onboard-headline { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; color: var(--brown); text-align: center; margin-top: 4px; }
+.onboard-subhead { font-family: var(--fd); font-size: 0.76rem; color: var(--brown-lt); text-align: center; }
+.onboard-divider { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 2px 0; }
+.onboard-divider span { flex: 1; max-width: 64px; height: 1px; background: var(--tint); }
+.onboard-divider i { width: 5px; height: 5px; border-radius: 50%; background: var(--tan); flex: none; }
+
+.fieldrow { display: flex; gap: 12px; align-items: center; }
+.fieldic {
+  width: 44px; height: 44px; border-radius: 12px; flex: none; display: flex;
+  align-items: center; justify-content: center; font-size: 1.2rem;
+}
+.fieldic.purple { background: #E7DEF5; }
+.fieldic.pink { background: #FBDEE0; }
+.fieldcol { flex: 1; min-width: 0; }
+
+.tf-wrap { position: relative; }
+.tf-wrap .tf { padding-right: 46px; }
+.mic-inset {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 34px; border-radius: 50%; border: none; background: transparent;
+  font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.mic-inset.purple { color: #6C4FC4; }
+.mic-inset.pink { color: #D63C6E; }
+.mic-inset.recording { color: var(--danger); animation: pulse 1.2s infinite; }
 .tf {
   width: 100%; font-family: var(--fd); font-size: 1rem; color: var(--brown); background: #fff;
   border: 1.5px solid var(--tint); border-radius: 11px; padding: 13px 14px; outline: none;
@@ -163,26 +197,50 @@ header button.back {
 <div class="phone">
   <header>
     <button class="back" id="backBtn" style="visibility:hidden">‹</button>
-    <div class="avatar" id="headerAvatar">🐐</div>
+    <div class="avatar" id="headerAvatar"><img src="/static/img/kiran-avatar.jpg" alt=""></div>
     <div class="titles">
       <div class="nm" id="headerName">किरन दीदी</div>
-      <div class="sub" id="headerStatus">आपकी अभ्यास साथी</div>
+      <div class="sub" id="headerStatus">आपके अभ्यास का साथी</div>
     </div>
   </header>
 
   <!-- Onboarding -->
   <div class="screen active" id="screen-onboarding">
     <div class="onboarding">
-      <div class="emoji">🐐</div>
-      <div class="apptitle">पिच साथी</div>
-      <div class="apptag">आपकी अभ्यास साथी</div>
-      <div class="dsub" style="text-align:center;margin-bottom:0">शुरू करने के लिए बस दो बातें लिखिए</div>
+      <div class="onboard-hero-row">
+        <img class="onboard-hero" src="/static/img/onboarding-hero.jpg" alt="">
+        <div class="onboard-mini-icons">
+          <div class="mini-ic">💬</div>
+          <div class="mini-ic">📖</div>
+          <div class="mini-ic">✓</div>
+        </div>
+      </div>
 
-      <div class="fieldlbl">👤 पशु सखी का नाम</div>
-      <input type="text" class="tf" id="onboardNameInput" placeholder="अपना नाम लिखिए">
+      <div class="onboard-headline">अभ्यास कीजिए, बेहतर बनिए</div>
+      <div class="onboard-subhead">किरन दीदी के साथ, हर दिन एक कदम आगे</div>
+      <div class="onboard-divider"><span></span><i></i><span></span></div>
 
-      <div class="fieldlbl">📍 ग्राम पंचायत</div>
-      <input type="text" class="tf" id="onboardGpInput" placeholder="अपनी ग्राम पंचायत लिखिए">
+      <div class="fieldrow">
+        <div class="fieldic purple">👤</div>
+        <div class="fieldcol">
+          <div class="fieldlbl">अपना नाम लिखें</div>
+          <div class="tf-wrap">
+            <input type="text" class="tf" id="onboardNameInput" placeholder="अपना नाम बोलें या लिखें">
+            <button class="mic-inset purple" id="onboardNameMicBtn" type="button" title="बोलकर नाम लिखें">🎙️</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="fieldrow">
+        <div class="fieldic pink">📍</div>
+        <div class="fieldcol">
+          <div class="fieldlbl">अपनी ग्राम पंचायत लिखें</div>
+          <div class="tf-wrap">
+            <input type="text" class="tf" id="onboardGpInput" placeholder="ग्राम पंचायत का नाम बोलें या लिखें">
+            <button class="mic-inset pink" id="onboardGpMicBtn" type="button" title="बोलकर ग्राम पंचायत लिखें">🎙️</button>
+          </div>
+        </div>
+      </div>
 
       <button class="cta" id="onboardSubmit">आगे बढ़ें ›</button>
     </div>
@@ -385,9 +443,9 @@ function go(id) {
 document.getElementById("backBtn").onclick = () => go("screen-home");
 
 function setHomeIdentity() {
-  document.getElementById("headerAvatar").textContent = "🐐";
+  document.getElementById("headerAvatar").innerHTML = '<img src="/static/img/kiran-avatar.jpg" alt="">';
   document.getElementById("headerName").textContent = "किरन दीदी";
-  document.getElementById("headerStatus").textContent = "आपकी अभ्यास साथी";
+  document.getElementById("headerStatus").textContent = "आपके अभ्यास का साथी";
 }
 function setRoleplayIdentity() {
   document.getElementById("headerAvatar").textContent = "👩";
@@ -410,6 +468,54 @@ document.getElementById("onboardSubmit").onclick = () => {
 [document.getElementById("onboardNameInput"), document.getElementById("onboardGpInput")].forEach(inp => {
   inp.addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("onboardSubmit").click(); });
 });
+
+function wireInlineMic(micBtnId, inputId) {
+  const micBtn = document.getElementById(micBtnId);
+  const input = document.getElementById(inputId);
+
+  micBtn.onclick = async () => {
+    if (!isRecording) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          micBtn.classList.remove("recording");
+          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+          const form = new FormData();
+          form.append("audio", blob, "clip.webm");
+
+          const originalPlaceholder = input.placeholder;
+          input.placeholder = "सुन रहे हैं...";
+          let data;
+          try {
+            const resp = await fetch("/api/onboard/transcribe", { method: "POST", body: form });
+            data = await resp.json();
+          } catch (err) {
+            input.placeholder = originalPlaceholder;
+            return;
+          }
+          input.placeholder = originalPlaceholder;
+          if (!data.error) input.value = data.text;
+        };
+        mediaRecorder.start();
+        isRecording = true;
+        micBtn.classList.add("recording");
+      } catch (err) {
+        // Mic permission denied - typing still works, so fail quietly.
+      }
+    } else {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      isRecording = false;
+      micBtn.classList.remove("recording");
+    }
+  };
+}
+
+wireInlineMic("onboardNameMicBtn", "onboardNameInput");
+wireInlineMic("onboardGpMicBtn", "onboardGpInput");
 
 document.getElementById("editProfileLink").onclick = () => {
   document.getElementById("onboardNameInput").value = localStorage.getItem("ps_name") || "";
@@ -662,6 +768,7 @@ document.getElementById("otherServiceBtn").onclick = () => go("screen-ptype");
 const QA_SERVICES = {
   curative: { icon: '🩺', name: 'इलाज' },
   vacc: { icon: '💉', name: 'टीकाकरण' },
+  deworm: { icon: '💊', name: 'कीड़े की दवा' },
 };
 
 let qaService = null;

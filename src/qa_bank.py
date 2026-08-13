@@ -2,15 +2,19 @@
 Sawal-Jawab (Knowledge Practice) question bank. Loads real vetted Q&A
 content and serves it per service - no LLM involved anywhere in this
 module. Both the question and the "approved answer" the PU sees are fixed,
-vetted text sourced from Input/Sawal_Jawab_Vetted_QA.md, never
+vetted text originally sourced from Input/Sawal_Jawab_Vetted_QA.md, never
 model-generated, to keep zero hallucination risk on real dosage/treatment
 content.
+
+Lives in system_prompts/, not Input/ - Input/ is gitignored (raw reference
+material only), but this JSON is content the deployed app actually serves,
+so it has to ship with the repo.
 """
 import json
 import os
 import random
 
-_QUESTIONS_PATH = os.path.join(os.path.dirname(__file__), "..", "Input", "sawal_jawab_questions.json")
+_QUESTIONS_PATH = os.path.join(os.path.dirname(__file__), "..", "system_prompts", "sawal_jawab_questions.json")
 _QUESTIONS = None
 
 

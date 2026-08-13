@@ -132,6 +132,30 @@ def index():
     return send_from_directory(app.static_folder, "index.html")
 
 
+@app.route("/api/onboard/transcribe", methods=["POST"])
+def onboard_transcribe():
+    """Lets either onboarding field's mic button capture spoken text (name
+    or gram panchayat) - thin wrapper around the same Sarvam STT call used
+    everywhere else in the app. No separate transliteration step: Sarvam's
+    speech-to-text already outputs Devanagari directly for hi-IN audio,
+    which is the Hindi-script-only text we want here anyway."""
+    audio_file = request.files["audio"]
+    audio_bytes = audio_file.read()
+    mime_type = audio_file.mimetype or "audio/webm"
+
+    try:
+        result = stt.transcribe(audio_bytes, mime_type=mime_type)
+    except AudioTooLongError:
+        return jsonify({"error": "too_long"}), 400
+    except TranscriptionError as e:
+        return jsonify({"error": "transcription_failed", "detail": str(e)}), 400
+
+    if not result["text"].strip():
+        return jsonify({"error": "empty_transcript"}), 400
+
+    return jsonify({"text": result["text"], "confidence": result["confidence"]})
+
+
 @app.route("/api/practice/start", methods=["POST"])
 def practice_start():
     data = request.get_json()
