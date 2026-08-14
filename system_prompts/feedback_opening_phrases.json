@@ -1,0 +1,46 @@
+{
+  "_note": "Opening-phrase bank for Kiran Didi's spoken+text feedback at the end of a Baatcheet ka Abhyas (Practice) session. Selected by performance category, then randomized within that category. See BUILD_PROMPT_feedback_tts.md for the selection logic. Never invented service/program facts here - these are tone-only openers, not evaluative content.",
+
+  "categories": {
+    "excellent_performance": [
+      "कमाल कर दिया दीदी!",
+      "वाह दीदी, बहुत बढ़िया!",
+      "शानदार दीदी!",
+      "बहुत खूब दीदी!",
+      "एकदम बढ़िया दीदी!"
+    ],
+    "good_short_warm": [
+      "शाबाश दीदी!",
+      "बहुत अच्छा दीदी!",
+      "बहुत बढ़िया दीदी!",
+      "बढ़िया बोलीं आप!",
+      "बहुत अच्छे से बोलीं दीदी!",
+      "अच्छा बोलीं दीदी!",
+      "बहुत सुंदर दीदी!",
+      "बढ़िया प्रयास दीदी!",
+      "बहुत अच्छा किया दीदी!",
+      "खूब अच्छा बोलीं दीदी!"
+    ],
+    "good_confidence_building": [
+      "शाबाश दीदी, बहुत अच्छा!",
+      "बहुत बढ़िया दीदी, आप अच्छी जा रही हैं!",
+      "बहुत अच्छा दीदी, आत्मविश्वास अच्छा लगा!",
+      "बढ़िया दीदी, अच्छे से संभाला आपने!",
+      "वाह दीदी, बढ़िया बोलीं!"
+    ],
+    "improving_warmth_rapport": [
+      "बहुत अपनापन था आपकी बात में!",
+      "बहुत सहज तरीके से बोलीं आप!",
+      "बहुत अच्छे से बात रखी दीदी!",
+      "बढ़िया दीदी, आपकी बात में अपनापन था!"
+    ]
+  },
+
+  "performance_category_map": {
+    "excellent": "excellent_performance",
+    "good": ["good_short_warm", "good_confidence_building"],
+    "improving": "improving_warmth_rapport"
+  },
+
+  "_retry_note": "Retry-tier (session ended via the existing rescue flow) does NOT use this bank - see build prompt's 'Retry tier' section for why."
+}

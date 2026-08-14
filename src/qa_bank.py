@@ -17,6 +17,8 @@ import random
 _QUESTIONS_PATH = os.path.join(os.path.dirname(__file__), "..", "system_prompts", "sawal_jawab_questions.json")
 _QUESTIONS = None
 
+MAX_QUESTIONS_PER_SESSION = 5
+
 
 def _load():
     global _QUESTIONS
@@ -35,11 +37,14 @@ def services_available():
 
 def new_question_order(service):
     """A shuffled list of question indexes for this service, for one
-    session - so each session sees every question for that service, once,
-    in a different order."""
+    session - capped at MAX_QUESTIONS_PER_SESSION so a service with more
+    questions than that doesn't overwhelm her in one sitting. Reshuffled
+    fresh every call, so which 5 (and their order) varies attempt to
+    attempt - if the service has MAX_QUESTIONS_PER_SESSION or fewer total,
+    she'll still see all of them, just in a new order each time."""
     indexes = [i for i, q in enumerate(_load()) if q["service"] == service]
     random.shuffle(indexes)
-    return indexes
+    return indexes[:MAX_QUESTIONS_PER_SESSION]
 
 
 def get_question(index):

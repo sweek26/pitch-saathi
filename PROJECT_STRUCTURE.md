@@ -22,6 +22,7 @@ the folder layout below.
 |---|---|
 | `llm.py` | Every call to Claude lives here — the household roleplay, scoring, Ask-mode answers. |
 | `stt.py` | Talks to Sarvam to turn a voice recording into text. |
+| `tts.py` | Talks to Sarvam to turn Kiran Didi's feedback text into a spoken audio clip. |
 | `sheets_logger.py` | Writes one row per session to the shared Google Sheet. |
 | `state_store.py` | Remembers where each conversation currently is (a local JSON file, keyed by session/phone number). |
 | `qa_bank.py` | Loads the सवाल-जवाब question bank and hands out questions. |
@@ -47,6 +48,7 @@ Not code — content. This is deliberately separate from `src/` so the
 | `practice.txt` | Instructions given to Claude for the household roleplay — persona, objections, scoring rules. |
 | `sawal_jawab_questions.json` | The real question/answer pairs सवाल-जवाब quizzes on. |
 | `motivation_nudges.md` | The short encouragement lines shown mid-conversation. |
+| `feedback_opening_phrases.json` | The spoken/text opening lines for end-of-session feedback, picked by performance tier (excellent/good/improving). |
 | `ask_*.txt`, `mera_madad.txt`, `vetted_curative_reference.txt` | Content for features not fully wired in yet. |
 
 ### `Input/` — raw source material, never uploaded to GitHub

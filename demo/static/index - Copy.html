@@ -67,44 +67,7 @@ header button.back {
 .badge { font-family: var(--fd); font-size: 0.65rem; background: var(--tint); color: var(--brown); padding: 2px 8px; border-radius: 20px; margin-left: 6px; }
 .badge.warn { background: #f3ddd8; color: var(--danger); }
 
-.home-picker { padding-bottom: 6px; }
-.section-head { font-family: var(--fd); font-size: 1rem; font-weight: 700; color: var(--brown); margin: 8px 0 7px; }
-
-.fcard { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: 0 0 20px rgba(35,35,35,.07); position: relative; }
-.home-picker .fcard + .fcard { margin-top: 24px; }
-.fcard-num {
-  position: absolute; top: -9px; left: -8px; width: 22px; height: 22px; border-radius: 50%;
-  background: var(--brown); color: #fff; font-family: var(--f); font-size: 0.68rem; font-weight: 700;
-  display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,.18);
-}
-.fcard-body { display: flex; gap: 10px; align-items: center; cursor: pointer; padding-bottom: 9px; margin-bottom: 9px; border-bottom: 1px solid var(--beige); }
-.fcard-ic { width: 42px; height: 42px; border-radius: 11px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
-.fcard-ic.purple { background: #E7DEF5; }
-.fcard-ic.pink { background: #FBDEE0; }
-.fcard-txt { flex: 1; min-width: 0; }
-.fcard-t { font-family: var(--fd); font-size: 0.94rem; font-weight: 700; color: var(--brown); line-height: 1.3; }
-.fcard-d { font-family: var(--fd); font-size: 0.74rem; color: var(--brown-lt); margin-top: 2px; line-height: 1.35; }
-
-.chiprow { display: flex; gap: 6px; }
-.chip {
-  flex: 1; min-width: 0; background: var(--cream); border: 1px solid var(--tint); border-radius: 10px;
-  padding: 7px 3px; text-align: center; font-family: var(--fd); font-size: 0.66rem; font-weight: 600;
-  color: var(--brown); cursor: pointer; line-height: 1.25;
-}
-.chip:hover { border-color: var(--tan); background: var(--beige); }
-.chip span { display: block; font-size: 0.95rem; margin-bottom: 2px; }
-
-@media (max-width: 340px) {
-  .home-picker { padding-bottom: 10px; }
-  .bubble.coach { padding: 9px 11px; margin-bottom: 6px; }
-  .section-head { margin: 6px 0 8px; }
-  .fcard { padding: 10px; margin-bottom: 7px; }
-  .fcard-body { padding-bottom: 7px; margin-bottom: 7px; }
-}
-
 #introLevelChoice { display: flex; flex-direction: column; }
-.levelchoice-group { display: flex; flex-direction: column; gap: 8px; border: 1.5px solid var(--tint); border-radius: 14px; padding: 8px; }
-.levelchoice-group .levelcard { border: none; box-shadow: none; margin-bottom: 0; }
 .levelcard.selected { border-color: var(--brown); background: var(--beige); }
 
 .qprogress { font-family: var(--fd); font-size: 0.78rem; color: var(--brown-lt); margin-bottom: 8px; }
@@ -126,22 +89,25 @@ header button.back {
 .tile .tic { width: 50px; height: 50px; border-radius: 13px; background: var(--beige); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
 .tile .tname { font-family: var(--fd); font-size: 0.92rem; font-weight: 600; line-height: 1.3; }
 
-.onboarding { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 15px 30px; gap: 8px; overflow-y: auto; }
-.fieldlbl { font-family: var(--fd); font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; margin-top: 20px; }
+.onboarding { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 16px 22px; gap: 9px; overflow-y: auto; }
+.fieldlbl { font-family: var(--fd); font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; margin-top: 10px; }
 .fieldcol .fieldlbl { margin-top: 0; }
 
-.onboard-hero { max-width: 200px; max-height: 200px; width: auto; height: auto; display: block; border-radius: 12px; object-fit: cover; align-self: center; margin: 0 auto; transform: translateY(-8px) scale(1.12); transform-origin: center top; }
-@media (max-height: 630px) {
-  .onboard-hero { transform: scale(1.12); transform-origin: center top; }
+.onboard-hero-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.onboard-hero { max-width: 185px; max-height: 160px; width: auto; height: auto; display: block; border-radius: 12px; object-fit: cover; }
+.onboard-mini-icons { display: flex; flex-direction: column; gap: 8px; flex: none; }
+.mini-ic {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--beige); color: var(--tan);
+  border: 1.5px dashed var(--tan); display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
 }
 
-.onboard-headline { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; color: var(--brown); text-align: center; margin-top: 20px; }
-.onboard-divider { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 6px 0 6px; }
+.onboard-headline { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; color: var(--brown); text-align: center; margin-top: 4px; }
+.onboard-subhead { font-family: var(--fd); font-size: 0.76rem; color: var(--brown-lt); text-align: center; }
+.onboard-divider { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 2px 0; }
 .onboard-divider span { flex: 1; max-width: 64px; height: 1px; background: var(--tint); }
 .onboard-divider i { width: 5px; height: 5px; border-radius: 50%; background: var(--tan); flex: none; }
 
 .fieldrow { display: flex; gap: 12px; align-items: center; }
-.fieldrow + .fieldrow { margin-top: 7px; }
 .fieldic {
   width: 44px; height: 44px; border-radius: 12px; flex: none; display: flex;
   align-items: center; justify-content: center; font-size: 1.2rem;
@@ -156,8 +122,9 @@ header button.back {
   position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
   width: 34px; height: 34px; border-radius: 50%; border: none; background: transparent;
   font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  color: var(--brown);
 }
+.mic-inset.purple { color: #6C4FC4; }
+.mic-inset.pink { color: #D63C6E; }
 .mic-inset.recording { color: var(--danger); animation: pulse 1.2s infinite; }
 .tf {
   width: 100%; font-family: var(--fd); font-size: 1rem; color: var(--brown); background: #fff;
@@ -193,13 +160,6 @@ header button.back {
   padding: 7px 16px; font-family: var(--fd); font-size: 0.8rem; cursor: pointer; margin-top: 8px;
 }
 
-.fb-play-btn {
-  background: var(--beige); border: 1.5px solid var(--brown); color: var(--brown); border-radius: 18px;
-  padding: 7px 16px; font-family: var(--fd); font-size: 0.8rem; font-weight: 600; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 6px; margin-bottom: 12px;
-}
-.fb-play-btn:hover { background: var(--tint); }
-
 .safe {
   background: var(--beige); border-radius: 10px; padding: 11px 13px; font-family: var(--fd);
   font-size: 0.82rem; line-height: 1.55; display: flex; gap: 9px; align-items: flex-start; margin-bottom: 14px;
@@ -217,11 +177,15 @@ header button.back {
 
 .cta { width: 100%; background: var(--brown); color: #fff; border: none; padding: 14px; font-family: var(--fd); font-size: 0.95rem; font-weight: 600; cursor: pointer; border-radius: 10px; margin-top: 8px; }
 .cta:hover { background: var(--brown-dk); }
-#onboardSubmit { margin-top: 10px; }
 .cta.ghost { background: transparent; color: var(--brown); border: 1.5px solid var(--brown); }
 .cta.ghost:hover { background: var(--beige); }
 .linkbtn { display: block; width: 100%; text-align: center; background: none; border: none; color: var(--brown-lt); font-family: var(--fd); font-size: 0.8rem; text-decoration: underline; cursor: pointer; margin-top: 10px; padding: 6px; }
 
+.trainer-toggle { margin-top: 16px; font-size: 0.78rem; color: var(--brown-lt); cursor: pointer; text-decoration: underline; background: none; border: none; padding: 0; font-family: var(--fd); }
+.trainer-view { display: none; margin-top: 10px; background: #fff; border: 1px dashed var(--tint); border-radius: 8px; padding: 11px; font-size: 0.82rem; font-family: var(--fd); }
+.trainer-view.open { display: block; }
+.trainer-view .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--beige); }
+.trainer-view .warn { color: var(--brown-lt); font-size: 0.75rem; margin-top: 8px; }
 .log-row { margin-top: 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; font-family: var(--fd); }
 
 .status-line { text-align: center; color: var(--brown-lt); font-family: var(--fd); font-size: 0.8rem; padding: 8px; }
@@ -243,7 +207,14 @@ header button.back {
   <!-- Onboarding -->
   <div class="screen active" id="screen-onboarding">
     <div class="onboarding">
-      <img class="onboard-hero" src="/static/img/onboarding-hero.jpg" alt="">
+      <div class="onboard-hero-row">
+        <img class="onboard-hero" src="/static/img/onboarding-hero.jpg" alt="">
+        <div class="onboard-mini-icons">
+          <div class="mini-ic">💬</div>
+          <div class="mini-ic">📖</div>
+          <div class="mini-ic">✓</div>
+        </div>
+      </div>
 
       <div class="onboard-headline">अभ्यास कीजिए, बेहतर बनिए</div>
       <div class="onboard-divider"><span></span><i></i><span></span></div>
@@ -254,7 +225,7 @@ header button.back {
           <div class="fieldlbl">अपना नाम लिखें</div>
           <div class="tf-wrap">
             <input type="text" class="tf" id="onboardNameInput" placeholder="अपना नाम बोलें या लिखें">
-            <button class="mic-inset" id="onboardNameMicBtn" type="button" title="बोलकर नाम लिखें">🎙️</button>
+            <button class="mic-inset purple" id="onboardNameMicBtn" type="button" title="बोलकर नाम लिखें">🎙️</button>
           </div>
         </div>
       </div>
@@ -265,7 +236,7 @@ header button.back {
           <div class="fieldlbl">अपनी ग्राम पंचायत लिखें</div>
           <div class="tf-wrap">
             <input type="text" class="tf" id="onboardGpInput" placeholder="ग्राम पंचायत का नाम बोलें या लिखें">
-            <button class="mic-inset" id="onboardGpMicBtn" type="button" title="बोलकर ग्राम पंचायत लिखें">🎙️</button>
+            <button class="mic-inset pink" id="onboardGpMicBtn" type="button" title="बोलकर ग्राम पंचायत लिखें">🎙️</button>
           </div>
         </div>
       </div>
@@ -276,43 +247,20 @@ header button.back {
 
   <!-- Home -->
   <div class="screen" id="screen-home">
-    <div class="picker home-picker">
+    <div class="picker">
       <div class="bubble coach" id="homeGreeting"></div>
-      <div class="section-head">आज क्या करना चाहेंगी?</div>
-
-      <div class="fcard">
-        <div class="fcard-num">1</div>
-        <div class="fcard-body" onclick="go('screen-ptype')">
-          <div class="fcard-ic purple">🎙️</div>
-          <div class="fcard-txt">
-            <div class="fcard-t">बातचीत का अभ्यास</div>
-            <div class="fcard-d">पूरी बातचीत का अभ्यास कीजिए</div>
-          </div>
-        </div>
-        <div class="chiprow">
-          <div class="chip" onclick="selectPtype('first')"><span>👋</span>पहली मुलाकात</div>
-          <div class="chip" onclick="selectPtype('deworm')"><span>💊</span>कृमिनाशक</div>
-          <div class="chip" onclick="selectPtype('vacc')"><span>💉</span>टीकाकरण</div>
-        </div>
+      <div class="dsub" style="margin-top:14px;margin-bottom:10px">आज क्या करना चाहेंगी?</div>
+      <div class="card" onclick="go('screen-ptype')">
+        <div class="ic">🎙️</div>
+        <div><div class="t">बातचीत का अभ्यास</div><div class="d">बकरीपालक से बात कीजिए, जैसे आप उनके घर गई हैं</div></div>
+        <div class="ch">›</div>
       </div>
-
-      <div class="fcard">
-        <div class="fcard-num">2</div>
-        <div class="fcard-body" onclick="openQaServices()">
-          <div class="fcard-ic pink">❓</div>
-          <div class="fcard-txt">
-            <div class="fcard-t">सवाल-जवाब</div>
-            <div class="fcard-d">सोचकर बोलकर जवाब दीजिए</div>
-          </div>
-        </div>
-        <div class="chiprow">
-          <div class="chip" onclick="startQa('curative')"><span>🩺</span>उपचार</div>
-          <div class="chip" onclick="startQa('deworm')"><span>💊</span>कृमिनाशक</div>
-          <div class="chip" onclick="startQa('vacc')"><span>💉</span>टीकाकरण</div>
-        </div>
+      <div class="card" onclick="openQaServices()">
+        <div class="ic">❓</div>
+        <div><div class="t">सवाल-जवाब</div><div class="d">सवालों के जवाब बोलकर अभ्यास कीजिए</div></div>
+        <div class="ch">›</div>
       </div>
-
-      <button class="linkbtn" id="editProfileLink">✏️ अपना नाम या ग्राम पंचायत बदलें</button>
+      <button class="linkbtn" id="editProfileLink">‹ अपना नाम या ग्राम पंचायत बदलें</button>
     </div>
   </div>
 
@@ -359,19 +307,16 @@ header button.back {
       <div class="bubble coach" id="introPrep"></div>
       <div class="safe"><span class="sic">🛡️</span><div><b>यहाँ ग़लती हो जाए तो कोई बात नहीं।</b> यह सिर्फ़ अभ्यास है — कोई नहीं सुन रहा, और आप जब चाहें रोक सकती हैं।</div></div>
       <div id="introLevelChoice">
-        <div class="dsub" style="margin:2px 0 8px">अभ्यास का तरीका चुनिए 👇</div>
-        <div class="levelchoice-group">
-          <div class="card levelcard" id="introLevel1Card" onclick="chooseLevel(1)">
-            <div class="ic">💬</div>
-            <div><div class="t" style="font-size:0.92rem">पूरी बात कहिए</div><div class="d">कोई टोकेगा नहीं — जैसे आप घर पर बोलतीं, वैसे बोलिए</div></div>
-          </div>
-          <div class="card levelcard" id="introLevel2Card" onclick="chooseLevel(2)" style="display:none">
-            <div class="ic">🎙️</div>
-            <div><div class="t" style="font-size:0.92rem">बीच में सवाल भी आएँगे</div><div class="d">बकरीपालक जवाब देंगी, आप बात आगे बढ़ाइए</div></div>
-          </div>
+        <div class="card levelcard" id="introLevel1Card" onclick="chooseLevel(1)">
+          <div class="ic">💬</div>
+          <div><div class="t" style="font-size:0.92rem">पूरी बात कहिए</div><div class="d">कोई टोकेगा नहीं — जैसे आप घर पर बोलतीं, वैसे बोलिए</div></div>
+        </div>
+        <div class="card levelcard" id="introLevel2Card" onclick="chooseLevel(2)" style="display:none">
+          <div class="ic">🎙️</div>
+          <div><div class="t" style="font-size:0.92rem">अब बीच में सवाल आएँगे</div><div class="d">बकरीपालक जवाब देंगी, आप बात आगे बढ़ाइए</div></div>
         </div>
       </div>
-      <button class="cta" id="startConvoBtn">👉 🎙️ अभ्यास शुरू करें</button>
+      <button class="cta" id="startConvoBtn">🎙️ अभ्यास शुरू करें</button>
     </div>
   </div>
 
@@ -399,15 +344,19 @@ header button.back {
     <div class="results">
       <div class="dtitle">आपकी बातचीत के बारे में</div>
       <div class="dsub">यह सिर्फ़ आपके लिए है — कोई और नहीं देखता</div>
-      <button class="fb-play-btn" id="fbPlayBtn" type="button" title="सुनें" style="display:none">🔊 सुनकर देखिए</button>
-      <audio id="fbAudio" style="display:none"></audio>
       <div class="fbblock">
         <div class="fbpart p1"><div class="h">✓ जो अच्छा हुआ</div><div class="b" id="fbGood"></div></div>
         <div class="fbpart p2"><div class="h">↻ अगली बार</div><div class="b" id="fbNext"></div></div>
         <div class="fbpart p3"><div class="h">💬 ये शब्द काम आएँगे</div><div class="quoteline" id="fbPhrase"></div></div>
       </div>
 
-      <div class="log-row" id="logStatus" style="display:none">✓ यह बातचीत अपने आप Sheet में सेव हो गई</div>
+      <button class="trainer-toggle" id="trainerToggle">Trainer / L&amp;D view दिखाइए ▾</button>
+      <div class="trainer-view" id="trainerView">
+        <div class="row"><span>Topic</span><strong id="tTopic"></strong></div>
+        <div class="row"><span>Gap category</span><strong id="tGap"></strong></div>
+        <div class="warn">PU इसको कभी नहीं देखती — सिर्फ़ ऊपर वाला feedback देखती है।</div>
+        <div class="log-row" id="logStatus" style="display:none">✓ यह बातचीत अपने आप Sheet में सेव हो गई</div>
+      </div>
 
       <button class="cta" id="retryBtn">↻ फिर से अभ्यास कीजिए</button>
       <button class="linkbtn" id="otherServiceBtn">दूसरी सेवा पर अभ्यास कीजिए</button>
@@ -482,10 +431,6 @@ const screens = ["screen-onboarding", "screen-home", "screen-ptype", "screen-ser
   "screen-intro", "screen-convo", "screen-rescue", "screen-feedback",
   "screen-qa-service", "screen-qa-question", "screen-qa-result", "screen-qa-done"];
 function go(id) {
-  if (id !== "screen-feedback") {
-    const fbAudio = document.getElementById("fbAudio");
-    if (fbAudio && !fbAudio.paused) fbAudio.pause();
-  }
   screens.forEach(s => document.getElementById(s).classList.toggle("active", s === id));
   document.getElementById("backBtn").style.visibility =
     (id === "screen-home" || id === "screen-onboarding") ? "hidden" : "visible";
@@ -522,22 +467,6 @@ document.getElementById("onboardSubmit").onclick = () => {
 [document.getElementById("onboardNameInput"), document.getElementById("onboardGpInput")].forEach(inp => {
   inp.addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("onboardSubmit").click(); });
 });
-
-// Some phone Hindi keyboards auto-insert "।" while typing (e.g. mapping "."
-// or a double-space to danda) - it never belongs in a name/GP field, so
-// strip it live and keep the cursor position correct.
-function stripStrayDanda(inp) {
-  inp.addEventListener("input", () => {
-    if (!inp.value.includes("।")) return;
-    const pos = inp.selectionStart;
-    const removedBeforeCursor = (inp.value.slice(0, pos).match(/।/g) || []).length;
-    inp.value = inp.value.replace(/।/g, "");
-    const newPos = Math.max(0, pos - removedBeforeCursor);
-    inp.setSelectionRange(newPos, newPos);
-  });
-}
-stripStrayDanda(document.getElementById("onboardNameInput"));
-stripStrayDanda(document.getElementById("onboardGpInput"));
 
 function wireInlineMic(micBtnId, inputId) {
   const micBtn = document.getElementById(micBtnId);
@@ -609,7 +538,7 @@ function renderHome() {
   const name = localStorage.getItem("ps_name") || "";
   const first = getSessionsCount() === 0;
   document.getElementById("homeGreeting").textContent = first
-    ? `नमस्ते ${name} जी! यहाँ बातचीत और सवाल-जवाब, दोनों का अभ्यास कर सकती हैं।`
+    ? `नमस्ते ${name} जी! मैं किरन दीदी हूँ। जब भी आपका मन हो, हम यहाँ अकेले में बातचीत का अभ्यास कर सकते हैं।`
     : `नमस्ते ${name} जी! आज फिर थोड़ा अभ्यास कर लें?`;
 }
 
@@ -775,10 +704,7 @@ async function finishAndScore() {
     const resp = await fetch("/api/practice/end", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        session_id: sessionId,
-        last_opening: localStorage.getItem("last_feedback_opening") || "",
-      }),
+      body: JSON.stringify({ session_id: sessionId }),
     });
     data = await resp.json();
   } catch (err) {
@@ -804,12 +730,7 @@ async function finishAndScore() {
     await fetch("/api/practice/log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        session_id: sessionId,
-        ps_name: localStorage.getItem("ps_name") || "",
-        ps_gp: localStorage.getItem("ps_gp") || "",
-        ...data,
-      }),
+      body: JSON.stringify({ session_id: sessionId, ...data }),
     });
     document.getElementById("logStatus").style.display = "block";
   } catch (err) {
@@ -822,42 +743,22 @@ function showFeedback(data) {
   document.getElementById("fbGood").textContent = data.good;
   document.getElementById("fbNext").textContent = data.next_time;
   document.getElementById("fbPhrase").textContent = "“" + data.exact_phrase + "”";
+  document.getElementById("tTopic").textContent = data.topic;
+  document.getElementById("tGap").textContent = data.gap_category;
+  document.getElementById("trainerView").classList.remove("open");
+  document.getElementById("trainerToggle").textContent = "Trainer / L&D view दिखाइए ▾";
   document.getElementById("logStatus").style.display = "none";
-
-  const playBtn = document.getElementById("fbPlayBtn");
-  const audioEl = document.getElementById("fbAudio");
-
-  function setPlayBtnLabel(playing) {
-    playBtn.textContent = playing ? "⏸ रोकिए" : "🔊 सुनकर देखिए";
-  }
-
-  if (data.audio_base64) {
-    audioEl.src = "data:audio/wav;base64," + data.audio_base64;
-    playBtn.style.display = "inline-flex";
-    setPlayBtnLabel(false);
-
-    playBtn.onclick = () => {
-      if (audioEl.paused) {
-        audioEl.play();
-      } else {
-        audioEl.pause();
-      }
-    };
-    audioEl.onplay = () => setPlayBtnLabel(true);
-    audioEl.onpause = () => setPlayBtnLabel(false);
-    audioEl.onended = () => setPlayBtnLabel(false);
-
-    localStorage.setItem("last_feedback_opening", data.opening_line || "");
-    // Autoplay once - this fires right after a user click (the stop
-    // button), which browsers treat as a valid gesture for autoplay.
-    audioEl.play().catch(() => {});
-  } else {
-    playBtn.style.display = "none"; // TTS failed server-side - text-only, no error shown to PU
-  }
 
   setHomeIdentity();
   go("screen-feedback");
 }
+
+document.getElementById("trainerToggle").onclick = () => {
+  const view = document.getElementById("trainerView");
+  view.classList.toggle("open");
+  document.getElementById("trainerToggle").textContent =
+    view.classList.contains("open") ? "Trainer / L&D view छुपाइए ▴" : "Trainer / L&D view दिखाइए ▾";
+};
 
 document.getElementById("retryBtn").onclick = () => showIntro();
 document.getElementById("otherServiceBtn").onclick = () => go("screen-ptype");

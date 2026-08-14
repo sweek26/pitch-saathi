@@ -18,6 +18,8 @@ paused, not accidentally broken, pending its replacement (मेरी बात
 follow-up pass. llm.mera_madad_reply itself is untouched and ready to reuse
 once that's rebuilt.
 """
+import base64
+import json
 import os
 import random
 import sys
@@ -31,8 +33,9 @@ load_dotenv()
 from flask import Flask, jsonify, request, send_from_directory  # noqa: E402
 from werkzeug.exceptions import HTTPException  # noqa: E402
 
-from src import llm, qa_bank, sheets_logger, state_store, stt  # noqa: E402
+from src import llm, qa_bank, sheets_logger, state_store, stt, tts  # noqa: E402
 from src.stt import AudioTooLongError, TranscriptionError  # noqa: E402
+from src.tts import SynthesisError  # noqa: E402
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), "static"))
 
@@ -78,6 +81,49 @@ def _load_nudges():
                     lines.append(line[2:].strip())
         _NUDGES = lines
     return _NUDGES
+
+
+_PHRASES_PATH = os.path.join(os.path.dirname(__file__), "..", "system_prompts", "feedback_opening_phrases.json")
+_PHRASE_BANK = None
+
+
+def _load_phrase_bank():
+    global _PHRASE_BANK
+    if _PHRASE_BANK is None:
+        with open(_PHRASES_PATH, "r", encoding="utf-8") as f:
+            _PHRASE_BANK = json.load(f)
+    return _PHRASE_BANK
+
+
+def _performance_tier(level, quality_counts):
+    """Derives excellent/good/improving for the spoken-feedback opening line
+    from turn_quality counts - there's no such tier anywhere else in the
+    app, so this is the one place it's decided. Level 1 is always a single
+    warm reply that never escalates (see practice.txt) so it's never told
+    it's "improving"; Level 2 uses the strong-turn ratio instead."""
+    strong = quality_counts.get("strong", 0)
+    total = sum(quality_counts.values())
+
+    if level == 1:
+        return "excellent" if strong >= 1 else "good"
+
+    ratio = (strong / total) if total else 0.0
+    if ratio >= 0.66:
+        return "excellent"
+    if ratio >= 0.4:
+        return "good"
+    return "improving"
+
+
+def _pick_opening(tier, last_opening):
+    """Random opening phrase for this tier, excluding whichever phrase was
+    spoken last time on this device so two sessions in a row don't repeat."""
+    bank = _load_phrase_bank()
+    mapped = bank["performance_category_map"][tier]
+    category_key = random.choice(mapped) if isinstance(mapped, list) else mapped
+    pool = bank["categories"][category_key]
+    candidates = [p for p in pool if p != last_opening] or pool
+    return random.choice(candidates)
 
 
 def _next_concept_hint(ptype, covered):
@@ -218,6 +264,12 @@ def practice_turn():
     # verified in testing that asking the model to self-manage either one
     # (exact counting, or pre-emptively softening its own tone) is
     # unreliable. This is the only place either threshold is decided.
+    # Tracked at every level (including Level 1's single turn) so the
+    # spoken-feedback opening line has data to pick a tier from even when
+    # weak_run/rescue - Level 2 only - never applies.
+    counts = session.setdefault("quality_counts", {"strong": 0, "weak": 0, "short": 0})
+    counts[reply["turn_quality"]] = counts.get(reply["turn_quality"], 0) + 1
+
     if level == 2:
         if reply["turn_quality"] == "strong":
             session["weak_run"] = 0
@@ -231,6 +283,7 @@ def practice_turn():
             phone_number=session_id, module="practice", ptype=ptype, level=level,
             transcript=result["text"], transcript_confidence=result["confidence"],
             reply_text="[rescued]", ended_via="rescue",
+            pu_name=name, gram_panchayat="",  # GP isn't sent to this endpoint today - leave blank rather than guess
         )
         state_store.clear_session(session_id)
         return jsonify({
@@ -284,6 +337,22 @@ def practice_end():
 
     feedback["ptype"] = session["ptype"]
     feedback["level"] = session["level"]
+
+    tier = _performance_tier(session["level"], session.get("quality_counts", {}))
+    opening_line = _pick_opening(tier, data.get("last_opening", ""))
+    spoken_text = f"{opening_line} {feedback['good']} {feedback['next_time']} {feedback['exact_phrase']}"
+
+    feedback["opening_line"] = opening_line
+    feedback["tier"] = tier
+    try:
+        audio_bytes = tts.synthesize(spoken_text)
+        feedback["audio_base64"] = base64.b64encode(audio_bytes).decode()
+        feedback["audio_ok"] = True
+    except SynthesisError:
+        app.logger.exception("TTS failed for session %s", session_id)
+        feedback["audio_base64"] = None  # frontend falls back to text-only, no crash
+        feedback["audio_ok"] = False
+
     state_store.clear_session(session_id)
     return jsonify(feedback)
 
@@ -302,12 +371,17 @@ def practice_log():
         transcript="[web demo session]",
         transcript_confidence=None,
         reply_text=data["good"],
+        pu_name=data.get("ps_name", ""),
+        gram_panchayat=data.get("ps_gp", ""),
         feedback={
             "topic": data["topic"],
             "gap_category": data["gap_category"],
             "good": data["good"],
             "next_time": data["next_time"],
             "exact_phrase": data["exact_phrase"],
+            "opening_line": data.get("opening_line", ""),
+            "tier": data.get("tier", ""),
+            "audio_ok": data.get("audio_ok", ""),
         },
         ended_via="scored",
     )
