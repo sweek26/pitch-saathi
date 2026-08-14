@@ -166,6 +166,11 @@ header button.back {
 .tf:focus { border-color: var(--brown); }
 .tf::placeholder { color: #bba79f; }
 
+.mic-error {
+  font-family: var(--fd); font-size: 0.78rem; line-height: 1.45; color: var(--danger);
+  margin-top: 6px; padding-left: 2px;
+}
+
 .bubble {
   background: #fff; border-radius: 12px 12px 12px 3px; padding: 11px 13px; margin-bottom: 10px;
   font-family: var(--fd); font-size: 0.9rem; line-height: 1.55; box-shadow: 0 0 14px rgba(35,35,35,.06);
@@ -256,6 +261,7 @@ header button.back {
             <input type="text" class="tf" id="onboardNameInput" placeholder="अपना नाम बोलें या लिखें">
             <button class="mic-inset" id="onboardNameMicBtn" type="button" title="बोलकर नाम लिखें">🎙️</button>
           </div>
+          <div class="mic-error" id="onboardNameMicError" style="display:none"></div>
         </div>
       </div>
 
@@ -267,6 +273,7 @@ header button.back {
             <input type="text" class="tf" id="onboardGpInput" placeholder="ग्राम पंचायत का नाम बोलें या लिखें">
             <button class="mic-inset" id="onboardGpMicBtn" type="button" title="बोलकर ग्राम पंचायत लिखें">🎙️</button>
           </div>
+          <div class="mic-error" id="onboardGpMicError" style="display:none"></div>
         </div>
       </div>
 
@@ -539,14 +546,41 @@ function stripStrayDanda(inp) {
 stripStrayDanda(document.getElementById("onboardNameInput"));
 stripStrayDanda(document.getElementById("onboardGpInput"));
 
-function wireInlineMic(micBtnId, inputId) {
+// FIX B — Sarvam STT sometimes appends a trailing sentence-ending mark
+// (danda "।", ".", ",", "?", "!") to a single spoken word/phrase like a
+// name or place name, where it never belongs. Strip ONLY a trailing run of
+// those marks (plus surrounding whitespace), never characters inside the
+// word. This is applied only to onboarding voice results below - it does
+// NOT touch stripStrayDanda() (manual typing) or any other screen.
+function cleanupSpokenText(text) {
+  if (!text) return text;
+  return text.trim().replace(/[।.,?!]+\s*$/, "").trim();
+}
+
+function wireInlineMic(micBtnId, inputId, errorId, permissionDeniedMessage) {
   const micBtn = document.getElementById(micBtnId);
   const input = document.getElementById(inputId);
+  const errorEl = document.getElementById(errorId);
+
+  function clearMicError() {
+    errorEl.style.display = "none";
+    errorEl.innerHTML = "";
+  }
+  function showMicError(message) {
+    // message may contain "\n" for a two-line Hindi message - render as <br>.
+    errorEl.innerHTML = message.replace(/\n/g, "<br>");
+    errorEl.style.display = "block";
+  }
+
+  // FIX A — if the user starts typing manually after a mic error, the
+  // error is no longer relevant; clear it so it doesn't linger.
+  input.addEventListener("input", clearMicError);
 
   micBtn.onclick = async () => {
     if (!isRecording) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        clearMicError(); // permission just succeeded - clear any earlier error
         audioChunks = [];
         mediaRecorder = new MediaRecorder(stream);
         mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
@@ -567,13 +601,18 @@ function wireInlineMic(micBtnId, inputId) {
             return;
           }
           input.placeholder = originalPlaceholder;
-          if (!data.error) input.value = data.text;
+          if (!data.error) {
+            input.value = cleanupSpokenText(data.text); // FIX B applied here
+            clearMicError();
+          }
         };
         mediaRecorder.start();
         isRecording = true;
         micBtn.classList.add("recording");
       } catch (err) {
-        // Mic permission denied - typing still works, so fail quietly.
+        // FIX A — mic permission denied/unavailable: show a clear Hindi
+        // message instead of failing silently. Typing still works.
+        showMicError(permissionDeniedMessage);
       }
     } else {
       mediaRecorder.stop();
@@ -584,8 +623,14 @@ function wireInlineMic(micBtnId, inputId) {
   };
 }
 
-wireInlineMic("onboardNameMicBtn", "onboardNameInput");
-wireInlineMic("onboardGpMicBtn", "onboardGpInput");
+wireInlineMic(
+  "onboardNameMicBtn", "onboardNameInput", "onboardNameMicError",
+  "माइक की अनुमति नहीं मिली।\nकृपया माइक की अनुमति दें या अपना नाम टाइप करें।"
+);
+wireInlineMic(
+  "onboardGpMicBtn", "onboardGpInput", "onboardGpMicError",
+  "माइक की अनुमति नहीं मिली।\nकृपया माइक की अनुमति दें या अपनी ग्राम पंचायत का नाम टाइप करें।"
+);
 
 document.getElementById("editProfileLink").onclick = () => {
   document.getElementById("onboardNameInput").value = localStorage.getItem("ps_name") || "";

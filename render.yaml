@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements-web.txt
-    startCommand: python -m gunicorn demo.server:app --bind 0.0.0.0:$PORT
+    startCommand: python -m gunicorn demo.server:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60
     envVars:
       - key: ANTHROPIC_API_KEY
         sync: false
