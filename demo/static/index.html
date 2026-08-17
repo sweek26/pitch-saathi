@@ -102,10 +102,27 @@ header button.back {
   .fcard-body { padding-bottom: 7px; margin-bottom: 7px; }
 }
 
-#introLevelChoice { display: flex; flex-direction: column; }
-.levelchoice-group { display: flex; flex-direction: column; gap: 8px; border: 1.5px solid var(--tint); border-radius: 14px; padding: 8px; }
-.levelchoice-group .levelcard { border: none; box-shadow: none; margin-bottom: 0; }
-.levelcard.selected { border-color: var(--brown); background: var(--beige); }
+/* height:0 - this wrap holds the tap-hint via absolute positioning so the
+   hint (even when hidden) never pushes the start button down or adds gap. */
+.tap-hint-wrap { position: relative; height: 0; }
+.tap-hint {
+  position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+  background: var(--brown-dk); color: #fff; font-family: var(--fd); font-size: 8px;
+  font-weight: 500; padding: 7px 14px; border-radius: 20px; white-space: nowrap;
+  display: flex; align-items: center; gap: 6px; box-shadow: 0 6px 16px rgba(35,25,20,.25);
+  animation: hintPulse 2.2s ease-in-out infinite; transition: opacity .25s ease;
+}
+.tap-hint::after {
+  content: ""; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+  border: 7px solid transparent; border-top-color: var(--brown-dk);
+}
+.tap-hint.hidden { opacity: 0; pointer-events: none; }
+@keyframes hintPulse { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-3px); } }
+
+/* Intro screen only - more separation from the prep line above, since that
+   gap comes from .bubble (shared with the chat screen) which we don't
+   want to change everywhere else. */
+#introPrep { margin-bottom: 20px; }
 
 .qprogress { font-family: var(--fd); font-size: 0.78rem; color: var(--brown-lt); margin-bottom: 8px; }
 .qablock { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 0 20px rgba(35,35,35,.07); margin-bottom: 12px; }
@@ -170,6 +187,13 @@ header button.back {
   font-family: var(--fd); font-size: 0.78rem; line-height: 1.45; color: var(--danger);
   margin-top: 6px; padding-left: 2px;
 }
+
+.qa-error {
+  background: #f8dedb; color: var(--danger); border-radius: 10px; padding: 10px 13px;
+  font-family: var(--fd); font-size: 0.85rem; line-height: 1.5; margin-top: 10px;
+}
+
+.mic:disabled, .mic-inset:disabled { opacity: .5; cursor: not-allowed; animation: none; }
 
 .bubble {
   background: #fff; border-radius: 12px 12px 12px 3px; padding: 11px 13px; margin-bottom: 10px;
@@ -364,21 +388,9 @@ header button.back {
         <div class="dtitle" style="margin:0" id="introTitle"></div>
       </div>
       <div class="bubble coach" id="introPrep"></div>
-      <div class="safe"><span class="sic">🛡️</span><div><b>यहाँ ग़लती हो जाए तो कोई बात नहीं।</b> यह सिर्फ़ अभ्यास है — कोई नहीं सुन रहा, और आप जब चाहें रोक सकती हैं।</div></div>
-      <div id="introLevelChoice">
-        <div class="dsub" style="margin:2px 0 8px">अभ्यास का तरीका चुनिए 👇</div>
-        <div class="levelchoice-group">
-          <div class="card levelcard" id="introLevel1Card" onclick="chooseLevel(1)">
-            <div class="ic">💬</div>
-            <div><div class="t" style="font-size:0.92rem">पूरी बात कहिए</div><div class="d">कोई टोकेगा नहीं — जैसे आप घर पर बोलतीं, वैसे बोलिए</div></div>
-          </div>
-          <div class="card levelcard" id="introLevel2Card" onclick="chooseLevel(2)" style="display:none">
-            <div class="ic">🎙️</div>
-            <div><div class="t" style="font-size:0.92rem">बीच में सवाल भी आएँगे</div><div class="d">बकरीपालक जवाब देंगी, आप बात आगे बढ़ाइए</div></div>
-          </div>
-        </div>
-      </div>
-      <button class="cta" id="startConvoBtn">👉 🎙️ अभ्यास शुरू करें</button>
+      <div class="safe"><span class="sic">🛡️</span><div><b>यह आपकी अपनी बातचीत की जगह है</b> — यहाँ न झिझक, न गलती की चिंता। सवाल भी आएँगे, बातचीत भी होगी।</div></div>
+      <div class="tap-hint-wrap" id="tapHintWrap"><div class="tap-hint" id="tapHint">👆 यहाँ क्लिक करें, अभ्यास शुरू करने के लिए</div></div>
+      <button class="cta" id="startConvoBtn">☝️ अभ्यास शुरू करें</button>
     </div>
   </div>
 
@@ -411,7 +423,7 @@ header button.back {
       <div class="fbblock">
         <div class="fbpart p1"><div class="h">✓ जो अच्छा हुआ</div><div class="b" id="fbGood"></div></div>
         <div class="fbpart p2"><div class="h">↻ अगली बार</div><div class="b" id="fbNext"></div></div>
-        <div class="fbpart p3"><div class="h">💬 ये शब्द काम आएँगे</div><div class="quoteline" id="fbPhrase"></div></div>
+        <div class="fbpart p3"><div class="h">💬 आप ऐसे कह सकती हैं</div><div class="quoteline" id="fbPhrase"></div></div>
       </div>
 
       <div class="log-row" id="logStatus" style="display:none">✓ यह बातचीत अपने आप Sheet में सेव हो गई</div>
@@ -435,6 +447,7 @@ header button.back {
     <div class="picker">
       <div class="qprogress" id="qaProgress"></div>
       <div class="bubble coach" id="qaQuestionText" style="max-width:100%"></div>
+      <div class="qa-error" id="qaError" style="display:none"></div>
     </div>
     <div class="mic-wrap">
       <div class="miccap" id="qaComposerLabel">जवाब बोलने के लिए दबाएँ</div>
@@ -480,7 +493,6 @@ const PRACTICE = {
 
 const sessionId = "WEBDEMO_" + crypto.randomUUID();
 let currentPtype = null;
-let currentLevel = 1;
 let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
@@ -661,7 +673,6 @@ function renderHome() {
 // --- Practice type / service selection ---
 function selectPtype(ptype) {
   currentPtype = ptype;
-  currentLevel = getDone(ptype) ? 2 : 1;
   showIntro();
 }
 
@@ -671,32 +682,27 @@ function showIntro() {
   document.getElementById("introTitle").textContent = p.name;
   document.getElementById("introPrep").textContent = p.prep;
 
-  document.getElementById("introLevel2Card").style.display = getDone(currentPtype) ? "flex" : "none";
-  renderLevelCards();
+  // Tap-hint: hidden by default every time this screen opens - it only
+  // appears while the cursor is over the start button, not automatically.
+  document.getElementById("tapHint").classList.add("hidden");
 
   go("screen-intro");
 }
 
-function chooseLevel(level) {
-  currentLevel = level;
-  renderLevelCards();
-}
-
-function renderLevelCards() {
-  document.getElementById("introLevel1Card").classList.toggle("selected", currentLevel === 1);
-  document.getElementById("introLevel2Card").classList.toggle("selected", currentLevel === 2);
-}
-
-document.getElementById("startConvoBtn").onclick = startConvo;
+const startConvoBtn = document.getElementById("startConvoBtn");
+startConvoBtn.onclick = startConvo;
+startConvoBtn.addEventListener("mouseenter", () => document.getElementById("tapHint").classList.remove("hidden"));
+startConvoBtn.addEventListener("mouseleave", () => document.getElementById("tapHint").classList.add("hidden"));
 
 async function startConvo() {
   document.getElementById("messages").innerHTML = "";
   document.getElementById("statusLine").textContent = "";
+  lastErrorBubble = null; // starting a fresh conversation - no error state carries over
   try {
     await fetch("/api/practice/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ session_id: sessionId, ptype: currentPtype, level: currentLevel }),
+      body: JSON.stringify({ session_id: sessionId, ptype: currentPtype }),
     });
   } catch (err) {
     go("screen-home");
@@ -710,8 +716,10 @@ async function startConvo() {
   const label = document.getElementById("composerLabel");
   const stopBtn = document.getElementById("stopBtn");
   stopBtn.style.display = "inline-block";
-  label.textContent = currentLevel === 1 ? "पूरी बात कहिए" : "बोलने के लिए दबाएँ";
+  label.textContent = "बोलने के लिए दबाएँ";
 }
+
+let lastErrorBubble = null; // tracks the currently-visible error card, if any, so a retry replaces it instead of stacking a new one
 
 function addBubble(kind, text) {
   const row = document.createElement("div");
@@ -727,6 +735,19 @@ function addBubble(kind, text) {
   }
   row.className = "bubble " + (kind === "me" ? "me" : kind === "household" ? "" : kind);
   const messages = document.getElementById("messages");
+
+  if (kind === "error") {
+    // One failed attempt = one visible error card. If the previous message
+    // is still an unresolved error from an earlier failed attempt, remove
+    // it before adding the new one instead of letting both stack up.
+    if (lastErrorBubble && lastErrorBubble.parentNode === messages) {
+      messages.removeChild(lastErrorBubble);
+    }
+    lastErrorBubble = row;
+  } else {
+    lastErrorBubble = null; // any successful message means the previous error is resolved
+  }
+
   messages.appendChild(row);
   messages.scrollTop = messages.scrollHeight;
 }
@@ -735,8 +756,10 @@ function addBubble(kind, text) {
 const micBtn = document.getElementById("micBtn");
 const composerLabel = document.getElementById("composerLabel");
 const statusLine = document.getElementById("statusLine");
+let isProcessingTurn = false; // true while a turn's request is in flight - blocks overlapping recordings
 
 micBtn.onclick = async () => {
+  if (isProcessingTurn) return; // ignore taps while the previous turn is still being processed
   if (!isRecording) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -761,52 +784,77 @@ micBtn.onclick = async () => {
 };
 
 async function onRecordingStop() {
-  const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
-  const form = new FormData();
-  form.append("session_id", sessionId);
-  form.append("name", localStorage.getItem("ps_name") || "");
-  form.append("audio", blob, "turn.webm");
+  if (isProcessingTurn) return; // defensive - should not fire twice, but never allow two in-flight turns
+  isProcessingTurn = true;
+  micBtn.disabled = true;
+  const turnStart = performance.now();
 
-  statusLine.textContent = "सुन रहे हैं...";
-  let data;
   try {
-    const resp = await fetch("/api/practice/turn", { method: "POST", body: form });
-    data = await resp.json();
-  } catch (err) {
+    const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+    const form = new FormData();
+    form.append("session_id", sessionId);
+    form.append("name", localStorage.getItem("ps_name") || "");
+    form.append("audio", blob, "turn.webm");
+
+    statusLine.textContent = "सुन रहे हैं...";
+    // STT and LLM happen inside ONE combined server request (by design - see
+    // /api/practice/turn), so the client can't know exactly when STT ends and
+    // LLM begins. This timer just improves PERCEIVED progress after a short,
+    // tunable delay - it never changes the actual request/response flow.
+    // Tune STATUS_SWITCH_MS using the real server-side STT timing measured in
+    // Part 3 below (e.g. set it close to the real median STT time).
+    // Real practice_turn.stt median measured 2026-08-14: 1.57s (n=6, range 1.43-2.21s).
+    const STATUS_SWITCH_MS = 1600;
+    const statusTimer = setTimeout(() => { statusLine.textContent = "सोच रहे हैं..."; }, STATUS_SWITCH_MS);
+
+    let data;
+    try {
+      const resp = await fetch("/api/practice/turn", { method: "POST", body: form });
+      data = await resp.json();
+    } catch (err) {
+      clearTimeout(statusTimer);
+      console.log(`[TIMING] practice/turn FAILED after ${(performance.now() - turnStart).toFixed(0)}ms (network error)`);
+      statusLine.textContent = "";
+      composerLabel.textContent = "बोलने के लिए दबाएँ";
+      addBubble("error", "नेटवर्क में दिक्कत आई। दोबारा बोलिए।");
+      return;
+    }
+    clearTimeout(statusTimer);
+    console.log(`[TIMING] practice/turn total round-trip: ${(performance.now() - turnStart).toFixed(0)}ms (audio_bytes=${blob.size})`);
+
     statusLine.textContent = "";
     composerLabel.textContent = "बोलने के लिए दबाएँ";
-    addBubble("error", "नेटवर्क में दिक्कत आई। दोबारा बोलिए।");
-    return;
-  }
-  statusLine.textContent = "";
-  composerLabel.textContent = "बोलने के लिए दबाएँ";
 
-  if (data.error === "too_long") {
-    addBubble("error", "यह रिकॉर्डिंग थोड़ी लंबी थी। थोड़ी छोटी रिकॉर्डिंग की कोशिश कीजिए।");
-    return;
-  }
-  if (data.error === "empty_transcript") {
-    addBubble("error", "कुछ सुनाई नहीं दिया। दोबारा कोशिश कीजिए।");
-    return;
-  }
-  if (data.error) {
-    addBubble("error", "समझने में दिक्कत आई। दोबारा कोशिश कीजिए।");
-    return;
-  }
+    if (data.error === "too_long") {
+      addBubble("error", "यह रिकॉर्डिंग थोड़ी लंबी थी। थोड़ी छोटी रिकॉर्डिंग की कोशिश कीजिए।");
+      return;
+    }
+    if (data.error === "empty_transcript") {
+      addBubble("error", "कुछ सुनाई नहीं दिया। दोबारा कोशिश कीजिए।");
+      return;
+    }
+    if (data.error) {
+      addBubble("error", "समझने में दिक्कत आई। दोबारा कोशिश कीजिए।");
+      return;
+    }
 
-  addBubble("me", data.transcript);
+    addBubble("me", data.transcript);
 
-  if (data.rescue) {
-    document.getElementById("rescueMessage").textContent = data.message;
-    setHomeIdentity();
-    go("screen-rescue");
-    return;
-  }
+    if (data.rescue) {
+      document.getElementById("rescueMessage").textContent = data.message;
+      setHomeIdentity();
+      go("screen-rescue");
+      return;
+    }
 
-  addBubble("household", data.reply);
+    addBubble("household", data.reply);
 
-  if (data.nudge) {
-    addBubble("coach", data.nudge);
+    if (data.nudge) {
+      addBubble("coach", data.nudge);
+    }
+  } finally {
+    isProcessingTurn = false;
+    micBtn.disabled = false;
   }
 }
 
@@ -964,16 +1012,30 @@ function showQaQuestion(data) {
   document.getElementById("qaProgress").textContent = `सवाल ${data.position} / ${data.total}`;
   document.getElementById("qaQuestionText").textContent = data.question;
   document.getElementById("qaComposerLabel").textContent = "जवाब बोलने के लिए दबाएँ";
+  clearQaError(); // moving to a new question always starts with a clean error state
   go("screen-qa-question");
 }
 
 const qaMicBtn = document.getElementById("qaMicBtn");
 const qaComposerLabel = document.getElementById("qaComposerLabel");
+const qaErrorEl = document.getElementById("qaError");
+let isProcessingQaAnswer = false; // true while an answer request is in flight
+
+function showQaError(text) {
+  qaErrorEl.textContent = text;
+  qaErrorEl.style.display = "block";
+}
+function clearQaError() {
+  qaErrorEl.style.display = "none";
+  qaErrorEl.textContent = "";
+}
 
 qaMicBtn.onclick = async () => {
+  if (isProcessingQaAnswer) return; // ignore taps while the previous answer is still being processed
   if (!isRecording) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      clearQaError(); // permission just succeeded / new attempt starting - clear any earlier error
       audioChunks = [];
       mediaRecorder = new MediaRecorder(stream);
       mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
@@ -995,38 +1057,54 @@ qaMicBtn.onclick = async () => {
 };
 
 async function onQaRecordingStop() {
-  const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
-  const form = new FormData();
-  form.append("session_id", sessionId);
-  form.append("audio", blob, "answer.webm");
+  if (isProcessingQaAnswer) return; // defensive - never allow two in-flight answer requests
+  isProcessingQaAnswer = true;
+  qaMicBtn.disabled = true;
+  const answerStart = performance.now();
 
-  qaComposerLabel.textContent = "सुन रहे हैं...";
-  let data;
   try {
-    const resp = await fetch("/api/qa/answer", { method: "POST", body: form });
-    data = await resp.json();
-  } catch (err) {
-    qaComposerLabel.textContent = "नेटवर्क में दिक्कत आई। दोबारा बोलिए।";
-    return;
-  }
-  qaComposerLabel.textContent = "जवाब बोलने के लिए दबाएँ";
+    const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+    const form = new FormData();
+    form.append("session_id", sessionId);
+    form.append("audio", blob, "answer.webm");
 
-  if (data.error === "too_long") {
-    qaComposerLabel.textContent = "यह रिकॉर्डिंग थोड़ी लंबी थी। थोड़ी छोटी रिकॉर्डिंग की कोशिश कीजिए।";
-    return;
-  }
-  if (data.error === "empty_transcript") {
-    qaComposerLabel.textContent = "कुछ सुनाई नहीं दिया। दोबारा कोशिश कीजिए।";
-    return;
-  }
-  if (data.error) {
-    qaComposerLabel.textContent = "समझने में दिक्कत आई। दोबारा कोशिश कीजिए।";
-    return;
-  }
+    // Sawal-Jawab has no LLM/TTS step - it's STT, then a fixed-answer lookup,
+    // so only "सुन रहे हैं..." is honest here (no "thinking" stage exists).
+    qaComposerLabel.textContent = "सुन रहे हैं...";
+    let data;
+    try {
+      const resp = await fetch("/api/qa/answer", { method: "POST", body: form });
+      data = await resp.json();
+    } catch (err) {
+      console.log(`[TIMING] qa/answer FAILED after ${(performance.now() - answerStart).toFixed(0)}ms (network error)`);
+      qaComposerLabel.textContent = "जवाब बोलने के लिए दबाएँ";
+      showQaError("नेटवर्क में दिक्कत आई। दोबारा बोलिए।");
+      return;
+    }
+    console.log(`[TIMING] qa/answer total round-trip: ${(performance.now() - answerStart).toFixed(0)}ms (audio_bytes=${blob.size})`);
+    qaComposerLabel.textContent = "जवाब बोलने के लिए दबाएँ";
 
-  document.getElementById("qaMyAnswer").textContent = data.transcript;
-  document.getElementById("qaApprovedAnswer").textContent = data.approved_answer;
-  go("screen-qa-result");
+    if (data.error === "too_long") {
+      showQaError("यह रिकॉर्डिंग थोड़ी लंबी थी। थोड़ी छोटी रिकॉर्डिंग की कोशिश कीजिए।");
+      return;
+    }
+    if (data.error === "empty_transcript") {
+      showQaError("कुछ सुनाई नहीं दिया। दोबारा कोशिश कीजिए।");
+      return;
+    }
+    if (data.error) {
+      showQaError("समझने में दिक्कत आई। दोबारा कोशिश कीजिए।");
+      return;
+    }
+
+    clearQaError();
+    document.getElementById("qaMyAnswer").textContent = data.transcript;
+    document.getElementById("qaApprovedAnswer").textContent = data.approved_answer;
+    go("screen-qa-result");
+  } finally {
+    isProcessingQaAnswer = false;
+    qaMicBtn.disabled = false;
+  }
 }
 
 document.getElementById("qaNextBtn").onclick = async () => {

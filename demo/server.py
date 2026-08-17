@@ -23,6 +23,7 @@ import json
 import os
 import random
 import sys
+import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -38,13 +39,6 @@ from src.stt import AudioTooLongError, TranscriptionError  # noqa: E402
 from src.tts import SynthesisError  # noqa: E402
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), "static"))
-
-WEAK_RUN_RESCUE_THRESHOLD = 3
-
-RESCUE_MESSAGE_TEMPLATE = (
-    "कोई बात नहीं {name} जी, आज इतना ही। अगली बार \"पहली मुलाक़ात\" वाला अभ्यास "
-    "करते हैं, वो थोड़ा आसान रहेगा।"
-)
 
 # Must stay in sync with practice.txt's per-type "Concepts" lists - code
 # owns deciding WHICH concept is still missing and WHEN to surface it
@@ -95,17 +89,14 @@ def _load_phrase_bank():
     return _PHRASE_BANK
 
 
-def _performance_tier(level, quality_counts):
+def _performance_tier(quality_counts):
     """Derives excellent/good/improving for the spoken-feedback opening line
     from turn_quality counts - there's no such tier anywhere else in the
-    app, so this is the one place it's decided. Level 1 is always a single
-    warm reply that never escalates (see practice.txt) so it's never told
-    it's "improving"; Level 2 uses the strong-turn ratio instead."""
+    app, so this is the one place it's decided. Every session now runs the
+    same interactive engine (the old Level 1/Level 2 split was removed),
+    so this always uses the strong-turn ratio."""
     strong = quality_counts.get("strong", 0)
     total = sum(quality_counts.values())
-
-    if level == 1:
-        return "excellent" if strong >= 1 else "good"
 
     ratio = (strong / total) if total else 0.0
     if ratio >= 0.66:
@@ -159,6 +150,20 @@ def _maybe_pick_nudge(session, turn_quality):
     return choice
 
 
+def _timed(label, fn, *args, **kwargs):
+    """Runs fn(*args, **kwargs), logs real elapsed wall-clock time under
+    `label`, and returns/raises exactly as fn would. Purely observational -
+    changes no behavior. Used to get real timing numbers for each external
+    API stage (STT/LLM/TTS) since none existed before. Safe to keep
+    permanently, or strip out later once the pilot's baseline is known."""
+    t0 = time.perf_counter()
+    try:
+        return fn(*args, **kwargs)
+    finally:
+        elapsed = time.perf_counter() - t0
+        app.logger.info("[TIMING] %s: %.2fs", label, elapsed)
+
+
 @app.errorhandler(Exception)
 def handle_unexpected_error(exc):
     """Safety net for every route below. Without this, any unhandled
@@ -190,7 +195,7 @@ def onboard_transcribe():
     mime_type = audio_file.mimetype or "audio/webm"
 
     try:
-        result = stt.transcribe(audio_bytes, mime_type=mime_type)
+        result = _timed("onboard_transcribe.stt", stt.transcribe, audio_bytes, mime_type=mime_type)
     except AudioTooLongError:
         return jsonify({"error": "too_long"}), 400
     except TranscriptionError as e:
@@ -207,14 +212,21 @@ def practice_start():
     data = request.get_json()
     session_id = data["session_id"]
     ptype = data["ptype"]
-    level = int(data["level"])
+    # Level is no longer a PU-facing choice - the intro screen's two-card
+    # picker was removed. Every session now runs the one interactive engine
+    # that used to be "Level 2". Hardcoded here rather than read from the
+    # client, so a stale cached page can never request the retired
+    # single-reply "Level 1" mode. Kept as a field (not deleted outright)
+    # only because sheets_logger's column schema and the feedback payload
+    # still depend on it existing - do not remove it from those.
+    level = 2
 
     scenario = None
-    if level == 2 and ptype in SCENARIO_PTYPES:
+    if ptype in SCENARIO_PTYPES:
         scenario = random.choice(SCENARIOS)
 
     state_store.save_session(session_id, {
-        "module": "practice", "ptype": ptype, "level": level, "turns": [], "weak_run": 0,
+        "module": "practice", "ptype": ptype, "level": level, "turns": [],
         "covered_concepts": [], "turns_since_nudge": 0, "last_nudge": None, "scenario": scenario,
     })
     return jsonify({"ok": True})
@@ -233,7 +245,7 @@ def practice_turn():
         return jsonify({"error": "no_session"}), 400
 
     try:
-        result = stt.transcribe(audio_bytes, mime_type=mime_type)
+        result = _timed("practice_turn.stt", stt.transcribe, audio_bytes, mime_type=mime_type)
     except AudioTooLongError:
         return jsonify({"error": "too_long"}), 400
     except TranscriptionError as e:
@@ -246,61 +258,34 @@ def practice_turn():
     level = session["level"]
     session["turns"].append({"role": "user", "text": result["text"]})
 
-    # Concept-opening, like the ceiling/rescue below, is code-timed: we
-    # decide here (from concepts covered so far) whether a topic is still
-    # missing, and only pass its key through for the model to work in IF
-    # it fits naturally that turn. Level 1 is a single warm reply and never
-    # steers toward a missing concept.
-    concept_hint = None
-    if level == 2:
-        concept_hint = _next_concept_hint(ptype, set(session.get("covered_concepts", [])))
+    # Concept-opening is code-timed: we decide here (from concepts covered
+    # so far) whether a topic is still missing, and only pass its key
+    # through for the model to work in IF it fits naturally that turn.
+    concept_hint = _next_concept_hint(ptype, set(session.get("covered_concepts", [])))
 
-    reply = llm.practice_persona_reply(
+    reply = _timed(
+        "practice_turn.llm", llm.practice_persona_reply,
         ptype, level, session["turns"], concept_hint=concept_hint, scenario=session.get("scenario"),
     )
 
-    # Both the ceiling softening and the rescue ending are FIXED strings
-    # triggered by plain code counting turn_quality, not model output -
-    # verified in testing that asking the model to self-manage either one
-    # (exact counting, or pre-emptively softening its own tone) is
-    # unreliable. This is the only place either threshold is decided.
-    # Tracked at every level (including Level 1's single turn) so the
-    # spoken-feedback opening line has data to pick a tier from even when
-    # weak_run/rescue - Level 2 only - never applies.
+    # quality_counts still feeds the spoken-feedback opening-line tier at
+    # the end of the session (see _performance_tier) - kept even though
+    # the hostility-ceiling/rescue mechanics below were removed, since it's
+    # useful signal on its own.
     counts = session.setdefault("quality_counts", {"strong": 0, "weak": 0, "short": 0})
     counts[reply["turn_quality"]] = counts.get(reply["turn_quality"], 0) + 1
 
-    if level == 2:
-        if reply["turn_quality"] == "strong":
-            session["weak_run"] = 0
-        else:
-            session["weak_run"] = session.get("weak_run", 0) + 1
+    # REMOVED on purpose: the old weak-run hostility ceiling (a scripted
+    # "अच्छा अच्छा... ठीक है" softening line after 2 weak/short turns in a
+    # row) and the rescue mechanic (forced early end after 3 in a row).
+    # Per Sweek's request, the household should never escalate, soften on
+    # a timer, or end the conversation early because of a rough patch -
+    # it should just keep responding like a normal, patient person would.
 
-    weak_run = session.get("weak_run", 0)
-
-    if level == 2 and weak_run >= WEAK_RUN_RESCUE_THRESHOLD:
-        sheets_logger.log_interaction(
-            phone_number=session_id, module="practice", ptype=ptype, level=level,
-            transcript=result["text"], transcript_confidence=result["confidence"],
-            reply_text="[rescued]", ended_via="rescue",
-            pu_name=name, gram_panchayat="",  # GP isn't sent to this endpoint today - leave blank rather than guess
-        )
-        state_store.clear_session(session_id)
-        return jsonify({
-            "transcript": result["text"],
-            "rescue": True,
-            "message": RESCUE_MESSAGE_TEMPLATE.format(name=name or "आप"),
-        })
-
-    if level == 2 and weak_run == 2:
-        reply["household_reply"] = "अच्छा अच्छा… ठीक है, आराम से बताइए।"
-
-    nudge = None
-    if level == 2:
-        covered = set(session.get("covered_concepts", []))
-        covered.update(reply.get("concepts_covered") or [])
-        session["covered_concepts"] = sorted(covered)
-        nudge = _maybe_pick_nudge(session, reply["turn_quality"])
+    covered = set(session.get("covered_concepts", []))
+    covered.update(reply.get("concepts_covered") or [])
+    session["covered_concepts"] = sorted(covered)
+    nudge = _maybe_pick_nudge(session, reply["turn_quality"])
 
     session["turns"].append({"role": "assistant", "text": reply["household_reply"]})
     state_store.save_session(session_id, session)
@@ -327,7 +312,8 @@ def practice_end():
         return jsonify({"error": "no_turns"}), 400
 
     try:
-        feedback = llm.practice_score_session(
+        feedback = _timed(
+            "practice_end.llm", llm.practice_score_session,
             session["ptype"], session["level"], session["turns"],
             covered_concepts=session.get("covered_concepts"), scenario=session.get("scenario"),
         )
@@ -338,14 +324,14 @@ def practice_end():
     feedback["ptype"] = session["ptype"]
     feedback["level"] = session["level"]
 
-    tier = _performance_tier(session["level"], session.get("quality_counts", {}))
+    tier = _performance_tier(session.get("quality_counts", {}))
     opening_line = _pick_opening(tier, data.get("last_opening", ""))
     spoken_text = f"{opening_line} {feedback['good']} {feedback['next_time']} {feedback['exact_phrase']}"
 
     feedback["opening_line"] = opening_line
     feedback["tier"] = tier
     try:
-        audio_bytes = tts.synthesize(spoken_text)
+        audio_bytes = _timed("practice_end.tts", tts.synthesize, spoken_text)
         feedback["audio_base64"] = base64.b64encode(audio_bytes).decode()
         feedback["audio_ok"] = True
     except SynthesisError:
@@ -427,7 +413,7 @@ def qa_answer():
         return jsonify({"error": "no_session"}), 400
 
     try:
-        result = stt.transcribe(audio_bytes, mime_type=mime_type)
+        result = _timed("qa_answer.stt", stt.transcribe, audio_bytes, mime_type=mime_type)
     except AudioTooLongError:
         return jsonify({"error": "too_long"}), 400
     except TranscriptionError as e:

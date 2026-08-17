@@ -49,7 +49,7 @@ def _system_for(ptype, level, concept_hint=None, scenario=None):
     global PRACTICE_PROMPT
     if PRACTICE_PROMPT is None:
         PRACTICE_PROMPT = _load_prompt("practice.txt")
-    system = f"{PRACTICE_PROMPT}\n\nActive practice type: {ptype}\nActive level: {level}"
+    system = f"{PRACTICE_PROMPT}\n\nActive practice type: {ptype}"
     if scenario:
         system += f"\nActive scenario variant: {scenario}"
     if concept_hint:
