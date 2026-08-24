@@ -288,15 +288,6 @@ header button.back {
 .who { font-family: var(--f); font-size: 0.62rem; letter-spacing: .5px; text-transform: uppercase; color: var(--brown-lt); margin-bottom: 4px; }
 .bubble.me .who { color: rgba(255,255,255,.65); }
 
-/* Groups one PU turn + the household's reply (+ an optional coach nudge)
-   into a single bordered card, so the conversation reads as a sequence of
-   distinct, aligned exchanges instead of a flat scrolling chat log. Reuses
-   .bubble as-is for the actual message styling/colors - this only adds the
-   grouping container around them. */
-.convo-turn { position: relative; background: var(--beige); border-radius: 12px; padding: 10px; margin-bottom: 14px; box-shadow: 0 0 20px rgba(35,35,35,.05); }
-.convo-turn .bubble { box-shadow: none; margin-bottom: 8px; }
-.convo-turn .bubble:last-child { margin-bottom: 0; }
-
 .messages { flex: 1; overflow-y: auto; padding: 14px 14px 6px; }
 .mic-wrap {
   padding: 10px var(--page-padding) 28px; text-align: center; flex-shrink: 0;
@@ -967,8 +958,6 @@ async function startConvo() {
   document.getElementById("messages").innerHTML = "";
   document.getElementById("statusLine").textContent = "";
   lastErrorBubble = null; // starting a fresh conversation - no error state carries over
-  currentTurnCard = null; // ditto for the turn-card grouping - never append into a card from a previous conversation
-  turnCounter = 0; // ditto for the per-card turn number
   try {
     await fetch("/api/practice/start", {
       method: "POST",
@@ -989,8 +978,6 @@ async function startConvo() {
 }
 
 let lastErrorBubble = null; // tracks the currently-visible error card, if any, so a retry replaces it instead of stacking a new one
-let currentTurnCard = null; // the .convo-turn card currently being built - "me" opens a new one, "household"/coach "nudge" join it
-let turnCounter = 0; // running exchange number shown on each card - not "X/N", since there's no fixed total
 
 function addBubble(kind, text) {
   const row = document.createElement("div");
@@ -1008,37 +995,18 @@ function addBubble(kind, text) {
   const messages = document.getElementById("messages");
 
   if (kind === "error") {
-    // One failed attempt = one visible error card, standalone (not part of
-    // a turn card - it isn't a completed exchange). If the previous message
+    // One failed attempt = one visible error card. If the previous message
     // is still an unresolved error from an earlier failed attempt, remove
     // it before adding the new one instead of letting both stack up.
     if (lastErrorBubble && lastErrorBubble.parentNode === messages) {
       messages.removeChild(lastErrorBubble);
     }
     lastErrorBubble = row;
-    messages.appendChild(row);
   } else {
     lastErrorBubble = null; // any successful message means the previous error is resolved
-    if (kind === "me") {
-      // A fresh PU turn always starts a new card - the household reply
-      // and any coach nudge that follow join this same card below.
-      currentTurnCard = document.createElement("div");
-      currentTurnCard.className = "convo-turn";
-      const num = document.createElement("div");
-      num.className = "fcard-num";
-      num.textContent = ++turnCounter;
-      currentTurnCard.appendChild(num);
-      currentTurnCard.appendChild(row);
-      messages.appendChild(currentTurnCard);
-    } else if (currentTurnCard) {
-      currentTurnCard.appendChild(row);
-    } else {
-      // No open turn yet (e.g. the one-time scene-setting coach line at
-      // the very start of the conversation) - render standalone.
-      messages.appendChild(row);
-    }
   }
 
+  messages.appendChild(row);
   messages.scrollTop = messages.scrollHeight;
 }
 
