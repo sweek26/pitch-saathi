@@ -52,52 +52,6 @@ TYPE_CONCEPTS = {
     "badhiya": ["benefits_illustrative", "not_alone"],
 }
 
-# PU-facing content for the "सवाल N" stepped convo screen. Two things per
-# concept key: a short topic tag for the step header, and a one-line coach
-# instruction telling her what to focus on. These are DRAFT copy - written
-# from practice.txt's concept definitions, not reviewed by Sweek yet.
-CONCEPT_META = {
-    "who_and_org": {"label": "अपना परिचय", "coach": "बताइए — आप कौन हैं, किस गाँव से हैं, और किस संस्था से आई हैं।"},
-    "credentials": {"label": "अपनी योग्यता", "coach": "अगर वे पूछें, तो समझाइए — आप डॉक्टर नहीं हैं, पर इस काम की खास ट्रेनिंग ली है।"},
-    "curiosity_about_goats": {"label": "बकरियों में दिलचस्पी", "coach": "उनकी बकरियों के बारे में पूछिए — कितनी हैं, पहले कोई बीमारी या मौत हुई है — सीधे बेचने पर मत जाइए।"},
-    "why_not_free": {"label": "मुफ़्त क्यों नहीं", "coach": "समझाइए — यह मुफ़्त क्यों नहीं है, आप इसमें खुद पैसा लगाती हैं।"},
-    "problem_if_untreated": {"label": "इलाज न होने का नुकसान", "coach": "समझाइए — कीड़े की दवा न देने पर बकरी के वज़न, दूध और सेहत पर क्या असर पड़ता है।"},
-    "sequencing": {"label": "सही क्रम", "coach": "बताइए — कीड़े की दवा टीके से पहले क्यों ज़रूरी है, और सही समय क्या है।"},
-    "self_care_rebuttal": {"label": "घरेलू इलाज़ बनाम ट्रेनिंग", "coach": "समझाइए — घर पर खुद अंदाज़ा लगाने के बजाय आपकी खास ट्रेनिंग क्यों भरोसेमंद है।"},
-    "roi_framing": {"label": "फ़ायदा बनाम खर्च", "coach": "समझाइए — यह छोटा-सा खर्च बकरी और झुंड की सेहत को कैसे बचाता है।"},
-    "no_cure_prevention_only": {"label": "इलाज नहीं, बचाव", "coach": "समझाइए — PPR का कोई इलाज नहीं है, टीका ही एक बचाव है।"},
-    "herd_spread": {"label": "झुंड में फैलाव", "coach": "बताइए — टीका सिर्फ़ एक बकरी को नहीं, पूरे झुंड को कैसे बचाता है।"},
-    "cost_comparison": {"label": "लागत की तुलना", "coach": "बताइए — डॉक्टर के मुक़ाबले आपकी सेवा कितनी सस्ती और सुविधाजनक है।"},
-    "honesty_about_limits": {"label": "ईमानदारी से सीमा बताना", "coach": "ईमानदारी से बताइए — कब मामला आपकी सीमा से बाहर है और डॉक्टर को दिखाना चाहिए।"},
-    "benefits_illustrative": {"label": "फ़ायदे समझाना", "coach": "किसी उदाहरण से समझाइए — बधियाकरण से वज़न और कीमत पर क्या असर होता है।"},
-    "not_alone": {"label": "भरोसा दिलाना", "coach": "भरोसा दिलाइए — आप अकेली नहीं आतीं, और वे पहले दूसरों से भी पूछ सकती हैं।"},
-}
-
-# सवाल 1's बकरीपालक line, per ptype - hand-authored, NOT AI-generated. The
-# AI can only reply once there's at least one PU turn in the conversation,
-# so this one line (only) has to be fixed content instead of a live call.
-# Every question after this is generated exactly as it is today.
-# first/deworm/vacc are Sweek's exact approved text. curative/badhiya are
-# still draft copy, unreviewed - flag them, don't ship silently.
-OPENING_LINE = {
-    "first": "नमस्ते दीदी! चलिए, अपना परिचय देकर शुरुआत करिये—अपना नाम और आप कहाँ से आई हैं,",
-    "deworm": "नमस्ते दीदी! चलिए, कृमिनाशक दवा के बारे में बात शुरू करते हैं।",
-    "vacc": "नमस्ते दीदी! चलिए, टीकाकरण के बारे में बात शुरू करते हैं।",
-    "curative": "नमस्ते... क्या हुआ? बताइए किस बारे में आई हैं?",  # DRAFT - not yet reviewed
-    "badhiya": "नमस्ते... बताइए, आज किस बारे में बात करनी है?",  # DRAFT - not yet reviewed
-}
-
-# Fixed redirect shown INSTEAD of the model's reply when she's clearly
-# pitching the other of these two confusable services (see practice.txt's
-# new Cross-topic guard section, Part 3 below). Keyed by the ACTIVE ptype -
-# the message always points her at the other one. A turn that triggers
-# this is never counted toward quality_counts/covered_concepts, and never
-# advances the "सवाल N" step - she just retries the same step. DRAFT copy.
-REDIRECT_MESSAGE = {
-    "deworm": "लगता है आप टीकाकरण के बारे में बता रही हैं — अभी हम कृमिनाशक की बात कर रहे हैं। टीकाकरण का अभ्यास करने के लिए होम स्क्रीन पर जाकर \"टीकाकरण\" चुनें।",
-    "vacc": "लगता है आप कृमिनाशक (कीड़े की दवा) के बारे में बता रही हैं — अभी हम टीकाकरण की बात कर रहे हैं। कृमिनाशक का अभ्यास करने के लिए होम स्क्रीन पर जाकर \"कृमिनाशक\" चुनें।",
-}
-
 # Scenario variants exist only for these two types so far (see
 # practice.txt) - auto-assigned per your call, not PU-selected. They
 # flavor HOW the household approaches the same objection, not what the
@@ -275,15 +229,7 @@ def practice_start():
         "module": "practice", "ptype": ptype, "level": level, "turns": [],
         "covered_concepts": [], "turns_since_nudge": 0, "last_nudge": None, "scenario": scenario,
     })
-
-    first_concept = _next_concept_hint(ptype, set())
-    first_meta = CONCEPT_META.get(first_concept, {})
-    return jsonify({
-        "ok": True,
-        "opening_household": OPENING_LINE.get(ptype, ""),
-        "opening_label": first_meta.get("label", ""),
-        "opening_coach": first_meta.get("coach", ""),
-    })
+    return jsonify({"ok": True})
 
 
 @app.route("/api/practice/turn", methods=["POST"])
@@ -322,25 +268,6 @@ def practice_turn():
         ptype, level, session["turns"], concept_hint=concept_hint, scenario=session.get("scenario"),
     )
 
-    # Cross-topic guard (deworm vs vacc only - see practice.txt's Cross-topic
-    # guard section). If she's clearly pitching the OTHER of these two
-    # confusable services, don't score this turn or advance the step - just
-    # tell her which practice type to pick instead, and let her retry.
-    off_topic = reply.get("off_topic_service")
-    if off_topic and ptype in REDIRECT_MESSAGE:
-        session["turns"].append({"role": "assistant", "text": REDIRECT_MESSAGE[ptype]})
-        state_store.save_session(session_id, session)
-        return jsonify({
-            "transcript": result["text"],
-            "confidence": result["confidence"],
-            "reply": REDIRECT_MESSAGE[ptype],
-            "rescue": False,
-            "nudge": None,
-            "off_topic": True,
-            "concept_label": "",
-            "concept_coach": "",
-        })
-
     # quality_counts still feeds the spoken-feedback opening-line tier at
     # the end of the session (see _performance_tier) - kept even though
     # the hostility-ceiling/rescue mechanics below were removed, since it's
@@ -363,16 +290,12 @@ def practice_turn():
     session["turns"].append({"role": "assistant", "text": reply["household_reply"]})
     state_store.save_session(session_id, session)
 
-    concept_meta = CONCEPT_META.get(concept_hint, {})
     return jsonify({
         "transcript": result["text"],
         "confidence": result["confidence"],
         "reply": reply["household_reply"],
         "rescue": False,
         "nudge": nudge,
-        "off_topic": False,
-        "concept_label": concept_meta.get("label", ""),
-        "concept_coach": concept_meta.get("coach", ""),
     })
 
 
@@ -547,4 +470,4 @@ def ask_test():
 
 
 if __name__ == "__main__":
-    app.run(port=5050, debug=True, threaded=True)
+    app.run(port=5050, debug=True)

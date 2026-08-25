@@ -283,16 +283,9 @@ header button.back {
 }
 .bubble.me { background: var(--brown); color: #fff; border-radius: 12px 12px 3px 12px; margin-left: auto; }
 .bubble.coach { background: var(--beige); box-shadow: none; border-left: 3px solid var(--brown); max-width: 100%; }
-.bubble.redirect { background: #FBF1E5; box-shadow: none; border-left: 3px solid var(--tan); max-width: 100%; }
 .bubble.rescue { background: var(--beige); box-shadow: none; border-left: 3px solid var(--tan); max-width: 100%; margin: 0 auto; }
 .bubble.error { background: #FBE8E5; color: var(--danger); }
-.who-row { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
-.who-avatar {
-  width: 20px; height: 20px; border-radius: 50%; background: var(--tint); flex: none;
-  display: flex; align-items: center; justify-content: center; font-size: 0.68rem;
-}
-.bubble.me .who-avatar { background: #fff; }
-.who { font-family: var(--f); font-size: 0.62rem; letter-spacing: .5px; text-transform: uppercase; color: var(--brown-lt); }
+.who { font-family: var(--f); font-size: 0.62rem; letter-spacing: .5px; text-transform: uppercase; color: var(--brown-lt); margin-bottom: 4px; }
 .bubble.me .who { color: rgba(255,255,255,.65); }
 
 /* Groups one PU turn + the household's reply (+ an optional coach nudge)
@@ -558,7 +551,7 @@ header button.back {
   <div class="screen" id="screen-convo">
     <div class="messages" id="messages"></div>
     <div class="status-line" id="statusLine"></div>
-    <div class="mic-wrap" id="convoMicWrap">
+    <div class="mic-wrap">
       <div class="miccap" id="composerLabel">बोलने के लिए दबाएँ</div>
       <button class="mic" id="micBtn">🎙️</button>
     </div>
@@ -974,16 +967,14 @@ async function startConvo() {
   document.getElementById("messages").innerHTML = "";
   document.getElementById("statusLine").textContent = "";
   lastErrorBubble = null; // starting a fresh conversation - no error state carries over
-  currentTurnCard = null; // ditto for the turn-card grouping
-
-  let data = {};
+  currentTurnCard = null; // ditto for the turn-card grouping - never append into a card from a previous conversation
+  turnCounter = 0; // ditto for the per-card turn number
   try {
-    const resp = await fetch("/api/practice/start", {
+    await fetch("/api/practice/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ session_id: sessionId, ptype: currentPtype }),
     });
-    data = await resp.json();
   } catch (err) {
     go("screen-home");
     return;
@@ -991,42 +982,26 @@ async function startConvo() {
   setRoleplayIdentity();
   go("screen-convo");
 
-  // Opening line is still a fixed, hand-authored hint per ptype (the AI can't
-  // generate a first line with zero PU turns to react to) - everything AFTER
-  // this is a normal, fully contextual AI reply, same as any other turn. Shown
-  // directly with no separate coach-explanation bubble above it.
-  addBubble("household", data.opening_household ||
-    `ठीक है ${localStorage.getItem("ps_name") || ""} जी। अब मैं बकरीपालक दीदी बनकर बात करूँगी — आप ऐसे बोलिए जैसे आप सच में उनके घर पहुँची हैं।`);
+  addBubble("coach", `ठीक है ${localStorage.getItem("ps_name") || ""} जी। अब मैं बकरीपालक दीदी बनकर बात करूँगी — आप ऐसे बोलिए जैसे आप सच में उनके घर पहुँची हैं।`);
 
   const label = document.getElementById("composerLabel");
   label.textContent = "बोलने के लिए दबाएँ";
 }
 
 let lastErrorBubble = null; // tracks the currently-visible error card, if any, so a retry replaces it instead of stacking a new one
-let currentTurnCard = null; // the .convo-turn card currently being built - every non-error bubble joins it, until the next "me" starts a fresh one
-
-const WHO_META = {
-  me: { label: "आप", icon: "🧑" },
-  household: { label: "बकरीपालक दीदी", icon: "👩" },
-};
+let currentTurnCard = null; // the .convo-turn card currently being built - "me" opens a new one, "household"/coach "nudge" join it
+let turnCounter = 0; // running exchange number shown on each card - not "X/N", since there's no fixed total
 
 function addBubble(kind, text) {
   const row = document.createElement("div");
   row.className = "bubble " + kind;
   row.textContent = text;
-  if (WHO_META[kind]) {
-    const whoRow = document.createElement("div");
-    whoRow.className = "who-row";
-    const avatar = document.createElement("span");
-    avatar.className = "who-avatar";
-    avatar.textContent = WHO_META[kind].icon;
-    const who = document.createElement("span");
+  if (kind === "me" || kind === "household") {
+    const who = document.createElement("div");
     who.className = "who";
-    who.textContent = WHO_META[kind].label;
-    whoRow.appendChild(avatar);
-    whoRow.appendChild(who);
+    who.textContent = kind === "me" ? "आप" : "बकरीपालक दीदी";
     row.textContent = "";
-    row.appendChild(whoRow);
+    row.appendChild(who);
     row.appendChild(document.createTextNode(text));
   }
   row.className = "bubble " + (kind === "me" ? "me" : kind === "household" ? "" : kind);
@@ -1049,13 +1024,17 @@ function addBubble(kind, text) {
       // and any coach nudge that follow join this same card below.
       currentTurnCard = document.createElement("div");
       currentTurnCard.className = "convo-turn";
+      const num = document.createElement("div");
+      num.className = "fcard-num";
+      num.textContent = ++turnCounter;
+      currentTurnCard.appendChild(num);
       currentTurnCard.appendChild(row);
       messages.appendChild(currentTurnCard);
     } else if (currentTurnCard) {
       currentTurnCard.appendChild(row);
     } else {
-      // No open turn yet (e.g. the one-time opening line at the very
-      // start of the conversation) - render standalone.
+      // No open turn yet (e.g. the one-time scene-setting coach line at
+      // the very start of the conversation) - render standalone.
       messages.appendChild(row);
     }
   }
@@ -1068,19 +1047,6 @@ const micBtn = document.getElementById("micBtn");
 const composerLabel = document.getElementById("composerLabel");
 const statusLine = document.getElementById("statusLine");
 let isProcessingTurn = false; // true while a turn's request is in flight - blocks overlapping recordings
-
-let recordingWarnTimer = null;
-let recordingAutoStopTimer = null;
-
-function stopRecording() {
-  clearTimeout(recordingWarnTimer);
-  clearTimeout(recordingAutoStopTimer);
-  mediaRecorder.stop();
-  mediaRecorder.stream.getTracks().forEach(t => t.stop());
-  isRecording = false;
-  micBtn.classList.remove("recording");
-  composerLabel.textContent = "रुकिए...";
-}
 
 micBtn.onclick = async () => {
   if (isProcessingTurn) return; // ignore taps while the previous turn is still being processed
@@ -1095,22 +1061,15 @@ micBtn.onclick = async () => {
       isRecording = true;
       micBtn.classList.add("recording");
       composerLabel.textContent = "रोकने के लिए दबाएँ";
-
-      // Sarvam's STT hard-caps a single clip at 30s (src/stt.py) - warn at
-      // 25s so she can wrap up, auto-stop at 28s so a recording NEVER
-      // actually reaches that hard cap and gets rejected after she's
-      // already said the whole thing.
-      recordingWarnTimer = setTimeout(() => {
-        if (isRecording) composerLabel.textContent = "बस थोड़ी देर में अपनी बात पूरी कर लीजिए...";
-      }, 25000);
-      recordingAutoStopTimer = setTimeout(() => {
-        if (isRecording) stopRecording();
-      }, 28000);
     } catch (err) {
       statusLine.textContent = "माइक की अनुमति नहीं मिली।";
     }
   } else {
-    stopRecording();
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    isRecording = false;
+    micBtn.classList.remove("recording");
+    composerLabel.textContent = "रुकिए...";
   }
 };
 
@@ -1175,13 +1134,6 @@ async function onRecordingStop() {
       document.getElementById("rescueMessage").textContent = data.message;
       setHomeIdentity();
       go("screen-rescue");
-      return;
-    }
-
-    if (data.off_topic) {
-      // Wrong-service guard (deworm vs vacc) - show the redirect and let
-      // her retry the same turn. Mic stays exactly where it is.
-      addBubble("redirect", data.reply);
       return;
     }
 

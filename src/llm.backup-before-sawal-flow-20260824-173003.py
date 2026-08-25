@@ -95,36 +95,23 @@ def practice_persona_reply(ptype, level, turns, concept_hint=None, scenario=None
 
     parsed = {}
     for _attempt in range(2):
-        if _attempt > 0:
-            print(f"[TIMING] practice_persona_reply retrying (attempt {_attempt + 1})", flush=True)
         response = _get_client().messages.create(
             model="claude-sonnet-5",
-            max_tokens=3072,
+            max_tokens=2048,
             system=system,
             messages=messages,
         )
-        print(f"[TIMING] practice_persona_reply attempt {_attempt + 1} stop_reason={response.stop_reason} usage={response.usage}", flush=True)
         raw = _extract_text(response, fallback="")
         try:
             parsed = json.loads(raw) if raw else {}
         except (json.JSONDecodeError, TypeError):
-            # Occasionally the model drops the JSON wrapper and replies with
-            # the in-character line as plain text instead (more likely now
-            # that the prompt leans hard on sounding natural rather than
-            # robotic). If it's plain text - not a truncated/malformed JSON
-            # attempt, which would start with "{" - use it as the reply
-            # directly rather than discard a perfectly good line.
-            # turn_quality/concepts_covered/off_topic_service fall back to
-            # their normal safe defaults below, same as any other case here.
-            stripped = raw.strip() if raw else ""
-            parsed = {"household_reply": stripped} if stripped and not stripped.startswith("{") else {}
+            parsed = {}
         if parsed.get("household_reply"):
             break
     return {
         "household_reply": parsed.get("household_reply") or "माफ़ कीजिए, थोड़ा रुक कर दोबारा बोलिए — समझ नहीं पाई।",
         "turn_quality": parsed.get("turn_quality", "weak"),
         "concepts_covered": parsed.get("concepts_covered") or [],
-        "off_topic_service": parsed.get("off_topic_service") or None,
     }
 
 
@@ -149,7 +136,7 @@ def practice_score_session(ptype, level, turns, covered_concepts=None, scenario=
 
     response = _get_client().messages.create(
         model="claude-sonnet-5",
-        max_tokens=3072,
+        max_tokens=2048,
         system=_system_for(ptype, level, scenario=scenario),
         messages=messages,
     )
