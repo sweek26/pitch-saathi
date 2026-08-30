@@ -186,9 +186,9 @@ def mera_madad_reply(history_summary):
 
 
 # ---------------------------------------------------------------------------
-# Ask — TEST MODE ONLY. Not wired into router.py/webhook.py (the real
-# WhatsApp pipeline stays Practice + Mera Madad only, per locked scope).
-# Three modes for side-by-side evaluation before deciding on one long-term:
+# Ask — TEST MODE ONLY. Not wired into the main app (Practice + Mera Madad
+# only, per locked scope). Three modes for side-by-side evaluation before
+# deciding on one long-term:
 #   safe        - no generation at all, honest "not covered, ask your FE"
 #   vetted      - answers only from a real vetted curative reference doc
 #   experimental- AI-generated herbal-only suggestion, no vetted source

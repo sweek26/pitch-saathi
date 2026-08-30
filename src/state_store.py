@@ -1,5 +1,5 @@
 """
-Per-PU conversation state, keyed by WhatsApp phone number.
+Per-PU conversation state, keyed by session id.
 
 No database in this pilot (per spec) — state lives in a single local JSON
 file. This is fine for 5-10 PU over a 2-4 week test; it is NOT meant to

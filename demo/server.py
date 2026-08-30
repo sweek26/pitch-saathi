@@ -1,10 +1,10 @@
 """
-Local demo web app - lets anyone try the Practice experience through a
-browser instead of WhatsApp or a terminal. Built to SHOW the product to
-others, not to replace webhook.py (the real WhatsApp entrypoint).
+Pitch Saathi web app - the Practice experience, delivered through a
+browser. The WhatsApp entrypoint (webhook.py/router.py) was explored
+early on and now lives in draft/, not connected to this app.
 
 Reuses the exact same llm.py / stt.py / sheets_logger.py / state_store.py
-the real pipeline uses - no separate demo logic.
+a WhatsApp pipeline would use - no separate demo logic.
 
 Run from the project root:
     python -m demo.server
@@ -533,7 +533,7 @@ def qa_next():
 @app.route("/api/ask_test", methods=["POST"])
 def ask_test():
     """TEST MODE ONLY - runs a question through all three Ask approaches
-    for side-by-side evaluation. Not part of the real WhatsApp pipeline."""
+    for side-by-side evaluation. Not wired into the main Practice flow."""
     data = request.get_json()
     question = data["question"].strip()
     if not question:
