@@ -89,13 +89,8 @@ header button.back {
 .home-picker { padding-bottom: 6px; }
 .section-head { font-family: var(--fd); font-size: 1rem; font-weight: 700; color: var(--brown); margin: 8px 0 7px; }
 
-.fcard { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: 0 0 20px rgba(35,35,35,.07); position: relative; }
+.fcard { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: 0 0 20px rgba(35,35,35,.07); }
 .home-picker .fcard + .fcard { margin-top: 24px; }
-.fcard-num {
-  position: absolute; top: -9px; left: -8px; width: 22px; height: 22px; border-radius: 50%;
-  background: var(--brown); color: #fff; font-family: var(--f); font-size: 0.68rem; font-weight: 700;
-  display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,.18);
-}
 .fcard-body { display: flex; gap: 10px; align-items: center; cursor: pointer; padding-bottom: 9px; margin-bottom: 9px; border-bottom: 1px solid var(--beige); }
 .fcard-ic { width: 42px; height: 42px; border-radius: 11px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
 .fcard-ic.purple { background: #E7DEF5; }
@@ -159,7 +154,7 @@ header button.back {
   /* Bottom padding needs enough room for the tap-hand animation that sits
      just below the button (see .tap-hand), not just the button itself. */
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-  padding: 30px 26px 42px; text-align: center;
+  padding: 52px 26px 42px; text-align: center;
 }
 .landing-avatar-wrap { position: relative; display: flex; align-items: center; justify-content: center; gap: 5px; margin-bottom: 16px; }
 .landing-avatar {
@@ -170,11 +165,11 @@ header button.back {
   box-shadow: 0 8px 20px rgba(0,0,0,.22); flex: none;
 }
 .landing-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.landing-headline { color: #fff; font-family: var(--fd); font-size: 1rem; font-weight: 500; line-height: 1.4; margin-top: 14px; }
-.landing-name { color: #E0B98E; font-family: var(--fd); font-size: 1.32rem; font-weight: 700; margin-top: 2px; } /* sampled from Input/screen_landing.png - lighter/warmer gold than --tan */
+.landing-headline { color: #fff; font-family: var(--fd); font-size: 1.13rem; font-weight: 500; line-height: 1.4; margin-top: 14px; }
+.landing-name { color: #E0B98E; font-family: var(--fd); font-size: 1.45rem; font-weight: 700; margin-top: 2px; } /* sampled from Input/screen_landing.png - lighter/warmer gold than --tan */
 .landing-name-heart { color: #D97E6B; } /* sampled from Input/screen_landing.png - a plain colorable heart instead of the 💗 emoji, which renders as a fixed multi-color glyph CSS can't recolor and looks different on every device */
 .landing-divider { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 11px 0; color: var(--tan); font-size: 0.85rem; }
-.landing-desc { color: #fff; opacity: .92; font-family: var(--fd); font-size: 0.86rem; line-height: 1.55; max-width: 280px; margin: 0 auto 22px; }
+.landing-desc { color: #fff; opacity: .92; font-family: var(--fd); font-size: 0.99rem; line-height: 1.55; max-width: 280px; margin: 0 auto 22px; }
 .landing-cta-wrap { position: relative; width: 100%; margin-top: auto; }
 .landing-cta {
   /* Sampled directly from Input/screen_landing.png - the approved design
@@ -286,6 +281,11 @@ header button.back {
 .bubble.redirect { background: #FBF1E5; box-shadow: none; border-left: 3px solid var(--tan); max-width: 100%; }
 .bubble.rescue { background: var(--beige); box-shadow: none; border-left: 3px solid var(--tan); max-width: 100%; margin: 0 auto; }
 .bubble.error { background: #FBE8E5; color: var(--danger); }
+.bubble.hint {
+  background: var(--beige); color: var(--brown); box-shadow: none; max-width: 100%;
+  border-radius: 22px; padding: 13px 20px; display: flex; align-items: flex-start; gap: 8px;
+}
+.bubble.hint .spark { color: var(--tan); flex: none; }
 .who-row { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
 .who-avatar {
   width: 20px; height: 20px; border-radius: 50%; background: var(--tint); flex: none;
@@ -318,11 +318,11 @@ header button.back {
 .mic.recording { background: var(--danger); animation: pulse 1.2s infinite; }
 @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(180,69,58,.4); } 50% { box-shadow: 0 0 0 12px rgba(180,69,58,0); } }
 .header-stop {
-  display: none; flex: none; background: none; border: 1.5px solid rgba(255,255,255,.55); color: #fff;
-  border-radius: 14px; padding: 6px 12px; font-family: var(--fd); font-size: 0.72rem; cursor: pointer;
+  display: none; flex: none; background: rgba(255,255,255,.9); border: 1.5px solid var(--danger); color: var(--danger);
+  border-radius: 14px; padding: 6px 12px; font-family: var(--fd); font-size: 0.72rem; font-weight: 600; cursor: pointer;
   white-space: nowrap; margin-left: 8px;
 }
-.header-stop:active { background: rgba(255,255,255,.12); }
+.header-stop:active { background: #fff; }
 
 .fb-play-btn {
   background: var(--beige); border: 1.5px solid var(--brown); color: var(--brown); border-radius: 18px;
@@ -459,7 +459,6 @@ header button.back {
       <div class="section-head">आज क्या करना चाहेंगी?</div>
 
       <div class="fcard">
-        <div class="fcard-num">1</div>
         <div class="fcard-body" onclick="go('screen-ptype')">
           <div class="fcard-ic purple">🎙️</div>
           <div class="fcard-txt">
@@ -475,7 +474,6 @@ header button.back {
       </div>
 
       <div class="fcard" id="qaFcard">
-        <div class="fcard-num">2</div>
         <div class="fcard-body" onclick="openQaServices()">
           <div class="fcard-ic pink">❓</div>
           <div class="fcard-txt">
@@ -506,7 +504,7 @@ header button.back {
       </div>
       <div class="card" onclick="go('screen-services')">
         <div class="ic">🐐</div>
-        <div><div class="t">सेवा के बारे में बातचीत</div><div class="d">कीड़े की दवा, टीका, इलाज या बधियाकरण</div></div>
+        <div><div class="t">सेवा के बारे में बातचीत</div><div class="d">कृमिनाशक, टीका, इलाज या बधियाकरण</div></div>
         <div class="ch">›</div>
       </div>
       <div class="safe"><span class="sic">🛡️</span><div>पहली बार कर रही हैं? अच्छी बातचीत की शुरुआत एक अच्छे परिचय से होती है।</div></div>
@@ -519,7 +517,7 @@ header button.back {
       <div class="dtitle">किस सेवा के बारे में?</div>
       <div class="dsub">जिस पर अभ्यास करना है, उसे चुनिए</div>
       <div class="grid2">
-        <div class="tile" onclick="selectPtype('deworm')"><div class="tic">💊</div><div class="tname">कीड़े की दवा</div></div>
+        <div class="tile" onclick="selectPtype('deworm')"><div class="tic">💊</div><div class="tname">कृमिनाशक</div></div>
         <div class="tile" onclick="selectPtype('vacc')"><div class="tic">💉</div><div class="tname">टीकाकरण</div></div>
         <div class="tile" onclick="selectPtype('curative')"><div class="tic">🩺</div><div class="tname">इलाज</div></div>
         <div class="tile" onclick="selectPtype('badhiya')"><div class="tic">✂️</div><div class="tname">बधियाकरण<br><span class="badge warn">कंटेंट पेंडिंग</span></div></div>
@@ -648,10 +646,10 @@ if (!SAWAL_JAWAB_ENABLED) document.getElementById("qaFcard").style.display = "no
 const PRACTICE = {
   first: { icon: '👋', name: 'परिचय अभ्यास', desc: 'नए घर पर पहली बार जाना — अपना परिचय देना',
     example: { image: '/static/img/sample_parichay_abyas.png', audio: '/static/audio/parichay_abhyas_sample.mp3', caption: 'PU और बकरीपालक की बातचीत' } },
-  deworm: { icon: '💊', name: 'कीड़े की दवा', desc: 'कृमिनाशक दवा के बारे में समझाना',
-    prep: 'आप एक बकरीपालक से कीड़े की दवा के बारे में बात करने जा रही हैं।' },
+  deworm: { icon: '💊', name: 'कृमिनाशक', desc: 'कृमिनाशक दवा के बारे में समझाना',
+    example: { image: '/static/img/sample_kriminashak.png', audio: '/static/audio/pitch_audio_deworming.mp3', caption: 'PU और बकरीपालक की कृमिनाशक पर बातचीत' } },
   vacc: { icon: '💉', name: 'टीकाकरण', desc: 'PPR के टीके के बारे में समझाना',
-    prep: 'आप एक बकरीपालक से टीकाकरण के बारे में बात करने जा रही हैं।' },
+    example: { image: '/static/img/sample_vaccination.png', audio: '/static/audio/pitch_audio_vaccination.mp3', caption: 'PU और बकरीपालक की टीकाकरण पर बातचीत' } },
   curative: { icon: '🩺', name: 'इलाज', desc: 'बीमार बकरी के इलाज के बारे में समझाना',
     prep: 'आप एक बकरीपालक से बीमार बकरी के इलाज के बारे में बात करने जा रही हैं।' },
   badhiya: { icon: '✂️', name: 'बधियाकरण', desc: 'बधियाकरण के फ़ायदे समझाना (कंटेंट अभी वेट सत्यापन के इंतज़ार में है)',
@@ -993,10 +991,22 @@ async function startConvo() {
 
   // Opening line is still a fixed, hand-authored hint per ptype (the AI can't
   // generate a first line with zero PU turns to react to) - everything AFTER
-  // this is a normal, fully contextual AI reply, same as any other turn. Shown
-  // directly with no separate coach-explanation bubble above it.
-  addBubble("household", data.opening_household ||
-    `ठीक है ${localStorage.getItem("ps_name") || ""} जी। अब मैं बकरीपालक दीदी बनकर बात करूँगी — आप ऐसे बोलिए जैसे आप सच में उनके घर पहुँची हैं।`);
+  // this is a normal, fully contextual AI reply, same as any other turn.
+  // Rendered as a standalone instruction pill (sparkle icon + soft beige
+  // background), not a chat bubble - it isn't in-character बकरीपालक dialogue,
+  // it's the app's own prompt telling her how to begin, so it shouldn't look
+  // like a message from either party, and doesn't join the .convo-turn card
+  // system the way real messages do.
+  const openingText = data.opening_household ||
+    `अपना परिचय दीजिए और बातचीत शुरू करिए।`;
+  const hint = document.createElement("div");
+  hint.className = "bubble hint";
+  const spark = document.createElement("span");
+  spark.className = "spark";
+  spark.textContent = "✦";
+  hint.appendChild(spark);
+  hint.appendChild(document.createTextNode(openingText));
+  document.getElementById("messages").appendChild(hint);
 
   const label = document.getElementById("composerLabel");
   label.textContent = "बोलने के लिए दबाएँ";
@@ -1010,11 +1020,11 @@ const WHO_META = {
   household: { label: "बकरीपालक दीदी", icon: "👩" },
 };
 
-function addBubble(kind, text) {
+function addBubble(kind, text, opts = {}) {
   const row = document.createElement("div");
   row.className = "bubble " + kind;
   row.textContent = text;
-  if (WHO_META[kind]) {
+  if (WHO_META[kind] && !opts.noWho) {
     const whoRow = document.createElement("div");
     whoRow.className = "who-row";
     const avatar = document.createElement("span");
@@ -1263,7 +1273,7 @@ function showFeedback(data) {
   }
 
   if (data.audio_base64) {
-    audioEl.src = "data:audio/wav;base64," + data.audio_base64;
+    audioEl.src = "data:audio/mpeg;base64," + data.audio_base64;
     playBtn.style.display = "inline-flex";
     setPlayBtnLabel(false);
 
@@ -1297,7 +1307,7 @@ document.getElementById("otherServiceBtn").onclick = () => go("screen-ptype");
 const QA_SERVICES = {
   curative: { icon: '🩺', name: 'इलाज' },
   vacc: { icon: '💉', name: 'टीकाकरण' },
-  deworm: { icon: '💊', name: 'कीड़े की दवा' },
+  deworm: { icon: '💊', name: 'कृमिनाशक' },
 };
 
 let qaService = null;

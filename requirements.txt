@@ -1,8 +1,16 @@
+# Railway reads this exact file by default for its Python auto-detection -
+# kept identical to requirements-web.txt (Render's install target) on
+# purpose, so both platforms build correctly without extra config. Used to
+# also carry sounddevice+numpy for local mic testing, but their only
+# consumer (scripts/voice_test.py) moved to draft/ in the pre-Railway
+# cleanup - a cloud build image doesn't have the system audio libs those
+# two need, so leaving them in here risked a failed Railway build for no
+# live benefit. Need to run that script again locally? `pip install
+# sounddevice numpy` in your own venv, no need to restore them here.
 flask
 python-dotenv
 requests
 anthropic
 gspread
 google-auth
-sounddevice
-numpy
+gunicorn
