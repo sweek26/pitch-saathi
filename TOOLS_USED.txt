@@ -31,10 +31,10 @@ Python
 
 Flask
     What it is: A lightweight Python library for building web servers.
-    Used for: TWO things in this project —
-      1. webhook.py — the real entrypoint that will receive WhatsApp
-         messages once that's connected.
-      2. demo/server.py — the browser demo app's backend.
+    Used for: demo/server.py — the app's backend, serving the browser UI
+    and answering its /api/... calls. (An earlier WhatsApp entrypoint,
+    webhook.py, used Flask too; it's retired to draft/ and isn't part of
+    the running app.)
 
 
 3. PYTHON LIBRARIES (installed via requirements.txt)
@@ -45,7 +45,7 @@ python-dotenv
 
 requests
     Used for: Making HTTP calls to external APIs — specifically Sarvam AI
-    (speech-to-text) and the WhatsApp Cloud API (once connected).
+    (speech-to-text).
 
 anthropic
     What it is: Anthropic's official Python library for calling Claude.
@@ -87,28 +87,29 @@ Google Cloud (Service Account) + Google Sheets API
     What it does: Lets the app write rows into your Google Sheet
     automatically, so every interaction is logged without manual copying.
 
-WhatsApp Cloud API (Meta) — not yet connected
-    What it will do, once set up: The actual channel — how a real PU's
-    voice note reaches the app, and how the reply reaches her back, on
-    WhatsApp itself.
+WhatsApp Cloud API (Meta) — explored early, not used
+    What it does: Explored early on as a way to deliver Pitch Saathi over
+    WhatsApp (a webhook + message router). That code is retired to
+    draft/ — the pilot runs as a browser app instead, so this API isn't
+    part of the running app.
 
 
-5. TESTING TOOLS (built specifically for this project, not external)
+5. THE APP + TESTING TOOLS (built specifically for this project, not external)
 ------------------------------------------------------------
 scripts/console_test.py
     What it is: A script that lets you type as the PU in a terminal and see
-    the household's reply + scoring — no voice, no WhatsApp needed. Fastest
+    the household's reply + scoring — no voice, no browser needed. Fastest
     way to test if the AI's behavior/prompts are working.
 
 scripts/voice_test.py
     What it is: Like the above, but you actually SPEAK into your
-    microphone. Uses the real Sarvam + Claude pipeline, so it's the closest
-    thing to the real WhatsApp experience without WhatsApp itself.
+    microphone. Uses the real Sarvam + Claude pipeline — a quick way to
+    test the voice flow without opening the browser app.
 
 demo/server.py + demo/static/index.html
-    What it is: A browser-based demo — a WhatsApp-style chat screen you can
-    click through, to show other people (like Arun or L&D) how the app will
-    feel, without needing WhatsApp connected yet.
+    What it is: The browser-based app itself — the actual pilot a PU (or
+    anyone reviewing it, like Arun or L&D) clicks through: onboarding,
+    Practice, and Mera Madad.
 
 
 6. BROWSER TECHNOLOGY (used inside the demo web app's front-end code)

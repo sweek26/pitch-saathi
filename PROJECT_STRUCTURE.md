@@ -5,35 +5,38 @@ file listing. Written for learning, not just reference.
 
 ## The big idea behind the layout
 
-Two different things eventually need this code:
-1. **The real product** — a WhatsApp bot a PU actually messages.
-2. **A browser demo** — for showing the concept to others before WhatsApp
-   is connected.
+The browser app — `demo/server.py` + `demo/static/index.html` — is the
+actual product a PU uses. `src/` holds all the "brains" (talk to Claude,
+transcribe audio, log to a Sheet) separately from that app code. That
+single decision explains most of the folder layout below.
 
-Rather than build the "brains" (talk to Claude, transcribe audio, log to a
-Sheet) twice, `src/` holds that logic ONCE, and both the demo and the real
-WhatsApp entrypoint import from it. That single decision explains most of
-the folder layout below.
+(A WhatsApp channel was explored early on as an alternative way to reach
+a PU. That entrypoint code is retired to `draft/` and isn't part of the
+current app — see the note in the `src/` table below.)
 
 ## Folder by folder
 
-### `src/` — the actual logic, reusable by both entrypoints
+### `src/` — the actual logic the browser app is built on
 | File | What it does |
 |---|---|
 | `llm.py` | Every call to Claude lives here — the household roleplay, scoring, Ask-mode answers. |
 | `stt.py` | Talks to Sarvam to turn a voice recording into text. |
 | `tts.py` | Talks to Sarvam to turn Kiran Didi's feedback text into a spoken audio clip. |
 | `sheets_logger.py` | Writes one row per session to the shared Google Sheet. |
-| `state_store.py` | Remembers where each conversation currently is (a local JSON file, keyed by session/phone number). |
+| `state_store.py` | Remembers where each conversation currently is (a local JSON file, keyed by session id). |
 | `qa_bank.py` | Loads the सवाल-जवाब question bank and hands out questions. |
-| `webhook.py`, `router.py`, `whatsapp.py` | The **real** WhatsApp entrypoint — not connected yet, but this is where a real PU's message would arrive and get routed. |
+
+A WhatsApp entrypoint (`webhook.py`, `router.py`, `whatsapp.py`) used to
+live here too, from when WhatsApp was explored as the delivery channel.
+It's retired to `draft/` (gitignored) and no longer part of `src/` or the
+running app.
 
 **Why separate from everything else**: this is the only code that talks to
 Claude/Sarvam/Sheets. Keeping it in one place means fixing a prompt or a
-scoring rule fixes it *everywhere it's used*, instead of two copies quietly
-drifting apart.
+scoring rule fixes it *everywhere it's used*, instead of copies quietly
+drifting apart if the same logic is ever needed in more than one place.
 
-### `demo/` — the browser stand-in for WhatsApp
+### `demo/` — the browser app (the actual product)
 `server.py` is a small Flask web server — it's what actually runs when you
 type `python -m demo.server`, and it's what Render runs in production too.
 `static/index.html` is the entire visible app: every screen, button, and
@@ -77,8 +80,8 @@ not disposable scratch material.
 ### `scripts/` — quick manual test tools
 `console_test.py` and `voice_test.py` let a developer exercise the real
 `src/` pipeline from a terminal — typing or speaking as the PU — without
-opening a browser or needing WhatsApp connected. Not part of the app
-itself, just a faster way to test it.
+opening a browser. Not part of the app itself, just a faster way to test
+it.
 
 ### `data/` — where the running app keeps its memory
 `session_state.json` lives here once the app is running — gitignored,

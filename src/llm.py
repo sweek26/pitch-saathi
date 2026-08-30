@@ -102,6 +102,8 @@ def practice_persona_reply(ptype, level, turns, concept_hint=None, scenario=None
             max_tokens=3072,
             system=system,
             messages=messages,
+            thinking={"type": "adaptive"},
+            output_config={"effort": "low"},
         )
         print(f"[TIMING] practice_persona_reply attempt {_attempt + 1} stop_reason={response.stop_reason} usage={response.usage}", flush=True)
         raw = _extract_text(response, fallback="")
@@ -152,6 +154,8 @@ def practice_score_session(ptype, level, turns, covered_concepts=None, scenario=
         max_tokens=3072,
         system=_system_for(ptype, level, scenario=scenario),
         messages=messages,
+        thinking={"type": "adaptive"},
+        output_config={"effort": "medium"},
     )
     raw = _extract_text(response)
     return json.loads(raw)
@@ -178,6 +182,8 @@ def mera_madad_reply(history_summary):
         max_tokens=1024,
         system=MERA_MADAD_PROMPT,
         messages=[{"role": "user", "content": user_content}],
+        thinking={"type": "adaptive"},
+        output_config={"effort": "low"},
     )
     return _extract_text(
         response,

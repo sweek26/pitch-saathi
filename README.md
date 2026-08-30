@@ -1,4 +1,4 @@
-# Pitch Saathi — WhatsApp Test Pipeline
+# Pitch Saathi
 
 Pilot for 5–10 Pashu Udhyami (PU). Two modules — **Practice** (AI plays the
 household, scores against the rubric, tags Knowledge vs Confidence) and
@@ -9,7 +9,7 @@ household, scores against the rubric, tags Knowledge vs Confidence) and
 
 | Piece | Tool | Why |
 |---|---|---|
-| Messaging | WhatsApp Cloud API (Meta) | Free sandbox tier, official |
+| Delivery | Browser app (Flask + vanilla JS) | Reachable via a link — no messaging platform needed |
 | Speech-to-Text | Sarvam AI | Built for Indian languages/dialects incl. Hindi |
 | LLM | Claude (Anthropic) | Two independent system prompts, no fine-tuning needed |
 | Logging | Google Sheets (gspread) | Matches "shared spreadsheet, no DB" scale |
@@ -19,9 +19,6 @@ household, scores against the rubric, tags Knowledge vs Confidence) and
 
 1. `pip install -r requirements.txt`
 2. `cp .env.example .env` and fill in real values (never commit `.env`):
-   - WhatsApp: create a Meta for Developers app → WhatsApp product → copy
-     Phone Number ID + a temporary access token. Pick any string for
-     `WHATSAPP_VERIFY_TOKEN` yourself.
    - Sarvam: sign up at sarvam.ai → API key.
    - Anthropic: console.anthropic.com → API key.
    - Google Sheets: create a Google Cloud service account, enable the
@@ -33,42 +30,42 @@ household, scores against the rubric, tags Knowledge vs Confidence) and
    `sheets_logger.py` reads/writes):
    `phone_number | timestamp | module | scenario | transcript | transcript_confidence | introduction | rapport | service | gap_tag | reply_text`
 
-## Testing without WhatsApp (current default — WhatsApp isn't connected yet)
+## Running the app
 
-Three ways to exercise the real pipeline (same `llm.py`/`stt.py`/`sheets_logger.py`
-code the WhatsApp path will use) without needing WhatsApp at all:
+`python -m demo.server` then open `http://localhost:5050` — this is the
+actual pilot: a browser-based chat app with onboarding (name +
+panchayat), Practice, and Mera Madad. It's also what Render runs in
+production. Includes an **"Ask — Test Mode"** screen for internally
+comparing three approaches to answering technical/medical questions
+(safe-default / vetted-retrieval / experimental-generation) — this is
+explicitly a team-evaluation tool, not part of what a PU sees, and isn't
+wired into the main app flow.
 
-- `python -m scripts.console_test` — type as the PU in a terminal, fastest
-  way to test prompt/scoring behavior.
+Two lighter-weight dev tools exercise the same underlying
+`llm.py`/`stt.py`/`sheets_logger.py` code from a terminal, without
+opening a browser:
+
+- `python -m scripts.console_test` — type as the PU in a terminal,
+  fastest way to test prompt/scoring behavior.
 - `python -m scripts.voice_test` — speak into your mic, get real Sarvam
-  transcription + a reply. Closest thing to the real experience.
-- `python -m demo.server` then open `http://localhost:5050` — a
-  browser-based WhatsApp-style chat demo with onboarding (name +
-  panchayat), Practice, and Mera Madad. Good for showing the concept to
-  others. Includes an **"Ask — Test Mode"** screen for internally
-  comparing three approaches to answering technical/medical questions
-  (safe-default / vetted-retrieval / experimental-generation) — this is
-  explicitly a team-evaluation tool, not part of the real product, and
-  is not wired into `router.py`/`webhook.py`.
+  transcription + a reply.
 
-## Run against real WhatsApp (once connected)
+## About the earlier WhatsApp exploration
 
-```
-python -m src.webhook
-ngrok http 5000
-```
-
-Put the ngrok HTTPS URL + `/webhook` into the Meta app's webhook config,
-with the same verify token as `.env`. Subscribe to the `messages` field.
+A WhatsApp channel was explored early in this project. That entrypoint
+code (`webhook.py`, `router.py`, `whatsapp.py`) is retired to `draft/`
+(gitignored) and isn't part of the current app — the browser app above
+is the pilot PUs actually use.
 
 ## Design assumptions — please review
 
 The build spec didn't fully define these; I picked defaults so the
 pipeline is runnable. Flag anything you want changed:
 
-1. **Module/scenario selection** — done via WhatsApp button messages
-   (`src/whatsapp.py: send_module_menu`, `send_scenario_menu`), not typed
-   keywords. Matches the low-literacy, voice-first design intent.
+1. **Module/scenario selection** — done via tappable buttons/chips in
+   the browser UI, not typed keywords. Matches the low-literacy,
+   voice-first design intent. (Originally prototyped against WhatsApp's
+   button messages; that entrypoint is retired to `draft/`.)
 2. **Practice session end trigger** — auto-scores and ends after 5 PU
    voice notes (`router.py: MAX_PRACTICE_TURNS`). No explicit "I'm done"
    signal exists yet. Easy to swap for a keyword-based end instead.
@@ -79,7 +76,7 @@ pipeline is runnable. Flag anything you want changed:
 ## Non-negotiables already built in
 
 - PU only ever sees `pu_feedback_hindi` / the Mera Madad reply text — raw
-  scores and gap tags go to the Sheet only, never to WhatsApp.
+  scores and gap tags go to the Sheet only, never to the PU.
 - Practice and Mera Madad load separate prompt files
   (`system_prompts/practice.txt`, `system_prompts/mera_madad.txt`) and are
   never combined in one LLM call.
@@ -88,11 +85,6 @@ pipeline is runnable. Flag anything you want changed:
 
 ## Not yet built
 
-- WhatsApp itself isn't connected yet — decision pending on a fresh Meta
-  Developer app vs. the org's existing Gupshup/Glific WhatsApp setup.
 - PU consent flow / enrollment.
 - Low-confidence transcript review queue (Sarvam returns a confidence
   score; it's logged per row but nothing acts on it yet).
-- `router.py`'s module-selection flow doesn't yet have the name/panchayat
-  onboarding the demo app prototypes — deferred until it's testable
-  against real WhatsApp messages.
