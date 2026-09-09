@@ -78,6 +78,7 @@ import os
 import re
 import threading
 import time
+import traceback
 
 import gspread
 from google.oauth2.service_account import Credentials
@@ -343,6 +344,17 @@ def log_question(
             sheet.update_cell(row_num, 1, question_id)
         return question_id
     except Exception:
+        # print(..., flush=True), not just logging.exception() - this
+        # project found stderr-based logging.exception() output does not
+        # reliably reach Railway's Deploy Logs, while explicit flushed
+        # prints (see llm.py's [TIMING] lines) do. Keep both: logging still
+        # helps in any environment where it does surface.
+        print(
+            f"[Question_Log] write failed (source={source}, session={session_id}) - "
+            "the question/answer itself was still shown to the user normally, it just "
+            f"wasn't recorded this time.\n{traceback.format_exc()}",
+            flush=True,
+        )
         _logger.exception(
             "Question_Log write failed (source=%s, session=%s) - the question/answer "
             "itself was still shown to the user normally, it just wasn't recorded this time.",
