@@ -310,6 +310,7 @@ def practice_turn():
 
     ptype = session["ptype"]
     level = session["level"]
+    gram_panchayat = request.form.get("gp", "")
     session["turns"].append({"role": "user", "text": result["text"]})
 
     # Concept-opening is code-timed: we decide here (from concepts covered
@@ -317,10 +318,29 @@ def practice_turn():
     # through for the model to work in IF it fits naturally that turn.
     concept_hint = _next_concept_hint(ptype, set(session.get("covered_concepts", [])))
 
-    reply = _timed(
-        "practice_turn.llm", llm.practice_persona_reply,
-        ptype, level, session["turns"], concept_hint=concept_hint, scenario=session.get("scenario"),
-    )
+    llm_t0 = time.perf_counter()
+    try:
+        reply = _timed(
+            "practice_turn.llm", llm.practice_persona_reply,
+            ptype, level, session["turns"], concept_hint=concept_hint, scenario=session.get("scenario"),
+        )
+    except Exception as e:
+        # Question_Log - the LLM call itself failed (an API outage, not the
+        # usual "model returned something unparseable" case, which
+        # practice_persona_reply already handles internally and never
+        # raises for). Log what we have, then re-raise UNCHANGED so the
+        # existing global error handler still returns exactly what it
+        # always has - this only ADDS a log entry, it does not change
+        # what the PU/tester sees on failure.
+        sheets_logger.log_question_async(
+            source="practice_turn", user_question=result["text"], llm_response="",
+            session_id=session_id, pu_name=name, gram_panchayat=gram_panchayat,
+            practice_type=ptype, input_type="Voice",
+            response_status="Error", error_message=str(e),
+            response_time_sec=time.perf_counter() - llm_t0,
+        )
+        raise
+    llm_elapsed = time.perf_counter() - llm_t0
 
     # Cross-topic guard (deworm vs vacc only - see practice.txt's Cross-topic
     # guard section). If she's clearly pitching the OTHER of these two
@@ -330,6 +350,12 @@ def practice_turn():
     if off_topic and ptype in REDIRECT_MESSAGE:
         session["turns"].append({"role": "assistant", "text": REDIRECT_MESSAGE[ptype]})
         state_store.save_session(session_id, session)
+        sheets_logger.log_question_async(
+            source="practice_turn", user_question=result["text"], llm_response=REDIRECT_MESSAGE[ptype],
+            session_id=session_id, pu_name=name, gram_panchayat=gram_panchayat,
+            practice_type=ptype, input_type="Voice",
+            response_status="Redirected", response_time_sec=llm_elapsed,
+        )
         return jsonify({
             "transcript": result["text"],
             "confidence": result["confidence"],
@@ -364,6 +390,12 @@ def practice_turn():
     state_store.save_session(session_id, session)
 
     concept_meta = CONCEPT_META.get(concept_hint, {})
+    sheets_logger.log_question_async(
+        source="practice_turn", user_question=result["text"], llm_response=reply["household_reply"],
+        session_id=session_id, pu_name=name, gram_panchayat=gram_panchayat,
+        practice_type=ptype, input_type="Voice",
+        response_status="Success", response_time_sec=llm_elapsed,
+    )
     return jsonify({
         "transcript": result["text"],
         "confidence": result["confidence"],
@@ -533,17 +565,49 @@ def qa_next():
 @app.route("/api/ask_test", methods=["POST"])
 def ask_test():
     """TEST MODE ONLY - runs a question through all three Ask approaches
-    for side-by-side evaluation. Not wired into the main Practice flow."""
+    for side-by-side evaluation. Not wired into the main Practice flow -
+    nothing in demo/static/index.html calls this route today, so logging
+    it will not show real PU usage until this feature is actually built
+    into the UI. session_id/pu_name/gram_panchayat/input_type are all
+    OPTIONAL on the request body (default to "") so any existing caller of
+    this route keeps working completely unchanged."""
     data = request.get_json()
     question = data["question"].strip()
     if not question:
         return jsonify({"error": "empty_question"}), 400
 
-    return jsonify({
-        "safe": llm.ask_safe_defer(question),
-        "vetted": llm.ask_vetted_retrieval(question),
-        "experimental": llm.ask_experimental_herbal(question),
-    })
+    session_id = data.get("session_id", "")
+    pu_name = data.get("pu_name", "")
+    gram_panchayat = data.get("gram_panchayat", "")
+    input_type = data.get("input_type", "Text")
+
+    results = {}
+    for mode, fn in (
+        ("safe", llm.ask_safe_defer),
+        ("vetted", llm.ask_vetted_retrieval),
+        ("experimental", llm.ask_experimental_herbal),
+    ):
+        t0 = time.perf_counter()
+        try:
+            answer = fn(question)
+        except Exception as e:
+            sheets_logger.log_question_async(
+                source="ask", user_question=question, llm_response="",
+                session_id=session_id, pu_name=pu_name, gram_panchayat=gram_panchayat,
+                ask_mode=mode, input_type=input_type,
+                response_status="Error", error_message=str(e),
+                response_time_sec=time.perf_counter() - t0,
+            )
+            raise  # unchanged behavior: a failure here still fails the whole request, exactly as before
+        elapsed = time.perf_counter() - t0
+        results[mode] = answer
+        sheets_logger.log_question_async(
+            source="ask", user_question=question, llm_response=answer,
+            session_id=session_id, pu_name=pu_name, gram_panchayat=gram_panchayat,
+            ask_mode=mode, input_type=input_type,
+            response_status="Success", response_time_sec=elapsed,
+        )
+    return jsonify(results)
 
 
 if __name__ == "__main__":

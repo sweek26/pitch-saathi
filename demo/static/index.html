@@ -1135,6 +1135,7 @@ async function onRecordingStop() {
     const form = new FormData();
     form.append("session_id", sessionId);
     form.append("name", localStorage.getItem("ps_name") || "");
+    form.append("gp", localStorage.getItem("ps_gp") || "");
     form.append("audio", blob, "turn.webm");
 
     statusLine.textContent = "सुन रहे हैं...";
