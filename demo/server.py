@@ -274,6 +274,7 @@ def practice_start():
     state_store.save_session(session_id, {
         "module": "practice", "ptype": ptype, "level": level, "turns": [],
         "covered_concepts": [], "turns_since_nudge": 0, "last_nudge": None, "scenario": scenario,
+        "started_at": time.time(),
     })
 
     first_concept = _next_concept_hint(ptype, set())
@@ -432,6 +433,11 @@ def practice_end():
 
     feedback["ptype"] = session["ptype"]
     feedback["level"] = session["level"]
+    # How long the PU spent talking to the app for this service, start (set
+    # in practice_start) to end (now) - session.get() guards a session that
+    # started before this field existed (mid-flight across a deploy).
+    started_at = session.get("started_at")
+    feedback["duration_sec"] = round(time.time() - started_at, 1) if started_at else ""
 
     tier = _performance_tier(session.get("quality_counts", {}))
     opening_line = _pick_opening(tier, data.get("last_opening", ""))
@@ -477,6 +483,7 @@ def practice_log():
             "opening_line": data.get("opening_line", ""),
             "tier": data.get("tier", ""),
             "audio_ok": data.get("audio_ok", ""),
+            "duration_sec": data.get("duration_sec", ""),
         },
         ended_via="scored",
     )

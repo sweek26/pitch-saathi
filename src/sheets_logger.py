@@ -5,7 +5,14 @@ Columns, in exact order (see CANONICAL_COLUMNS below - the live Sheet's
 header row must match this exactly, via fix_header_row()):
   phone_number, timestamp, pu_name, gram_panchayat, module, ptype, level,
   transcript, transcript_confidence, topic, gap_category, good, next_time,
-  exact_phrase, reply_text, ended_via, opening_line, tier, audio_ok
+  exact_phrase, reply_text, ended_via, opening_line, tier, audio_ok,
+  duration_sec
+
+duration_sec is how long the PU spent in this session for this service -
+practice_start() stamps session["started_at"] when she begins, practice_end()
+subtracts that from "now" and rounds to 1 decimal. Blank only for a session
+that was already mid-flight (past practice_start()) when this field was
+added, so it has no started_at to diff against.
 
 pu_name/gram_panchayat are read from the PU's onboarding (localStorage on
 the client) so a session row is human-readable without cross-referencing
@@ -106,7 +113,7 @@ CANONICAL_COLUMNS = [
     "phone_number", "timestamp", "pu_name", "gram_panchayat", "module",
     "ptype", "level", "transcript", "transcript_confidence", "topic",
     "gap_category", "good", "next_time", "exact_phrase", "reply_text",
-    "ended_via", "opening_line", "tier", "audio_ok",
+    "ended_via", "opening_line", "tier", "audio_ok", "duration_sec",
 ]
 
 # NEW - Question_Log tab's header row. Title_Case on purpose (distinct from
@@ -167,9 +174,9 @@ def log_interaction(
     gram_panchayat="",
 ):
     """feedback: dict with topic/gap_category/good/next_time/exact_phrase,
-    plus (practice module only) opening_line/tier/audio_ok from the spoken
-    feedback feature - or None for a mid-conversation turn row / a rescue
-    ending. Row order here must match CANONICAL_COLUMNS exactly."""
+    plus (practice module only) opening_line/tier/audio_ok/duration_sec from
+    the spoken feedback feature - or None for a mid-conversation turn row.
+    Row order here must match CANONICAL_COLUMNS exactly."""
     feedback = feedback or {}
     row = [
         phone_number,
@@ -191,6 +198,7 @@ def log_interaction(
         feedback.get("opening_line", ""),
         feedback.get("tier", ""),
         feedback.get("audio_ok", ""),
+        feedback.get("duration_sec", ""),
     ]
     # table_range anchors the append at column A - without it, append_row()
     # scans the WHOLE sheet for "the table" and, once the sheet's column
